@@ -10,7 +10,74 @@
     <meta name="theme-color" content="#1e3799">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+    <!-- DYNAMIC LOGO GENERATOR -->
+<script>
+    (function() {
+        var canvas = document.createElement('canvas');
+        canvas.width = 512;
+        canvas.height = 512;
+        var ctx = canvas.getContext('2d');
+
+        // 1. Background (Modern Blue Gradient)
+        var grd = ctx.createLinearGradient(0, 0, 0, 512);
+        grd.addColorStop(0, "#1e3799");
+        grd.addColorStop(1, "#0c2461");
+        ctx.fillStyle = grd;
+        
+        // Draw Rounded Rectangle (Squircle)
+        ctx.beginPath();
+        if(ctx.roundRect) {
+             ctx.roundRect(0, 0, 512, 512, 100);
+        } else {
+             ctx.rect(0, 0, 512, 512); // Fallback for old browsers
+        }
+        ctx.fill();
+
+        // 2. Book Icon
+        ctx.fillStyle = "#f6b93b"; // Gold
+        ctx.beginPath();
+        ctx.moveTo(256, 120);
+        ctx.quadraticCurveTo(150, 120, 100, 150);
+        ctx.lineTo(100, 350);
+        ctx.quadraticCurveTo(150, 320, 256, 320);
+        ctx.quadraticCurveTo(362, 320, 412, 350);
+        ctx.lineTo(412, 150);
+        ctx.quadraticCurveTo(362, 120, 256, 120);
+        ctx.fill();
+        
+        // Spine shadow
+        ctx.fillStyle = "rgba(0,0,0,0.1)";
+        ctx.fillRect(254, 120, 4, 200);
+
+        // 3. Text "Proje"
+        ctx.fillStyle = "rgba(255,255,255,0.9)";
+        ctx.font = "300 40px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("Proje", 256, 100);
+
+        // 4. Text "ISLAM"
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "900 110px sans-serif";
+        ctx.fillText("ISLAM", 256, 430);
+
+        // 5. Text "LIBRARY" (Badge)
+        ctx.fillStyle = "#f6b93b";
+        ctx.font = "700 25px sans-serif";
+        ctx.fillText("LIBRARY", 256, 470);
+
+        // Convert to Icon Links automatically
+        var link = document.createElement('link');
+        link.type = 'image/png';
+        link.rel = 'icon';
+        link.href = canvas.toDataURL();
+        document.head.appendChild(link);
+
+        var appleLink = document.createElement('link');
+        appleLink.rel = 'apple-touch-icon';
+        appleLink.href = canvas.toDataURL();
+        document.head.appendChild(appleLink);
+    })();
+</script>
     
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
