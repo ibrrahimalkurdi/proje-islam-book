@@ -1,6 +1,6 @@
 
 <!DOCTYPE html>
-<html lang="ku" dir="rtl">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -10,7 +10,6 @@
     <meta name="theme-color" content="#1e3799">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
     
     <!-- Fonts & Icons -->
@@ -269,6 +268,57 @@
         .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); width: 100%; margin-top: 10px; }
         .btn:active { transform: scale(0.98); }
         .hidden { display: none !important; }
+        
+        /* --- NEW DELIVERY DESIGN --- */
+        .delivery-box {
+            background: white;
+            border-radius: 20px;
+            padding: 0;
+            margin: 20px 0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+        .delivery-header {
+            background: #fdf2e9;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #d35400;
+            font-weight: bold;
+            font-size: 1rem;
+            border-bottom: 1px solid #fad390;
+        }
+        .delivery-body { padding: 15px; }
+        .input-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+        .input-group-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            pointer-events: none;
+        }
+        .delivery-select, .delivery-input {
+            width: 100%;
+            padding: 15px 45px 15px 15px; /* space for icon */
+            border-radius: 15px;
+            border: 2px solid var(--border-color);
+            font-size: 0.95rem;
+            background: var(--bg-body);
+            color: var(--text-main);
+            transition: 0.3s;
+            appearance: none;
+        }
+        .delivery-select:focus, .delivery-input:focus {
+            border-color: var(--primary);
+            background: white;
+        }
+
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes heartBeat { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
@@ -295,7 +345,7 @@
             <h2 style="color:var(--text-main); margin-bottom:10px;" data-lang="enter_code">تکایە کۆدێ بنڤیسە</h2>
             <p style="color:var(--text-light); margin-bottom:20px; font-size:0.9rem;" data-lang="code_desc">کۆد د ئاگەهداریان دا هاتیە بۆ تە.</p>
             <input type="tel" id="verify-input" class="auth-input code-input" maxlength="4" placeholder="XXXX">
-            <button class="btn btn-primary" onclick="app.submitVerify()" data-lang="confirm_btn">پشتڕاستکرن</button>
+            <button id="btn-submit-verify" class="btn btn-primary" onclick="app.submitVerify()" data-lang="confirm_btn">پشتڕاستکرن</button>
             <button class="btn btn-outline" onclick="app.closeVerifyModal()" style="border:none; color:var(--text-light); margin-top:10px;">پاشگەزبوون</button>
         </div>
     </div>
@@ -364,9 +414,9 @@
                 <div id="lang-selector">
                     <div class="icon-btn" onclick="app.toggleLangMenu()"><i class="fas fa-globe"></i></div>
                     <div class="lang-dropdown" id="lang-menu">
+                        <div class="lang-opt" onclick="app.setLang('arabic')">العربية</div>
                         <div class="lang-opt" onclick="app.setLang('badini')">Badînî</div>
                         <div class="lang-opt" onclick="app.setLang('sorani')">سۆرانی</div>
-                        <div class="lang-opt" onclick="app.setLang('arabic')">العربية</div>
                     </div>
                 </div>
                 <div style="position:relative;">
@@ -461,8 +511,29 @@
                         <span style="color:var(--text-light);" data-lang="price">نرخ</span>
                         <span id="sub-total">0 IQD</span>
                     </div>
+                    
+                    <!-- NEW DELIVERY DESIGN -->
+                    <div class="delivery-box">
+                        <div class="delivery-header">
+                            <i class="fas fa-shipping-fast"></i> زانیاریێن گەهاندنێ
+                        </div>
+                        <div class="delivery-body">
+                            <div class="input-group">
+                                <i class="fas fa-map-marker-alt input-group-icon"></i>
+                                <select id="delivery-city-select" class="delivery-select" onchange="app.updateDeliveryFee()">
+                                    <option value="">-- باژێڕ / دەڤەر هەڵبژێرە --</option>
+                                    <!-- Populated dynamically -->
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <i class="fas fa-pen input-group-icon"></i>
+                                <input type="text" id="delivery-details" class="delivery-input" placeholder="تێبینی (ناڤێ تاخی، نێزیک مزگەفتێ...)">
+                            </div>
+                        </div>
+                    </div>
+
                     <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                        <span style="color:var(--info);">گەهاندن (Delivery) <small id="delivery-type-label" style="font-size:0.7rem"></small></span>
+                        <span style="color:var(--info);">گەهاندن (Delivery)</span>
                         <span id="delivery-fee">0 IQD</span>
                     </div>
                     <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
@@ -692,7 +763,8 @@
                 orders: [],
                 notifications: JSON.parse(localStorage.getItem('notifs_pro_max')) || [],
                 darkMode: localStorage.getItem('theme_pro_max') === 'dark',
-                lang: localStorage.getItem('lang_pro_max') || 'badini',
+                lang: localStorage.getItem('lang_pro_max') || 'arabic', 
+                
                 currentBook: null,
                 isEditMode: false,
                 sortAsc: true,
@@ -700,10 +772,11 @@
                 pointsDiscount: 0,
                 verifyOrderId: null,
                 ordersListener: null,
+                pointsListener: null,
                 activeLibFilter: null,
                 deliveryFee: 0,
-                
-                // Dynamic Data from Firebase
+                isSubmitting: false, 
+
                 books: [],
                 libraries: [],
                 cities: [],
@@ -714,7 +787,6 @@
                 if (this.state.darkMode) document.body.setAttribute('data-theme', 'dark');
                 this.updateTexts();
                 
-                // Fetch All Data Real-time
                 this.fetchAllData();
                 
                 this.updateCartUI();
@@ -723,42 +795,33 @@
                 
                 if(this.state.user) {
                     this.fetchLiveOrders();
-                    this.syncUserPoints();
                 }
 
                 this.setupInputListeners();
             },
 
-            // --- FETCH DATA FROM FIREBASE (SYNC WITH ADMIN) ---
             fetchAllData() {
-                // Fetch Books
                 firestore.collection('books').onSnapshot(snap => {
                     this.state.books = [];
-                    snap.forEach(doc => {
-                        this.state.books.push({ docId: doc.id, ...doc.data() });
-                    });
+                    snap.forEach(doc => { this.state.books.push({ docId: doc.id, ...doc.data() }); });
                     this.renderBooks(this.state.books);
                 });
 
-                // Fetch Libraries
                 firestore.collection('libraries').onSnapshot(snap => {
                     this.state.libraries = [];
-                    snap.forEach(doc => {
-                        this.state.libraries.push({ docId: doc.id, ...doc.data() });
-                    });
+                    snap.forEach(doc => { this.state.libraries.push({ docId: doc.id, ...doc.data() }); });
                     this.renderLibraries();
                 });
 
-                // Fetch Cities
                 firestore.collection('settings').doc('locations').onSnapshot(doc => {
                     if(doc.exists) {
                         this.state.cities = doc.data().list || [];
                         this.renderCityOptions();
                         this.renderCityFilters();
+                        this.renderDeliveryOptions();
                     }
                 });
 
-                // Fetch Point Rules
                 firestore.collection('settings').doc('points_rules_dynamic').onSnapshot(doc => {
                     if(doc.exists) {
                         this.state.pointRules = doc.data().rules || [];
@@ -766,17 +829,29 @@
                     }
                 });
 
-                // NEW: NOTIFICATION LISTENER (LIVE)
                 firestore.collection('notifications').onSnapshot(snap => {
                     snap.docChanges().forEach(change => {
                         if (change.type === 'added') {
                             const data = change.doc.data();
-                            // If it's a new notification (created recently)
-                            const now = new Date(); 
-                            // Check if targeted
-                            if (!data.targetPhone || (this.state.user && data.targetPhone === this.state.user.phone)) {
-                                this.addNotification(data.text);
-                                this.showToast("🔔 " + data.text);
+                            
+                            // 1. Check if user is logged in
+                            if (!this.state.user) return;
+
+                            // 2. Check if notification targets this user
+                            if (!data.targetPhone || data.targetPhone === this.state.user.phone) {
+                                
+                                const notifTime = data.id || Date.now();
+                                
+                                // 3. Retrieve last seen notification time from LocalStorage
+                                const lastSeenTime = parseInt(localStorage.getItem('last_notif_time_pro')) || 0;
+                                
+                                // 4. Only show toast if this is a NEW notification (newer than what we've seen)
+                                if (notifTime > lastSeenTime) {
+                                    this.showToast("🔔 " + data.text);
+                                    localStorage.setItem('last_notif_time_pro', notifTime);
+                                }
+                                
+                                this.addNotification(data.text, notifTime);
                             }
                         }
                     });
@@ -785,14 +860,19 @@
 
             renderCityOptions() {
                 const options = this.state.cities.map(c => `<option value="${c}">${c}</option>`).join('');
-                const regSelect = document.getElementById('reg-city');
-                const profileSelect = document.getElementById('inp-city');
-                
-                if(regSelect) regSelect.innerHTML = options;
-                if(profileSelect) {
-                    profileSelect.innerHTML = options;
-                    if(this.state.user && this.state.user.city) profileSelect.value = this.state.user.city;
+                if(document.getElementById('reg-city')) document.getElementById('reg-city').innerHTML = options;
+                if(document.getElementById('inp-city')) {
+                    document.getElementById('inp-city').innerHTML = options;
+                    if(this.state.user && this.state.user.city) document.getElementById('inp-city').value = this.state.user.city;
                 }
+            },
+            
+            renderDeliveryOptions() {
+                const select = document.getElementById('delivery-city-select');
+                if(!select) return;
+                const options = `<option value="">-- باژێڕ / دەڤەر هەڵبژێرە --</option>` + 
+                                this.state.cities.map(c => `<option value="${c}">${c}</option>`).join('');
+                select.innerHTML = options;
             },
 
             renderCityFilters() {
@@ -823,18 +903,40 @@
                 });
             },
 
-            async syncUserPoints() {
-                if(!this.state.user) return;
-                try {
-                    const doc = await firestore.collection('users').doc(this.state.user.phone).get();
-                    if(doc.exists) {
-                        const data = doc.data();
-                        this.state.user.points = data.points || 0;
-                        this.saveUserLocally();
-                        this.updateProfileUI();
-                        this.updateCartUI(); // Update display in cart
+            checkHeaderStatus() {
+                const icon = document.getElementById('header-user-status');
+                if(this.state.user) {
+                    icon.innerHTML = `<i class="fas fa-user-check"></i>`;
+                    document.getElementById('profile-guest').classList.add('hidden');
+                    document.getElementById('profile-user').classList.remove('hidden');
+                    document.getElementById('points-redeem-section').style.display = 'block';
+                    this.updateProfileUI(); this.renderOrderHistory();
+
+                    if(!this.state.pointsListener) {
+                        this.state.pointsListener = firestore.collection('users').doc(this.state.user.phone)
+                            .onSnapshot(doc => {
+                                if(doc.exists) {
+                                    const newData = doc.data();
+                                    this.state.user.points = newData.points || 0;
+                                    this.state.user.name = newData.name;
+                                    this.state.user.city = newData.city;
+                                    this.saveUserLocally();
+                                    this.updateProfileUI(); 
+                                    this.updateCartUI(); 
+                                }
+                            });
                     }
-                } catch(e) { console.log("Points sync error", e); }
+
+                } else {
+                    icon.innerHTML = `<i class="far fa-user"></i>`;
+                    document.getElementById('profile-guest').classList.remove('hidden');
+                    document.getElementById('profile-user').classList.add('hidden');
+                    document.getElementById('points-redeem-section').style.display = 'none';
+                    if(this.state.pointsListener) {
+                        this.state.pointsListener(); 
+                        this.state.pointsListener = null;
+                    }
+                }
             },
 
             fetchLiveOrders() {
@@ -850,8 +952,6 @@
                         });
                         this.state.orders.sort((a, b) => b.id - a.id);
                         this.renderOrderHistory(); 
-                    }, (error) => {
-                        console.error("Error fetching orders:", error);
                     });
             },
 
@@ -872,13 +972,7 @@
                         cancelButton = `<div class="btn-cancel-order" onclick="app.cancelOrder('${o.docId}')"><i class="fas fa-times"></i></div>`;
                     } else if(o.status === 'approved') {
                         statusBadge = `<div class="track-status-badge st-done"><i class="fas fa-check-circle"></i> ${t['approved']}</div>`;
-                        // SHOW VERIFICATION CODE
-                        codeDisplay = `
-                        <div class="code-box-display">
-                            <div style="font-size:0.8rem; color:var(--text-light);">کۆدێ وەرگرتنێ (Verification)</div>
-                            <div class="code-val-display">${o.code}</div>
-                        </div>
-                        `;
+                        codeDisplay = `<div class="code-box-display"><div style="font-size:0.8rem; color:var(--text-light);">کۆدێ وەرگرتنێ (Verification)</div><div class="code-val-display">${o.code}</div></div>`;
                         actionArea = `<button class="btn-confirm-order" onclick="app.openVerifyModal(${o.id})">${t['confirm_btn']}</button>`;
                     } else if(o.status === 'delivered') {
                         statusBadge = `<div class="track-status-badge st-del"><i class="fas fa-truck"></i> ${t['delivered']}</div>`;
@@ -908,19 +1002,17 @@
                     try {
                         await firestore.collection('orders').doc(docId).delete();
                         this.showToast("داواکاری هاتە ژێبرن 🗑️");
-                        // Orders update automatically via listener
-                    } catch (err) {
-                        this.showToast("هەڵە ل ژێبرنێ! ❌");
-                    }
+                    } catch (err) { this.showToast("هەڵە ل ژێبرنێ! ❌"); }
                 }
             },
 
-            addNotification(text) {
-                const notif = { id: Date.now(), text: text, read: false, time: new Date().toLocaleTimeString() };
-                // avoid duplicates if close in time
-                const exists = this.state.notifications.find(n => n.text === text && (Date.now() - n.id < 5000));
+            addNotification(text, id) {
+                const notifId = id || Date.now();
+                // Check if notification already exists based on ID
+                const exists = this.state.notifications.find(n => n.id === notifId);
                 if(exists) return;
 
+                const notif = { id: notifId, text: text, read: false, time: new Date().toLocaleTimeString() };
                 this.state.notifications.unshift(notif);
                 this.saveNotifications();
                 this.checkNotifications();
@@ -936,6 +1028,7 @@
             toggleNotif() {
                 const dropdown = document.getElementById('notif-dropdown');
                 dropdown.classList.toggle('show');
+                
                 if (dropdown.classList.contains('show')) {
                     this.state.notifications.forEach(n => n.read = true);
                     this.saveNotifications();
@@ -955,14 +1048,11 @@
                 const t = translations[this.state.lang];
                 if(!val) return this.showToast("تکایە ناڤێ پەرتووکێ بنڤیسە ⚠️");
                 
-                // Add to firestore (optional, but shows full connection)
                 firestore.collection('requests').add({
                     bookName: val,
                     user: this.state.user ? this.state.user.phone : 'Guest',
                     date: new Date().toISOString()
                 });
-
-                this.addNotification(`${t['req_sent']}: ${val}`);
                 this.showToast(t['sent_msg']);
                 document.getElementById('req-book-input').value = "";
             },
@@ -1039,27 +1129,12 @@
                     localStorage.removeItem('user_pro_max');
                     this.state.user = null; this.state.orders = [];
                     if(this.state.ordersListener) this.state.ordersListener(); 
+                    if(this.state.pointsListener) { this.state.pointsListener(); this.state.pointsListener = null; }
                     location.reload();
                 }
             },
             saveUserLocally() { localStorage.setItem('user_pro_max', JSON.stringify(this.state.user)); },
-            checkHeaderStatus() {
-                const icon = document.getElementById('header-user-status');
-                if(this.state.user) {
-                    icon.innerHTML = `<i class="fas fa-user-check"></i>`;
-                    document.getElementById('profile-guest').classList.add('hidden');
-                    document.getElementById('profile-user').classList.remove('hidden');
-                    document.getElementById('points-redeem-section').style.display = 'block';
-                    this.updateProfileUI(); this.renderOrderHistory();
-                } else {
-                    icon.innerHTML = `<i class="far fa-user"></i>`;
-                    document.getElementById('profile-guest').classList.remove('hidden');
-                    document.getElementById('profile-user').classList.add('hidden');
-                    document.getElementById('points-redeem-section').style.display = 'none';
-                }
-            },
 
-            // --- REDEEM POINTS LOGIC (DYNAMIC) ---
             applyPointsDiscount() {
                 const select = document.getElementById('points-select');
                 const pointsNeeded = parseInt(select.value);
@@ -1072,10 +1147,7 @@
                     this.updateCartUI();
                     return;
                 }
-
-                // Find the rule matching pointsNeeded
                 const rule = this.state.pointRules.find(r => r.points === pointsNeeded);
-
                 if(currentPoints >= pointsNeeded && rule) {
                     this.state.pointsDiscount = rule.discount;
                     msg.innerText = "داشکاندن چالاک بوو ✅";
@@ -1089,6 +1161,10 @@
                     this.updateCartUI();
                 }
             },
+            
+            updateDeliveryFee() {
+                this.updateCartUI();
+            },
 
             async smartCheckout() {
                 const t = translations[this.state.lang];
@@ -1099,13 +1175,22 @@
                     this.toggleAuthOverlay();
                     return;
                 }
+                
+                const selectedCity = document.getElementById('delivery-city-select').value;
+                const details = document.getElementById('delivery-details').value.trim();
+
+                if(!selectedCity || selectedCity === "") {
+                    const sel = document.getElementById('delivery-city-select');
+                    sel.style.borderColor = 'red';
+                    sel.focus();
+                    setTimeout(() => sel.style.borderColor = '#e67e22', 1000);
+                    return this.showToast("تکایە باژێڕ / دەڤەرێ هەڵبژێرە ⚠️");
+                }
 
                 const verificationCode = Math.floor(1000 + Math.random() * 9000).toString();
                 
-                // CALCULATE FINAL TOTAL BASED ON CART & WHOLESALE
                 let totalBooks = 0;
                 this.state.cart.forEach(item => {
-                    // Check wholesale
                     let itemPrice = item.price;
                     if(item.bulkQty && item.qty >= item.bulkQty) {
                         itemPrice = item.bulkPrice || item.price;
@@ -1113,18 +1198,13 @@
                     totalBooks += (itemPrice * item.qty);
                 });
                 
-                // Delivery Logic (Smart)
                 let delivery = this.state.deliveryFee;
-                // (Already calculated in updateCartUI, can reuse this.state.deliveryFee)
                 
                 const totalDiscountPercent = this.state.discount + this.state.pointsDiscount;
                 const discountAmount = totalBooks * totalDiscountPercent;
                 const finalTotal = (totalBooks + delivery) - discountAmount;
                 
-                // Points Deduction Logic
-                const pointsUsed = parseInt(document.getElementById('points-select').value);
-                
-                // Points Earning (Net Payment / 2000)
+                const pointsUsed = parseInt(document.getElementById('points-select').value) || 0;
                 const earnedPoints = Math.floor(finalTotal / 2000);
 
                 const orderId = Date.now();
@@ -1135,13 +1215,14 @@
                     userId: userPhone,
                     userName: this.state.user.name,
                     userAddress: this.state.user.address,
-                    userCity: this.state.user.city || "",
+                    userCity: selectedCity, 
+                    userDetails: details, 
                     date: new Date().toLocaleDateString('ku-IQ'),
                     time: new Date().toLocaleTimeString(),
                     items: [...this.state.cart], 
                     total: finalTotal,
                     deliveryFee: delivery,
-                    earnedPoints: earnedPoints,
+                    earnedPoints: earnedPoints, 
                     pointsUsed: pointsUsed,
                     status: 'waiting', 
                     code: verificationCode
@@ -1150,24 +1231,24 @@
                 try {
                     await firestore.collection('orders').doc(orderId.toString()).set(newOrder);
                     
-                    // Update User Points (Subtract used, Add earned)
-                    let newPoints = (this.state.user.points - pointsUsed) + earnedPoints;
-                    if(newPoints < 0) newPoints = 0;
-
-                    await firestore.collection('users').doc(userPhone).update({
-                        points: newPoints
-                    });
+                    if(pointsUsed > 0) {
+                        const currentP = parseInt(this.state.user.points) || 0;
+                        let newPoints = currentP - pointsUsed;
+                        if(newPoints < 0) newPoints = 0;
+                        await firestore.collection('users').doc(userPhone).update({
+                            points: newPoints
+                        });
+                        this.state.user.points = newPoints;
+                        this.saveUserLocally();
+                    }
                     
-                    this.state.user.points = newPoints;
-                    this.saveUserLocally();
-
-                    this.addNotification(`داواکارییا نوێ #${orderId.toString().slice(-6)} هاتە تۆمارکرن 📝`);
                     this.state.cart = [];
                     this.saveCart();
+                    
                     this.showToast(t['sent_msg']);
                     
-                    // Reset Points Selection
                     document.getElementById('points-select').value = "0";
+                    document.getElementById('delivery-details').value = ""; // Clear
                     this.state.pointsDiscount = 0;
 
                     setTimeout(() => {
@@ -1185,35 +1266,68 @@
                 this.state.verifyOrderId = orderId;
                 document.getElementById('verify-input').value = '';
                 document.getElementById('verify-modal').style.display = 'flex';
+                // Reset flag
+                this.state.isSubmitting = false;
+                document.getElementById('btn-submit-verify').disabled = false;
             },
             closeVerifyModal() { document.getElementById('verify-modal').style.display = 'none'; this.state.verifyOrderId = null; },
+            
             async submitVerify() {
+                if(this.state.isSubmitting) return;
+                this.state.isSubmitting = true;
+                document.getElementById('btn-submit-verify').disabled = true;
+
                 const inputCode = document.getElementById('verify-input').value.trim();
                 const orderId = this.state.verifyOrderId;
                 const order = this.state.orders.find(o => o.id === orderId);
-                // Note: Checking order from state (which comes from Firestore)
+                
                 if (order && inputCode === order.code) {
                     try {
-                        await firestore.collection('orders').doc(orderId.toString()).update({ status: 'delivered' });
-                        this.showToast(translations[this.state.lang]['code_success']);
+                        const orderRef = firestore.collection('orders').doc(orderId.toString());
+                        const freshDoc = await orderRef.get();
+                        
+                        if(freshDoc.exists && freshDoc.data().status === 'delivered') {
+                            this.showToast("ئەڤ داواکاریە پێشتر هاتبو وەرگرتن! ❌");
+                            this.closeVerifyModal();
+                            return;
+                        }
+
+                        // ATOMIC INCREMENT FOR SAFETY
+                        await orderRef.update({ status: 'delivered' });
+                        
+                        if(order.earnedPoints && order.earnedPoints > 0) {
+                             const userPhone = this.state.user.phone;
+                             await firestore.collection('users').doc(userPhone).update({
+                                 points: firebase.firestore.FieldValue.increment(order.earnedPoints)
+                             });
+                             // FORCE LOCAL UPDATE FOR IMMEDIATE UI FEEDBACK
+                             this.state.user.points += order.earnedPoints;
+                             this.saveUserLocally();
+                             this.updateProfileUI();
+
+                             this.showToast(`پیرۆزە! ${order.earnedPoints} خاڵ بۆ تە هاتنە زیادکرن 🌟`);
+                        } else {
+                             this.showToast(translations[this.state.lang]['code_success']);
+                        }
                         this.closeVerifyModal();
-                    } catch (err) { this.showToast("هەڵە ل نوێکرنێ! ❌"); }
+                    } catch (err) { 
+                        this.showToast("هەڵە ل نوێکرنێ! ❌");
+                        this.state.isSubmitting = false;
+                        document.getElementById('btn-submit-verify').disabled = false;
+                    }
                 } else {
                     this.showToast(translations[this.state.lang]['wrong_code']);
+                    this.state.isSubmitting = false;
+                    document.getElementById('btn-submit-verify').disabled = false;
                 }
             },
 
             renderLibraries() {
-                // Identify libraries with discounts (Based on book originalPrice vs price)
                 const libsWithDiscount = this.state.libraries.map(lib => {
-                    // Check if this lib has any discounted books
                     const hasDiscount = this.state.books.some(b => b.libId === lib.id && b.originalPrice && b.originalPrice > b.price) || (lib.discountPercent > 0);
                     return { ...lib, hasDiscount };
                 });
-
-                // Sort: Discounted first
                 libsWithDiscount.sort((a, b) => (b.hasDiscount ? 1 : 0) - (a.hasDiscount ? 1 : 0));
-
                 const con = document.getElementById('stories-list');
                 con.innerHTML = libsWithDiscount.map(lib => `
                     <div class="story-item ${lib.hasDiscount ? 'has-discount' : ''}" onclick="app.filterByLibrary(${lib.id}, this)">
@@ -1245,7 +1359,6 @@
             },
 
             openPreview() {
-                // Dynamic preview images from current book
                 const b = this.state.currentBook;
                 if(b && b.previewImages && b.previewImages.length > 0) {
                      const container = document.getElementById('preview-container');
@@ -1256,6 +1369,7 @@
                 }
             },
             closePreview() { document.getElementById('preview-modal').style.display = 'none'; },
+            
             showToast(msg) {
                 const container = document.getElementById('toast-container');
                 const toast = document.createElement('div');
@@ -1268,7 +1382,6 @@
             },
 
             async applyCoupon() {
-                // FIXED: UPPERCASE SENSITIVITY
                 const code = document.getElementById('coupon-input').value.trim().toUpperCase();
                 const msg = document.getElementById('coupon-msg');
                 if(!code) return;
@@ -1314,7 +1427,6 @@
                     const lib = this.state.libraries.find(l => l.id === b.libId);
                     const libName = lib ? lib.name : "Library";
                     
-                    // Price Logic for Card
                     let priceDisplay = `<span class="price">${b.price.toLocaleString()}</span>`;
                     if(b.originalPrice && b.originalPrice > b.price) {
                         priceDisplay = `
@@ -1323,7 +1435,6 @@
                         `;
                     }
                     
-                    // Wholesale Badge
                     let wholesaleBadge = '';
                     if(b.bulkPrice && b.bulkQty) {
                         wholesaleBadge = `<div class="wholesale-badge">جوملە: ${b.bulkPrice.toLocaleString()}</div>`;
@@ -1379,7 +1490,6 @@
                 document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
                 el.classList.add('active');
                 
-                // Toggle City Filter
                 if(cat === 'city') {
                     const cityDiv = document.getElementById('city-filters');
                     cityDiv.style.display = cityDiv.style.display === 'none' ? 'flex' : 'none';
@@ -1429,11 +1539,9 @@
                 document.getElementById('m-paper').innerText = b.paper || "-";
                 document.getElementById('m-volumes').innerText = b.volumes || "1";
                 
-                // Wholesale & Free info updates
                 document.getElementById('m-bulk-qty').innerText = b.bulkQty || 5;
                 document.getElementById('m-free-limit').innerText = lib ? (lib.freeDeliveryLimit || 50000).toLocaleString() : '50,000';
 
-                // NEW: Wholesale Price Display in Modal
                 const wsInfo = document.getElementById('m-wholesale-info');
                 if(b.bulkPrice && b.bulkPrice > 0) {
                     wsInfo.style.display = 'block';
@@ -1484,32 +1592,28 @@
                 const t = translations[this.state.lang];
                 let totalBooks = 0;
                 
-                // Dynamic Delivery Calculation
                 let deliveryFee = 0;
-                let deliveryType = "";
                 let freeLimit = 50000;
+                
+                const selectedCity = document.getElementById('delivery-city-select') ? document.getElementById('delivery-city-select').value : "";
 
-                // NEW: SMART DELIVERY LOGIC (CITY CHECK)
                 if (this.state.cart.length > 0 && this.state.user) {
                     const libId = this.state.cart[0].libId;
                     const lib = this.state.libraries.find(l => l.id === libId);
-                    const userCity = this.state.user.city || "";
                     
                     if (lib) {
                         freeLimit = lib.freeDeliveryLimit || 50000;
-                        if (userCity && lib.city === userCity) {
+                        if (selectedCity && lib.city === selectedCity) {
                             deliveryFee = lib.localPrice || 2000; 
-                            deliveryType = "(ناڤخۆ)";
-                        } else {
+                        } else if(selectedCity) {
                             deliveryFee = lib.foreignPrice || 5000; 
-                            deliveryType = "(دەرەکی)";
+                        } else {
+                            deliveryFee = 0;
                         }
                     } else {
                         deliveryFee = 5000; 
                     }
                 }
-                
-                document.getElementById('delivery-type-label').innerText = deliveryType;
 
                 if (this.state.cart.length === 0) {
                     list.innerHTML = `<p style="text-align:center; color:var(--text-light); margin-top:20px;">${t['empty_cart']}</p>`;
@@ -1519,17 +1623,14 @@
                     document.getElementById('coupon-input').value = '';
                 } else {
                     list.innerHTML = this.state.cart.map(item => {
-                        // Check for wholesale price
                         let finalPrice = item.price;
                         let isWholesale = false;
                         if(item.bulkQty && item.qty >= item.bulkQty) {
                             finalPrice = item.bulkPrice;
                             isWholesale = true;
                         }
-
                         const rowTotal = finalPrice * item.qty;
                         totalBooks += rowTotal;
-
                         return `
                             <div class="cart-item">
                                 <img src="${item.img}" class="cart-img" onerror="this.onerror=null;this.src='${DEFAULT_IMG}';">
@@ -1550,11 +1651,9 @@
                     }).join('');
                 }
                 
-                // FREE Delivery Check Logic
-                if (this.state.cart.length > 0) {
+                if (this.state.cart.length > 0 && selectedCity) {
                     if(totalBooks >= freeLimit) {
                         deliveryFee = 0;
-                        document.getElementById('delivery-type-label').innerText = "(بێ بەرامبەر)";
                     }
                 }
                 this.state.deliveryFee = deliveryFee;
@@ -1593,7 +1692,6 @@
                 document.getElementById('inp-name').value = u.name;
                 document.getElementById('inp-phone').value = u.phone;
                 
-                // City Select needs to be populated first (done in renderCityOptions)
                 if(document.getElementById('inp-city').options.length > 0) {
                     document.getElementById('inp-city').value = u.city || "Duhok";
                 }
@@ -1630,3 +1728,4 @@
     </script>
 </body>
 </html>
+
