@@ -12,87 +12,21 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Vazirmatn:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Vazirmatn:wght@200;300;400;500;600;700;800;900&family=Outfit:wght@300;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <!-- FIREBASE SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
-    <!-- ⚡️ LOGO GENERATOR (ئەڤە لۆگۆیێ شین و زێڕین دروست دکەت) ⚡️ -->
-    <script>
-        (function() {
-            // 1. Create a canvas
-            var canvas = document.createElement('canvas');
-            canvas.width = 512;
-            canvas.height = 512;
-            var ctx = canvas.getContext('2d');
-
-            // 2. Background: Modern Blue Gradient
-            var grd = ctx.createLinearGradient(0, 0, 0, 512);
-            grd.addColorStop(0, "#1e3799");
-            grd.addColorStop(1, "#0c2461");
-            ctx.fillStyle = grd;
-            
-            // Draw Squircle (Rounded Box)
-            ctx.beginPath();
-            ctx.moveTo(100, 0);
-            ctx.lineTo(412, 0);
-            ctx.quadraticCurveTo(512, 0, 512, 100);
-            ctx.lineTo(512, 412);
-            ctx.quadraticCurveTo(512, 512, 412, 512);
-            ctx.lineTo(100, 512);
-            ctx.quadraticCurveTo(0, 512, 0, 412);
-            ctx.lineTo(0, 100);
-            ctx.quadraticCurveTo(0, 0, 100, 0);
-            ctx.fill();
-
-            // 3. Gold Book Icon
-            ctx.fillStyle = "#f6b93b";
-            ctx.shadowColor = "rgba(0,0,0,0.3)";
-            ctx.shadowBlur = 20;
-            ctx.shadowOffsetY = 10;
-            
-            ctx.beginPath();
-            ctx.moveTo(256, 140);
-            // Left page
-            ctx.quadraticCurveTo(150, 140, 100, 170);
-            ctx.lineTo(100, 370);
-            ctx.quadraticCurveTo(150, 340, 256, 340);
-            // Right page
-            ctx.quadraticCurveTo(362, 340, 412, 370);
-            ctx.lineTo(412, 170);
-            ctx.quadraticCurveTo(362, 140, 256, 140);
-            ctx.fill();
-            
-            ctx.shadowColor = "transparent"; // Reset shadow
-
-            // 4. Text "ISLAM"
-            ctx.fillStyle = "#ffffff";
-            ctx.font = "900 100px sans-serif";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText("ISLAM", 256, 440);
-
-            // 5. Text "Proje"
-            ctx.fillStyle = "rgba(255,255,255,0.9)";
-            ctx.font = "300 45px sans-serif";
-            ctx.fillText("Proje", 256, 100);
-
-            // 6. Generate URL and Set Icons
-            var iconUrl = canvas.toDataURL('image/png');
-            
-            var link1 = document.createElement('link');
-            link1.rel = 'icon'; link1.href = iconUrl;
-            document.head.appendChild(link1);
-
-            var link2 = document.createElement('link');
-            link2.rel = 'apple-touch-icon'; link2.href = iconUrl;
-            document.head.appendChild(link2);
-        })();
-    </script>
+    <!-- ⚡️ DIRECT LOGO CODE (SVG) FOR IPHONE ⚡️ -->
+    <!-- This replaces the old image link -->
+    <link rel="icon" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='a' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%231e3799'/%3E%3Cstop offset='100%25' stop-color='%230c2461'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='100' fill='url(%23a)'/%3E%3Cpath d='M256 140 Q150 140 100 170 L100 370 Q150 340 256 340 Q362 340 412 370 L412 170 Q362 140 256 140 Z' fill='%23f6b93b'/%3E%3Ctext x='256' y='100' font-family='sans-serif' font-weight='300' font-size='45' fill='white' text-anchor='middle' opacity='0.9'%3EProje%3C/text%3E%3Ctext x='256' y='450' font-family='sans-serif' font-weight='900' font-size='110' fill='white' text-anchor='middle'%3EISLAM%3C/text%3E%3C/svg%3E">
+    
+    <link rel="apple-touch-icon" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='a' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%231e3799'/%3E%3Cstop offset='100%25' stop-color='%230c2461'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='0' fill='url(%23a)'/%3E%3Cpath d='M256 140 Q150 140 100 170 L100 370 Q150 340 256 340 Q362 340 412 370 L412 170 Q362 140 256 140 Z' fill='%23f6b93b'/%3E%3Ctext x='256' y='100' font-family='sans-serif' font-weight='300' font-size='45' fill='white' text-anchor='middle' opacity='0.9'%3EProje%3C/text%3E%3Ctext x='256' y='450' font-family='sans-serif' font-weight='900' font-size='110' fill='white' text-anchor='middle'%3EISLAM%3C/text%3E%3C/svg%3E">
 
     <style>
+        /* CSS Codes ... (هەمان ستایلێن بەرێ دابنێ) */
         :root {
             --primary: #1e3799;       
             --primary-dark: #0c2461;
@@ -130,6 +64,9 @@
         body { background: var(--bg-body); color: var(--text-main); overflow-x: hidden; padding-bottom: calc(var(--nav-h) + 20px); transition: background 0.3s, color 0.3s; }
         a { text-decoration: none; color: inherit; }
         
+        /* REST OF YOUR CSS HERE... */
+        /* (تکایە هەمی ستایلێن دی لێرە دابنێ وەکی فایلی بەرێ) */
+
         /* --- TOAST NOTIFICATION --- */
         #toast-container { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); z-index: 6000; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 350px; pointer-events: none; }
         .toast { background: rgba(30, 30, 30, 0.95); color: white; padding: 15px 20px; border-radius: 50px; display: flex; align-items: center; gap: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); opacity: 0; transform: translateY(20px); transition: 0.3s; backdrop-filter: blur(5px); }
