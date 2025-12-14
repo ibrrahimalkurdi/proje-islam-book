@@ -2,303 +2,1604 @@
 <html lang="ku" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>پانێلا کرێکاران</title>
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="پانێلا کرێکاران">
-    <meta name="theme-color" content="#0077b6">
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Proje Islam Library</title>
+    
+    <!-- PWA Setup -->
+    <meta name="theme-color" content="#1e3799">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.png">
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Vazirmatn:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- FIREBASE SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
     <style>
-        :root {--primary-color: #0077b6;--secondary-color: #00b4d8;--success-color: #2a9d8f;--danger-color: #e63946;--background-color: #f0f3f5;--card-bg: #ffffff;--text-color: #2b2d42;--border-radius: 12px;--box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);--light-gray: #e9ecef;}
-        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700&display=swap');
-        body {font-family: 'Vazirmatn', sans-serif;margin: 0;background-color: var(--background-color);color: var(--text-color);font-size: 16px;line-height: 1.6;}
-        header {background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));color: white;padding: 1rem 1.5rem;display: flex;justify-content: space-between;align-items: center;box-shadow: 0 4px 10px rgba(0,0,0,0.1);}
-        header h1 {margin: 0;font-size: 1.5rem;font-weight: 700;}
-        #user-info {font-size: 0.9rem;font-weight: 600;}
-        main {padding: 1.5rem;max-width: 1200px;margin: auto;}
-        .view {display: none;}
-        .view.active {display: block;animation: fadeIn 0.4s ease-out;}
-        @keyframes fadeIn {from {opacity: 0;transform: translateY(10px);}to {opacity: 1;transform: translateY(0);}}
-        .btn {background-color: var(--primary-color);color: white;border: none;padding: 0.8rem 1.8rem;font-size: 1rem;font-weight: 600;border-radius: 8px;cursor: pointer;transition: all 0.25s;display: inline-flex;align-items: center;justify-content: center;gap: 0.5rem;}
-        .btn:hover {opacity: 0.85;transform: translateY(-2px);box-shadow: 0 3px 10px rgba(0,0,0,0.1);}
-        .btn.success-btn {background-color: var(--success-color);}
-        .btn.danger-btn {background-color: var(--danger-color);}
-        .back-btn {margin-bottom: 1.5rem;}
-        .card {background-color: var(--card-bg);padding: 1.5rem;border-radius: var(--border-radius);box-shadow: var(--box-shadow);margin-bottom: 1.5rem;}
-        h2 {margin-top: 0;font-size: 1.4rem;font-weight: 700;color: var(--primary-color);border-bottom: 2px solid var(--light-gray);padding-bottom: 0.5rem;margin-bottom: 1.5rem;}
-        .form-group {margin-bottom: 1.2rem;}
-        .form-group label {display: block;margin-bottom: 0.5rem;font-weight: 600;}
-        .form-group input {width: 100%;padding: 0.8rem;border: 1px solid #ccc;border-radius: 8px;box-sizing: border-box;font-size: 1rem;}
-        .form-group input:focus {border-color: var(--primary-color);outline: none;box-shadow: 0 0 0 3px rgba(0, 119, 182, 0.2);}
-        #login-view {max-width: 400px;margin: 5rem auto;text-align: center;}
-        .dashboard-actions {display: grid;grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));gap: 1.5rem;margin-bottom: 2rem;}
-        .action-button {background: var(--card-bg);border: none;padding: 2rem 1rem;border-radius: var(--border-radius);box-shadow: var(--box-shadow);cursor: pointer;transition: all 0.3s;text-align: center;font-family: inherit;}
-        .action-button:hover {transform: translateY(-7px);box-shadow: 0 8px 25px rgba(0,0,0,0.12);}
-        .action-button .icon {font-size: 3.5rem;color: var(--primary-color);line-height: 1;}
-        .action-button h3 {margin: 1rem 0 0;font-size: 1.2rem;color: var(--text-color);}
-        #cart-container h3 {font-size: 1.2rem;margin-bottom: 1rem;}
-        #cart-items-list {list-style-type: none;padding: 0;margin-bottom: 1.5rem;}
-        #cart-items-list li {display: flex;justify-content: space-between;align-items: center;padding: 0.8rem;border-bottom: 1px solid var(--light-gray);font-size: 1rem;}
-        #cart-items-list li:last-child {border: none;}
-        #cart-items-list .item-name {font-weight: 600;}
-        #cart-items-list .item-price {color: var(--success-color);font-weight: 600;}
-        #total-price-display {text-align: center;font-size: 1.8rem;font-weight: 700;color: var(--primary-color);background: #f0f8ff;padding: 1rem;border-radius: 8px;margin-bottom: 1.5rem;}
-        #total-price-display small {font-size: 1rem;font-weight: 400;}
-        .modal {position: fixed;top: 0;left: 0;width: 100%;height: 100%;background: rgba(0,0,0,0.6);display: none;align-items: center;justify-content: center;z-index: 2000;animation: fadeIn 0.3s;}
-        .modal.active {display: flex;}
-        .modal-content {background: white;padding: 1.5rem 2rem;border-radius: var(--border-radius);width: 90%;max-width: 500px;box-shadow: 0 10px 30px rgba(0,0,0,0.2);}
-        .modal-content h3 {margin-top: 0;margin-bottom: 1rem;color: var(--primary-color);}
-        #scanner-reader {width: 100%;border-radius: 8px;overflow: hidden;border: 2px solid var(--light-gray);}
-        #toast {position: fixed;bottom: -100px;left: 50%;transform: translateX(-50%);background-color: var(--success-color);color: white;padding: 1rem 1.8rem;border-radius: 8px;box-shadow: 0 5px 15px rgba(0,0,0,0.2);transition: bottom 0.5s ease, transform 0.5s ease;z-index: 1000;width: 90%;max-width: 450px;text-align: center;font-size: 1rem;}
-        #toast.danger {background-color: var(--danger-color);}
-        #toast.show {bottom: 20px;}
-        #loader-overlay {position: fixed;top: 0;left: 0;width: 100%;height: 100%;background: rgba(255, 255, 255, 0.9);z-index: 9999;display: flex;justify-content: center;align-items: center;flex-direction: column;}
-        .spinner {border: 8px solid #f3f3f3;border-top: 8px solid var(--primary-color);border-radius: 50%;width: 60px;height: 60px;animation: spin 1s linear infinite;}
-        @keyframes spin {0% {transform: rotate(0deg);}100% {transform: rotate(360deg);}}
-        table {width: 100%;border-collapse: collapse;margin-top: 1rem;}
-        th, td {padding: 0.8rem;border-bottom: 1px solid var(--light-gray);text-align: right;white-space: nowrap;}
-        th {background-color: #f8f9fa;font-weight: 700;color: var(--primary-color);}
-        .amount-col, .price-col {font-weight: 700;color: var(--success-color);}
-        .list-wrapper {overflow-x: auto;}
+        :root {
+            --primary: #1e3799;       
+            --primary-dark: #0c2461;
+            --accent: #f6b93b;        
+            --bg-body: #f1f2f6;
+            --bg-card: #ffffff;
+            --text-main: #2f3542;
+            --text-light: #a4b0be;
+            --border-color: #eee;
+            --danger: #eb4d4b;
+            --success: #2ecc71;
+            --warning: #f1c40f;
+            --info: #3498db;
+            --radius: 20px;
+            --shadow: 0 10px 30px rgba(0,0,0,0.08);
+            --header-h: 70px;
+            --nav-h: 80px;
+            --story-gradient: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            --discount-gradient: linear-gradient(45deg, #ff0000 0%, #ff5252 100%);
+        }
+
+        [data-theme="dark"] {
+            --primary: #4a69bd;       
+            --primary-dark: #1e3799;
+            --accent: #f8c291;        
+            --bg-body: #121212;
+            --bg-card: #1e1e1e;
+            --text-main: #f1f2f6;
+            --text-light: #747d8c;
+            --border-color: #333;
+            --shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Vazirmatn', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; }
+        body { background: var(--bg-body); color: var(--text-main); overflow-x: hidden; padding-bottom: calc(var(--nav-h) + 20px); transition: background 0.3s, color 0.3s; }
+        a { text-decoration: none; color: inherit; }
+        
+        /* --- TOAST NOTIFICATION --- */
+        #toast-container { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); z-index: 6000; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 350px; pointer-events: none; }
+        .toast { background: rgba(30, 30, 30, 0.95); color: white; padding: 15px 20px; border-radius: 50px; display: flex; align-items: center; gap: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); opacity: 0; transform: translateY(20px); transition: 0.3s; backdrop-filter: blur(5px); }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast-icon { width: 25px; height: 25px; background: var(--success); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 0.8rem; }
+        .toast-icon.error { background: var(--danger); }
+        
+        /* --- LIBRARIES STYLE --- */
+        .stories-container { padding: 15px 20px; display: flex; gap: 20px; overflow-x: auto; scrollbar-width: none; margin-bottom: 5px; }
+        .story-item { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; transition: transform 0.2s; position: relative; }
+        .story-item:active { transform: scale(0.9); }
+        
+        .story-item.active-lib .story-ring { border-color: var(--success); box-shadow: 0 0 0 3px var(--success); background: none; }
+        
+        /* Discount Style for Library Ring */
+        .story-item.has-discount .story-ring { background: var(--discount-gradient); animation: pulse-ring 2s infinite; }
+        .discount-badge-story { position: absolute; top: 0; right: 0; background: red; color: white; width: 22px; height: 22px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 0.7rem; border: 2px solid var(--bg-body); font-weight: bold; }
+
+        .story-ring { width: 70px; height: 70px; border-radius: 50%; padding: 3px; background: var(--story-gradient); position: relative; transition: 0.3s; }
+        .story-img { width: 100%; height: 100%; border-radius: 50%; border: 3px solid var(--bg-body); object-fit: cover; background: white; }
+        .story-name { font-size: 0.75rem; max-width: 75px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-main); font-weight: 600; text-align: center; }
+        
+        /* --- SCREENS --- */
+        .screen { display: none; min-height: 100vh; animation: fadeIn 0.4s ease-out; }
+        .screen.active { display: block; }
+
+        /* --- AUTH MODAL --- */
+        #auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 5000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(5px); overflow-y: auto; }
+        .auth-box { background: var(--bg-card); width: 90%; max-width: 400px; padding: 30px; border-radius: 30px; color: var(--text-main); box-shadow: 0 20px 50px rgba(0,0,0,0.3); position: relative; margin: 20px 0; max-height: 90vh; overflow-y: auto; }
+        .auth-close { position: absolute; top: 15px; left: 15px; font-size: 1.2rem; cursor: pointer; color: var(--text-light); }
+        .auth-logo { font-size: 3rem; color: var(--primary); margin-bottom: 20px; text-align: center; }
+        .auth-input { width: 100%; padding: 15px; background: var(--bg-body); color: var(--text-main); border: 2px solid transparent; border-radius: 15px; margin-bottom: 15px; font-size: 1rem; transition: 0.3s; }
+        .auth-input:focus { border-color: var(--primary); background: var(--bg-card); }
+        
+        .radio-group { display: flex; gap: 15px; margin-bottom: 15px; }
+        .radio-label { flex: 1; background: var(--bg-body); padding: 12px; border-radius: 12px; text-align: center; cursor: pointer; border: 2px solid transparent; transition: 0.3s; color: var(--text-light); }
+        .radio-input { display: none; }
+        .radio-input:checked + .radio-label { background: var(--bg-card); border-color: var(--primary); color: var(--primary); font-weight: bold; }
+
+        .btn-auth { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 15px; font-weight: 800; font-size: 1.1rem; cursor: pointer; box-shadow: 0 10px 20px rgba(30, 55, 153, 0.3); }
+        
+        /* --- VERIFY MODAL --- */
+        #verify-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .verify-box { background: var(--bg-card); width: 90%; max-width: 350px; padding: 30px; border-radius: 25px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .code-input { letter-spacing: 10px; font-size: 2rem; text-align: center; font-weight: 900; color: var(--primary); }
+        
+        /* --- HEADER --- */
+        header { position: sticky; top: 0; z-index: 100; background: var(--bg-card); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 5px 20px rgba(0,0,0,0.05); height: var(--header-h); transition: background 0.3s; }
+        .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .brand-text { font-family: 'Amiri', serif; font-size: 1.4rem; font-weight: 700; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        [data-theme="dark"] .brand-text { background: linear-gradient(135deg, #fff 0%, var(--accent) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .header-actions { display: flex; gap: 10px; align-items: center; }
+        .icon-btn { position: relative; width: 35px; height: 35px; border-radius: 50%; background: var(--bg-body); display: flex; justify-content: center; align-items: center; cursor: pointer; color: var(--text-main); font-size: 1rem; }
+        
+        #lang-selector { position: relative; display: inline-block; }
+        .lang-dropdown { display: none; position: absolute; top: 40px; left: 0; background: var(--bg-card); box-shadow: var(--shadow); border-radius: 15px; overflow: hidden; z-index: 101; width: 120px; }
+        .lang-dropdown.show { display: block; }
+        .lang-opt { padding: 10px; border-bottom: 1px solid var(--border-color); cursor: pointer; font-size: 0.9rem; text-align: center; color: var(--text-main); }
+
+        #notif-dropdown { display: none; position: absolute; top: 60px; left: 20px; width: 280px; max-height: 400px; overflow-y: auto; background: var(--bg-card); box-shadow: var(--shadow); border-radius: 15px; z-index: 102; padding: 10px; }
+        #notif-dropdown.show { display: block; }
+        .notif-item { padding: 10px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: var(--text-main); }
+        .notif-dot { position: absolute; top: -2px; right: -2px; width: 12px; height: 12px; background: var(--danger); border-radius: 50%; border: 2px solid var(--bg-card); display: none; }
+        .notif-dot.show { display: block; }
+
+        /* --- SEARCH & HOME --- */
+        .search-container { padding: 10px 20px 10px; display: flex; gap: 10px; align-items: center; }
+        .search-box { position: relative; width: 100%; }
+        .search-input { width: 100%; padding: 16px 50px 16px 20px; border-radius: 20px; border: none; background: var(--bg-card); color: var(--text-main); box-shadow: var(--shadow); font-size: 1rem; }
+        .search-icon { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: var(--text-light); }
+        .sort-btn { background: var(--bg-card); width: 50px; height: 50px; border-radius: 15px; display: flex; justify-content: center; align-items: center; box-shadow: var(--shadow); color: var(--primary); font-size: 1.2rem; cursor: pointer; flex-shrink: 0; }
+
+        .categories { display: flex; gap: 12px; overflow-x: auto; padding: 10px 20px; scrollbar-width: none; }
+        .cat-chip { background: var(--bg-card); padding: 10px 20px; border-radius: 30px; white-space: nowrap; font-weight: 600; color: var(--text-light); border: 1px solid var(--border-color); transition: 0.3s; cursor: pointer; }
+        .cat-chip.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 5px 15px rgba(30, 55, 153, 0.3); }
+
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 20px; }
+        .card { background: var(--bg-card); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); position: relative; transition: transform 0.2s; }
+        .card:active { transform: scale(0.97); }
+        .card-img-c { height: 180px; width: 100%; position: relative; }
+        .card-img { width: 100%; height: 100%; object-fit: cover; }
+        .card-badge { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.6); color: white; padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; backdrop-filter: blur(4px); }
+        .card-fav { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.8); width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #ccc; cursor: pointer; z-index: 10; backdrop-filter: blur(4px); }
+        .card-fav.active { color: var(--danger); animation: heartBeat 0.4s; }
+        .lib-tag { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: white; font-size: 0.75rem; padding: 20px 10px 5px; display: flex; align-items: center; gap: 5px; }
+        
+        .card-body { padding: 12px; }
+        .card-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-main); }
+        .card-author { font-size: 0.8rem; color: var(--text-light); margin-bottom: 10px; }
+        .card-footer { display: flex; justify-content: space-between; align-items: center; }
+        .price { font-weight: 800; color: var(--primary); }
+        .old-price { text-decoration: line-through; color: #999; font-size: 0.75rem; margin-left: 5px; }
+        .discount-price { color: var(--danger); font-weight: 900; }
+        .btn-add { width: 32px; height: 32px; background: var(--bg-body); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: var(--primary); transition: 0.2s; }
+
+        .request-box { margin: 20px; padding: 20px; background: var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px dashed var(--primary); text-align: center; }
+        .req-input-row { display: flex; gap: 10px; margin-top: 15px; }
+        .req-input { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-main); }
+        .btn-req { padding: 0 15px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; }
+
+        /* --- PRODUCT MODAL --- */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-body); z-index: 2000; overflow-y: auto; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .modal.open { transform: translateY(0); }
+        .modal-header { height: 300px; position: relative; }
+        .modal-img { width: 100%; height: 100%; object-fit: cover; }
+        .modal-btn-row { position: absolute; top: 20px; left: 20px; right: 20px; display: flex; justify-content: space-between; pointer-events: none; }
+        .modal-btn-icon { background: rgba(255,255,255,0.9); width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; cursor: pointer; pointer-events: auto; color: var(--text-main); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        
+        /* Fixed padding-bottom for modal body to avoid overlap with footer */
+        .modal-body { background: var(--bg-card); border-radius: 30px 30px 0 0; margin-top: -40px; position: relative; padding: 30px 30px 100px 30px; min-height: 500px; }
+        
+        .spec-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 20px 0; background: var(--bg-body); padding: 15px; border-radius: 15px; text-align: center; }
+        .spec-item { padding: 5px; }
+        .spec-item h5 { color: var(--text-light); font-size: 0.75rem; font-weight: normal; margin-bottom: 2px; }
+        .spec-item span { color: var(--primary-dark); font-weight: bold; font-size: 0.9rem; }
+        
+        /* Wholesale / Offers Section in Modal */
+        .offers-box { background: rgba(246, 185, 59, 0.15); border: 1px dashed var(--accent); padding: 15px; border-radius: 15px; margin-top: 20px; }
+        .offer-row { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: var(--text-main); margin-bottom: 5px; }
+        .offer-icon { color: var(--accent); }
+
+        .related-books-section { margin-top: 30px; }
+        .related-title { font-weight: bold; margin-bottom: 10px; color: var(--text-main); font-size: 1rem; border-bottom: 2px solid var(--border-color); display: inline-block; padding-bottom: 5px; }
+        .related-scroll { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; padding-bottom: 10px; }
+        .related-card { min-width: 100px; width: 100px; cursor: pointer; }
+        .related-img { width: 100px; height: 140px; border-radius: 10px; object-fit: cover; }
+        .related-name { font-size: 0.75rem; font-weight: bold; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 5px; color: var(--text-main); }
+
+        .modal-footer { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bg-card); padding: 20px; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 15px; z-index: 2001; }
+        
+        #preview-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-body); z-index: 8000; display: none; overflow-y: auto; }
+        .preview-header { position: sticky; top: 0; background: var(--bg-card); padding: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 8001; }
+        .preview-content { padding: 20px; text-align: center; }
+        .preview-page { width: 100%; max-width: 600px; margin-bottom: 20px; border-radius: 10px; box-shadow: var(--shadow); border: 1px solid var(--border-color); }
+        
+        /* --- CART --- */
+        .coupon-box { display: flex; gap: 10px; margin-top: 20px; }
+        .coupon-input { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-main); }
+        .btn-apply { padding: 0 20px; background: var(--primary-dark); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        .cart-item { background: var(--bg-card); padding: 15px; border-radius: 15px; display: flex; gap: 15px; margin-bottom: 15px; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+        .cart-img { width: 60px; height: 80px; border-radius: 10px; object-fit: cover; }
+        .qty-control { display: flex; align-items: center; background: var(--bg-body); border-radius: 8px; padding: 2px; }
+        .qty-btn { width: 28px; height: 28px; display: flex; justify-content: center; align-items: center; cursor: pointer; font-weight: bold; color: var(--text-main); }
+        
+        /* POINTS REDEMPTION IN CART */
+        .points-redeem-box {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: white; padding: 15px; border-radius: 15px; margin-top: 15px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .redeem-btn {
+            background: white; color: #6c5ce7; border: none; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 0.8rem; cursor: pointer;
+        }
+
+        /* --- PROFILE (NEW STYLE) --- */
+        .profile-header { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); padding: 40px 20px 60px; text-align: center; color: white; border-radius: 0 0 40px 40px; position: relative; }
+        .avatar-container { width: 100px; height: 100px; margin: 0 auto 15px; position: relative; }
+        .avatar { width: 100%; height: 100%; border-radius: 50%; border: 4px solid var(--accent); object-fit: cover; background: white; }
+        .edit-fab { position: absolute; top: 20px; left: 20px; background: rgba(255,255,255,0.2); width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; backdrop-filter: blur(5px); }
+        .profile-card { background: var(--bg-card); width: 90%; margin: -40px auto 20px; border-radius: 20px; padding: 20px; box-shadow: var(--shadow); position: relative; }
+        .info-row { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid var(--border-color); align-items: center; }
+        .info-row:last-child { border: none; }
+        .info-label { color: var(--text-light); font-size: 0.9rem; }
+        .info-val { font-weight: 600; color: var(--text-main); }
+        .edit-input { border: 1px solid var(--primary); background: var(--bg-body); padding: 5px 10px; border-radius: 8px; width: 60%; text-align: left; color: var(--text-main); font-weight: bold; }
+        .edit-input:disabled { background: #e0e0e0; border-color: #ccc; color: #888; cursor: not-allowed; }
+
+        .points-badge {
+            background: var(--accent);
+            color: black;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            display: inline-block;
+        }
+
+        /* Logout Button Styled (Hidden by default) */
+        .btn-logout-styled {
+            width: 90%;
+            margin: 0 auto 30px; 
+            padding: 15px;
+            background: #fff0f0;
+            border: 2px solid var(--danger);
+            color: var(--danger);
+            border-radius: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            transition: 0.2s;
+            font-size: 1rem;
+        }
+        .btn-logout-styled:active { transform: scale(0.95); }
+
+        /* New Live Orders Section */
+        .live-orders-container {
+            padding: 0 20px;
+        }
+        .live-title {
+            font-size: 1.1rem;
+            color: var(--text-main);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-right: 10px;
+            border-right: 4px solid var(--primary);
+        }
+        
+        .track-card {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        
+        .track-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed var(--border-color); }
+        .track-id { font-weight: 900; font-size: 1.1rem; color: var(--text-main); letter-spacing: 1px; }
+        .track-date { font-size: 0.8rem; color: var(--text-light); }
+
+        .track-status-badge { display: inline-block; padding: 8px 15px; border-radius: 50px; font-size: 0.85rem; font-weight: bold; margin-bottom: 15px; width: 100%; text-align: center; }
+        .st-wait { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .st-done { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .st-del { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+
+        .track-items { font-size: 0.9rem; color: var(--text-main); line-height: 1.6; margin-bottom: 15px; }
+        .track-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+        .track-total { font-weight: 900; color: var(--primary); font-size: 1.2rem; }
+        
+        .btn-confirm-order { width: 100%; padding: 10px; background: var(--success); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; animation: pulse 2s infinite; }
+        .btn-cancel-order { width: 40px; height: 40px; background: rgba(235, 77, 75, 0.1); color: var(--danger); border-radius: 50%; border: 1px solid var(--danger); display: flex; justify-content: center; align-items: center; cursor: pointer; }
+
+        /* --- NAV --- */
+        .nav-bar { position: fixed; bottom: 20px; left: 20px; right: 20px; background: var(--bg-card); height: 70px; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 10px 40px rgba(0,0,0,0.15); z-index: 1000; }
+        .nav-item { color: var(--text-light); font-size: 1.4rem; transition: 0.3s; position: relative; width: 50px; height: 50px; display: flex; justify-content: center; align-items: center; border-radius: 50%; }
+        .nav-item.active { background: var(--primary); color: white; transform: translateY(-10px); box-shadow: 0 10px 20px rgba(30, 55, 153, 0.3); }
+        .badge { position: absolute; top: -5px; right: -5px; background: var(--danger); color: white; font-size: 0.65rem; width: 20px; height: 20px; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 2px solid white; }
+        
+        /* --- BTNS --- */
+        .btn { padding: 15px; border-radius: 15px; border: none; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; font-size: 1rem; transition: 0.2s; }
+        .btn-primary { background: var(--primary); color: white; width: 100%; box-shadow: 0 8px 20px rgba(30, 55, 153, 0.25); }
+        .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); width: 100%; margin-top: 10px; }
+        .btn:active { transform: scale(0.98); }
+        .hidden { display: none !important; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes heartBeat { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
+        @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(255, 0, 0, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); } }
     </style>
 </head>
 <body>
-    <div id="loader-overlay"><div class="spinner"></div></div>
 
-    <header id="main-header" style="display: none;">
-        <h1>پانێلا کرێکاران</h1>
-        <div>
-            <div id="user-info"></div>
-            <button id="logout-btn" class="btn danger-btn" style="padding: 0.4rem 0.8rem; margin-top: 0.3rem;">چوونا دەرڤە</button>
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast-container"></div>
+    
+    <!-- PREVIEW MODAL -->
+    <div id="preview-modal">
+        <div class="preview-header">
+            <div style="font-weight:bold; color:var(--text-main);" data-lang="preview">چاڤخشاندن 📖</div>
+            <div onclick="app.closePreview()" style="font-size:1.5rem; cursor:pointer;"><i class="fas fa-times"></i></div>
         </div>
-    </header>
+        <div class="preview-content" id="preview-container"></div>
+    </div>
+    
+    <!-- VERIFICATION MODAL -->
+    <div id="verify-modal">
+        <div class="verify-box">
+            <h2 style="color:var(--text-main); margin-bottom:10px;" data-lang="enter_code">تکایە کۆدێ بنڤیسە</h2>
+            <p style="color:var(--text-light); margin-bottom:20px; font-size:0.9rem;" data-lang="code_desc">کۆد د ئاگەهداریان دا هاتیە بۆ تە.</p>
+            <input type="tel" id="verify-input" class="auth-input code-input" maxlength="4" placeholder="XXXX">
+            <button class="btn btn-primary" onclick="app.submitVerify()" data-lang="confirm_btn">پشتڕاستکرن</button>
+            <button class="btn btn-outline" onclick="app.closeVerifyModal()" style="border:none; color:var(--text-light); margin-top:10px;">پاشگەزبوون</button>
+        </div>
+    </div>
 
-    <main>
-        <section id="login-view" class="view active">
-            <div class="card">
-                <h2>چوونا ژۆر (کرێکار)</h2>
-                <form id="login-form">
-                    <div class="form-group"><label for="worker-email">ئیمەیل:</label><input type="email" id="worker-email" required></div>
-                    <div class="form-group"><label for="worker-password">پاسۆرد:</label><input type="password" id="worker-password" required></div>
-                    <button type="submit" class="btn" style="width: 100%;">داخلبوون</button>
-                </form>
-            </div>
-        </section>
-
-        <section id="dashboard-view" class="view">
-            <div class="dashboard-actions">
-                <button id="start-scan-btn" class="action-button"><div class="icon">&#128247;</div><h3>فرۆتن ب سکان</h3></button>
-                <button id="manual-entry-btn" class="action-button"><div class="icon">&#9997;</div><h3>تۆمارکرنا ب دەست</h3></button>
-                <button id="price-check-btn" class="action-button"><div class="icon">&#128181;</div><h3>پشکنینا بهای</h3></button>
+    <!-- AUTH OVERLAY -->
+    <div id="auth-overlay" class="hidden">
+        <div class="auth-box">
+            <div class="auth-close" onclick="app.toggleAuthOverlay()"><i class="fas fa-times"></i></div>
+            <div class="auth-logo"><i class="fas fa-kaaba"></i></div>
+            
+            <!-- Login Form -->
+            <div id="login-form">
+                <h2 style="margin-bottom:20px; text-align:center;" data-lang="login">چوونە ژوور</h2>
+                <input type="tel" id="login-phone" class="auth-input" placeholder="ژمارا مۆبایلێ (07xxxxxxxxx)" maxlength="11">
+                <input type="password" id="login-pass" class="auth-input" placeholder="وشەی نهێنی (Password)">
+                <button class="btn-auth" onclick="app.login()" data-lang="login_btn">چوونە ژوور</button>
+                <p style="margin-top:15px; font-size:0.9rem; color:var(--text-light); text-align:center;">
+                    <span data-lang="no_account">تە هەژمار نینە؟</span> 
+                    <span onclick="app.switchAuth('register')" style="color:var(--primary); cursor:pointer; font-weight:bold;" data-lang="create">دروستکرن</span>
+                </p>
             </div>
             
-            <div id="cart-container" class="card" style="display: none;">
-                <h2>لیستا فرۆتنێ یا نها</h2>
-                <ul id="cart-items-list"></ul>
-                <div id="total-price-display">0 <small>دینار</small></div>
-                <div style="display: flex; gap: 1rem;">
-                    <button id="finalize-sale-btn" class="btn success-btn" style="flex-grow: 1;">پشتراستکرنا فرۆتنێ</button>
-                    <button id="clear-cart-btn" class="btn danger-btn" style="flex-grow: 1;">ڤالاکرن</button>
+            <!-- Register Form -->
+            <div id="register-form" class="hidden">
+                <h2 style="margin-bottom:20px; text-align:center;" data-lang="new_account">هەژمارا نوێ</h2>
+                <input type="text" id="reg-name" class="auth-input" placeholder="ناڤێ سیانی">
+                <input type="tel" id="reg-phone" class="auth-input" placeholder="ژمارا مۆبایلێ (07xxxxxxxxx)" maxlength="11">
+                <input type="password" id="reg-pass" class="auth-input" placeholder="وشەی نهێنی (Password)">
+                
+                <div class="radio-group">
+                    <input type="radio" name="gender" id="g-male" value="Kur" class="radio-input" checked>
+                    <label for="g-male" class="radio-label">کوڕ <i class="fas fa-male"></i></label>
+                    <input type="radio" name="gender" id="g-female" value="Keç" class="radio-input">
+                    <label for="g-female" class="radio-label">کچ <i class="fas fa-female"></i></label>
+                </div>
+                
+                <div style="display:flex; gap:10px;">
+                    <input type="number" id="reg-age" class="auth-input" placeholder="ژی (عەمر)" style="flex:1;">
+                    <select id="reg-city" class="auth-input" style="flex:2;">
+                        <!-- Options filled dynamically -->
+                        <option value="Duhok">دهۆک</option>
+                    </select>
+                </div>
+
+                <input type="text" id="reg-address" class="auth-input" placeholder="ناڤنیشان (تاخ)">
+                
+                <button class="btn-auth" onclick="app.register()" data-lang="register_btn">تۆمارکرن</button>
+                <p style="margin-top:15px; font-size:0.9rem; color:var(--text-light); text-align:center;">
+                    <span data-lang="have_account">تە هەژمار هەیە؟</span>
+                    <span onclick="app.switchAuth('login')" style="color:var(--primary); cursor:pointer; font-weight:bold;" data-lang="login">چوونە ژوور</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="main-app">
+        
+        <!-- HEADER -->
+        <header>
+            <div class="brand">
+                <i class="fas fa-quran" style="font-size:1.4rem; color:var(--accent);"></i>
+                <span class="brand-text">proje islam library</span>
+            </div>
+            <div class="header-actions">
+                <div id="lang-selector">
+                    <div class="icon-btn" onclick="app.toggleLangMenu()"><i class="fas fa-globe"></i></div>
+                    <div class="lang-dropdown" id="lang-menu">
+                        <div class="lang-opt" onclick="app.setLang('badini')">Badînî</div>
+                        <div class="lang-opt" onclick="app.setLang('sorani')">سۆرانی</div>
+                        <div class="lang-opt" onclick="app.setLang('arabic')">العربية</div>
+                    </div>
+                </div>
+                <div style="position:relative;">
+                    <div class="icon-btn" onclick="app.toggleNotif()">
+                        <i class="far fa-bell"></i>
+                        <div id="notif-dot" class="notif-dot"></div>
+                    </div>
+                    <div id="notif-dropdown"></div>
+                </div>
+                <div class="icon-btn" onclick="app.toggleTheme()">
+                    <i class="fas fa-moon" id="theme-icon"></i>
+                </div>
+                <div id="header-user-status" onclick="app.nav('profile', document.querySelectorAll('.nav-item')[2])" style="font-size:0.8rem; font-weight:bold; color:var(--primary); cursor:pointer;">
+                    <i class="far fa-user"></i>
                 </div>
             </div>
+        </header>
 
-            <div class="card">
-                <h2>تۆمارێن فرۆتنێن من (ئەڤرۆ)</h2>
-                <div class="list-wrapper">
-                    <table id="sales-history-table">
-                        <thead><tr><th>رووژ و دەم</th><th>کۆژمە</th><th>جور</th><th>پێکهاتە</th></tr></thead>
-                        <tbody><tr><td colspan="4" style="text-align:center;">چ تۆمار نینن...</td></tr></tbody>
-                    </table>
+        <!-- 1. HOME SCREEN -->
+        <section id="home" class="screen active">
+            <div class="search-container">
+                <div class="search-box">
+                    <input type="text" class="search-input" id="search-input" placeholder="لێگەریان..." oninput="app.search(this.value)">
+                    <i class="fas fa-search search-icon"></i>
                 </div>
+                <div class="sort-btn" onclick="app.toggleSort()">
+                    <i class="fas fa-sort-amount-down" id="sort-icon"></i>
+                </div>
+            </div>
+            
+            <!-- LIBRARIES -->
+            <h4 style="padding:0 20px; color:var(--text-light); font-size:0.9rem;" data-lang="libraries">پەرتووکخانە</h4>
+            <div class="stories-container" id="stories-list"></div>
+            
+            <div class="categories">
+                <div class="cat-chip active" onclick="app.filter('all', this)" data-lang="all">هەمی</div>
+                <div class="cat-chip" onclick="app.filter('favorites', this)" data-lang="fav">دڵخواز ❤️</div>
+                <div class="cat-chip" onclick="app.filter('قورئان', this)" data-lang="quran">قورئان</div>
+                <div class="cat-chip" onclick="app.filter('عەقیدە', this)" data-lang="aqida">عەقیدە</div>
+                <div class="cat-chip" onclick="app.filter('فەرموودە', this)" data-lang="hadith">فەرموودە</div>
+                <div class="cat-chip" onclick="app.filter('مێژوو', this)" data-lang="history">مێژوو</div>
+                <div class="cat-chip" onclick="app.filter('city', this)" data-lang="city_filter">باژێڕ</div>
+            </div>
+            
+            <!-- CITY FILTER (Hidden by default) -->
+            <div id="city-filters" class="categories" style="display:none; margin-top:-10px;">
+                <!-- Populated by JS -->
+            </div>
+
+            <div class="grid" id="book-grid"></div>
+            <div class="request-box">
+                <h3 style="font-size:1rem; color:var(--primary);" data-lang="req_title">کتێبەکەت نەدۆزیەوە؟</h3>
+                <p style="font-size:0.8rem; color:var(--text-light); margin-bottom:10px;" data-lang="req_desc">ناڤێ پەرتووکێ بنڤیسە، ئەم دێ بۆ تە دابین کەین.</p>
+                <div class="req-input-row">
+                    <input type="text" id="req-book-input" class="req-input" placeholder="ناڤێ پەرتووکێ...">
+                    <button class="btn-req" onclick="app.requestBook()" data-lang="send">هنارتن</button>
+                </div>
+            </div>
+            <div style="height:100px;"></div> 
+        </section>
+
+        <!-- 2. CART SCREEN -->
+        <section id="cart" class="screen">
+            <div style="padding:20px;">
+                <h2 style="margin-bottom:20px; color:var(--text-main);" data-lang="cart_title">سەبەتەیا کڕینێ</h2>
+                <div id="cart-list"></div>
+                <div style="background:var(--bg-card); padding:20px; border-radius:20px; margin-top:20px; box-shadow:var(--shadow);">
+                    
+                    <!-- POINTS REDEMPTION -->
+                    <div id="points-redeem-section" style="display:none;">
+                        <div class="points-redeem-box">
+                            <div>
+                                <div style="font-size:0.8rem; opacity:0.9;">خاڵێن تە: <span id="my-current-points">0</span></div>
+                                <div style="font-weight:bold;">داشکاندن ب خاڵان</div>
+                            </div>
+                            <select id="points-select" style="padding:5px; border-radius:10px; border:none; color:black;">
+                                <option value="0">هەڵبژێرە</option>
+                                <!-- Populated from DB -->
+                            </select>
+                            <button class="redeem-btn" onclick="app.applyPointsDiscount()">چالاک بکە</button>
+                        </div>
+                        <p id="points-msg" style="font-size:0.75rem; margin-top:5px; color:var(--success); text-align:center;"></p>
+                    </div>
+
+                    <div class="coupon-box">
+                        <input type="text" id="coupon-input" class="coupon-input" placeholder="CODE">
+                        <button class="btn-apply" onclick="app.applyCoupon()">Check</button>
+                    </div>
+                    <div id="coupon-msg" style="font-size:0.8rem; margin:5px 0 15px; color:var(--success); min-height:18px;"></div>
+                    
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                        <span style="color:var(--text-light);" data-lang="price">نرخ</span>
+                        <span id="sub-total">0 IQD</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                        <span style="color:var(--info);">گەهاندن (Delivery)</span>
+                        <span id="delivery-fee">0 IQD</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                        <span style="color:var(--danger);" data-lang="discount">داشکاندن</span>
+                        <span id="discount-val">0 IQD</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:20px; font-size:1.2rem; font-weight:800; color:var(--text-main); border-top:1px dashed #ccc; padding-top:10px;">
+                        <span data-lang="total">کۆیێ گشتی</span>
+                        <span id="final-total" style="color:var(--primary);">0 IQD</span>
+                    </div>
+                    <button class="btn btn-primary" onclick="app.smartCheckout()">
+                        <i class="fas fa-check-circle" style="font-size:1.4rem;"></i>
+                        <span data-lang="checkout">تەمامکرنا داواکاریێ</span>
+                    </button>
+                </div>
+            </div>
+            <div style="height:100px;"></div>
+        </section>
+
+        <!-- 3. PROFILE SCREEN (UPDATED) -->
+        <section id="profile" class="screen">
+            <div id="profile-guest" class="hidden" style="text-align:center; padding:50px 20px;">
+                <i class="fas fa-user-lock" style="font-size:4rem; color:var(--text-light); margin-bottom:20px;"></i>
+                <h2 data-lang="guest_title">تکایە وەرە ژوور</h2>
+                <p style="color:var(--text-light); margin-bottom:30px;" data-lang="guest_desc">بۆ دیتنا داواکاری و زانیاریێن خۆ، پێدڤیە بچیە ژوور.</p>
+                <button class="btn btn-primary" onclick="app.toggleAuthOverlay()" data-lang="login_btn">چوونە ژوور / تۆمارکرن</button>
+            </div>
+
+            <div id="profile-user" class="hidden">
+                <div class="profile-header">
+                    <div class="edit-fab" onclick="app.toggleEditMode()">
+                        <i class="fas fa-edit" id="edit-icon"></i>
+                    </div>
+                    <div class="avatar-container">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="avatar">
+                    </div>
+                    <h2 id="p-name-display">User Name</h2>
+                    <p id="p-phone-display" style="opacity:0.8;">0750...</p>
+                    <div class="points-badge">
+                        <i class="fas fa-star"></i> <span id="p-points-display">0</span> <span data-lang="points">خال</span>
+                    </div>
+                </div>
+
+                <div class="profile-card">
+                    <h3 style="margin-bottom:15px; border-bottom:1px solid var(--border-color); padding-bottom:10px; color:var(--text-main);" data-lang="personal_info">زانیاریێن کەسی</h3>
+                    <div class="info-row">
+                        <span class="info-label"><i class="fas fa-user"></i> <span data-lang="name">ناڤ</span></span>
+                        <span class="info-val" id="val-name">...</span>
+                        <input type="text" id="inp-name" class="edit-input hidden">
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label"><i class="fas fa-phone"></i> <span data-lang="phone">مۆبایل</span></span>
+                        <span class="info-val" id="val-phone">...</span>
+                        <input type="tel" id="inp-phone" class="edit-input hidden" disabled>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label"><i class="fas fa-city"></i> <span>باژێڕ</span></span>
+                        <span class="info-val" id="val-city">...</span>
+                        <select id="inp-city" class="edit-input hidden">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label"><i class="fas fa-map-marker-alt"></i> <span data-lang="address">ناڤنیشان</span></span>
+                        <span class="info-val" id="val-address">...</span>
+                        <input type="text" id="inp-address" class="edit-input hidden">
+                    </div>
+                    <div id="save-btn-container" class="hidden" style="margin-top:20px;">
+                        <button class="btn btn-primary" onclick="app.saveProfileChanges()" data-lang="save">پاشەکەوتکرن</button>
+                    </div>
+                </div>
+
+                <!-- LOGOUT BUTTON (Moved INSIDE Edit Mode) -->
+                <button onclick="app.logout()" id="btn-logout-edit" class="btn-logout-styled hidden">
+                    <span data-lang="logout">دەرکەڤتن ژ هەژمارێ</span> <i class="fas fa-sign-out-alt"></i>
+                </button>
+
+                <!-- NEW LIVE ORDERS SECTION (Below Logout) -->
+                <div class="live-orders-container">
+                    <h3 class="live-title">
+                        <i class="fas fa-history"></i> <span data-lang="my_orders">داواکاری و چاڤەڕێبوون</span>
+                    </h3>
+                    <div id="live-orders-list"></div>
+                </div>
+                
+                <div style="height:120px;"></div>
             </div>
         </section>
 
-        <section id="price-check-view" class="view">
-            <button class="btn back-btn" data-target="dashboard-view">&#8592; پاشڤەچوون</button>
-            <div class="card">
-                <h2>پشکنینا بهایێ بەرهەمان</h2>
-                <div class="form-group"><input type="text" id="price-search-input" placeholder="لێگەریان ل گۆر ناڤ یان بارکۆد..."></div>
-                <div class="list-wrapper">
-                    <table id="price-check-results-table">
-                        <thead><tr><th>ناڤێ بەرهەمی</th><th>بارکۆد</th><th>بهای</th></tr></thead>
-                        <tbody><tr><td colspan="3" style="text-align:center;">ل بەرهەمەکێ بگەڕێ...</td></tr></tbody>
-                    </table>
-                </div>
+        <!-- NAV -->
+        <nav class="nav-bar">
+            <div class="nav-item active" onclick="app.nav('home', this)"><i class="fas fa-home"></i></div>
+            <div class="nav-item" onclick="app.nav('cart', this)">
+                <i class="fas fa-shopping-bag"></i>
+                <div class="badge" id="cart-count">0</div>
             </div>
-        </section>
+            <div class="nav-item" onclick="app.nav('profile', this)"><i class="fas fa-user-circle"></i></div>
+        </nav>
+    </div>
 
-    </main>
+    <!-- PRODUCT MODAL -->
+    <div id="product-modal" class="modal">
+        <div class="modal-header">
+            <div class="modal-btn-row">
+                <div class="modal-btn-icon" onclick="app.closeModal()"><i class="fas fa-times"></i></div>
+                <div class="modal-btn-icon" onclick="app.shareBook()"><i class="fas fa-share-alt"></i></div>
+            </div>
+            <img src="" id="m-img" class="modal-img">
+        </div>
+        <div class="modal-body">
+            <span id="m-cat" style="background:var(--accent); color:black; padding:5px 15px; border-radius:20px; font-size:0.8rem; font-weight:bold;">Cat</span>
+            <span id="m-lib" style="background:var(--primary); color:white; padding:5px 15px; border-radius:20px; font-size:0.8rem; font-weight:bold; margin-right:5px;">Lib</span>
+            <h1 id="m-title" style="margin:15px 0 5px; color:var(--primary-dark); font-size:1.6rem;">Title</h1>
+            <p id="m-author" style="color:var(--text-light);">Author</p>
+            
+            <div class="spec-grid">
+                <div class="spec-item"><h5 data-lang="pages">لاپەڕ</h5><span id="m-pages">0</span></div>
+                <div class="spec-item"><h5 data-lang="investigation">تەحقیق</h5><span id="m-tahqiq">-</span></div>
+                <div class="spec-item"><h5 data-lang="paper">جورێ کاغەزێ</h5><span id="m-paper">-</span></div>
+                <div class="spec-item"><h5 data-lang="volumes">ژمارا بەرگان</h5><span id="m-volumes">1</span></div>
+            </div>
 
-    <div id="scanner-modal" class="modal"><div class="modal-content"><h3>کامیرێ بەرامبەر بارکۆدی بگرە</h3><div id="scanner-reader"></div><button type="button" id="stop-scan-btn" class="btn danger-btn" style="width:100%; margin-top:1rem;">داخستن</button></div></div>
-    
-    <div id="manual-entry-modal" class="modal"><div class="modal-content"><h3>تۆمارکرنا شولێ ب دەست</h3><form id="manual-entry-form"><div class="form-group"><label for="manual-amount">کۆژمێ پارەی (ب دینار):</label><input type="number" id="manual-amount" required placeholder="بۆ نمونە: 5000"></div><div class="form-group"><label for="manual-notes">تێبینی (ئختیاری):</label><input type="text" id="manual-notes" placeholder="بۆ نمونە: کریا گەهاندنێ"></div><div style="display: flex; gap: 1rem;"><button type="submit" class="btn success-btn" style="flex-grow: 1;">پێشکەفتن</button><button type="button" id="close-manual-modal-btn" class="btn" style="background-color: #6c757d; flex-grow: 1;">پاشڤەچوون</button></div></form></div></div>
-    
-    <div id="supervisor-code-modal" class="modal"><div class="modal-content"><h3>پشتراستکرن</h3><form id="supervisor-code-form"><div class="form-group"><label for="supervisor-code">کۆدێ سەرپەرشتیاری داخل بکە:</label><input type="password" id="supervisor-code" inputmode="numeric" pattern="[0-9]*" required></div><div style="display: flex; gap: 1rem;"><button type="submit" class="btn success-btn" style="flex-grow: 1;">پشتراستکرن</button><button type="button" id="close-code-modal-btn" class="btn" style="background-color: #6c757d; flex-grow: 1;">پاشڤەچوون</button></div></form></div></div>
+            <!-- Wholesale & Free Delivery Info -->
+            <div class="offers-box">
+                <div class="offer-row"><i class="fas fa-truck offer-icon"></i> <span>گەهاندن بێ بەرامبەرە بۆ کڕینا سەرووی <span id="m-free-limit">50,000</span> IQD</span></div>
+                <div class="offer-row"><i class="fas fa-tags offer-icon"></i> <span>کڕینا +<span id="m-bulk-qty">5</span> دانە = داشکاندن (جوملە)</span></div>
+            </div>
 
-    <div id="toast"></div>
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+            <h4 style="margin-bottom:10px; margin-top:20px; color:var(--text-main);" data-lang="summary">پوختە</h4>
+            <p id="m-desc" style="line-height:1.8; color:var(--text-main); text-align:justify;">...</p>
+            <button class="btn btn-outline" onclick="app.openPreview()">
+                <i class="fas fa-book-reader"></i> <span data-lang="preview">چاڤخشاندن (نموونە)</span>
+            </button>
+
+            <!-- RELATED BOOKS SECTION -->
+            <div class="related-books-section">
+                <div class="related-title" data-lang="related">پەرتووکێن هەڤشێوە</div>
+                <div class="related-scroll" id="related-books-container"></div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <div style="flex:1;">
+                <div style="font-size:0.8rem; color:var(--text-light);" data-lang="price">نرخ</div>
+                <div id="m-price" style="font-size:1.4rem; font-weight:900; color:var(--primary);">0 IQD</div>
+            </div>
+            <button class="btn btn-primary" style="flex:1.5;" onclick="app.addToCartFromModal()">
+                <span data-lang="add_to_cart">زیادکرن</span> <i class="fas fa-cart-plus"></i>
+            </button>
+        </div>
+    </div>
 
     <script>
-    const FIREBASE_CONFIG = {
-        apiKey: "AIzaSyBslRXn1kjfJTm7sKtmoUtgyKkDA0Ro-34",
-        authDomain: "ibrrahim-alkurdi.firebaseapp.com",
-        projectId: "ibrrahim-alkurdi",
-        storageBucket: "ibrrahim-alkurdi.appspot.com",
-        messagingSenderId: "490128006332",
-        appId: "1:490128006332:web:b7ff692d5ff4513a2644b9",
-        measurementId: "G-Q4VWN89L3R"
-    };
+        const firebaseConfig = {
+            apiKey: "AIzaSyB8-7RLi1UbixK8d-LGmH-K-SfR-GaMZ2E",
+            authDomain: "projeislambook.firebaseapp.com",
+            projectId: "projeislambook",
+            storageBucket: "projeislambook.firebasestorage.app",
+            messagingSenderId: "577300732966",
+            appId: "1:577300732966:web:df3000e0db45adf4e51ae7",
+            measurementId: "G-SJ97S3FWYE"
+        };
 
-    firebase.initializeApp(FIREBASE_CONFIG);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const allViews = document.querySelectorAll('.view');
-        const toast = document.getElementById('toast');
-        const loader = document.getElementById('loader-overlay');
-        const mainHeader = document.getElementById('main-header');
-        const userInfo = document.getElementById('user-info');
-        
-        const loginForm = document.getElementById('login-form');
-        const logoutBtn = document.getElementById('logout-btn');
-        
-        const startScanBtn = document.getElementById('start-scan-btn');
-        const manualEntryBtn = document.getElementById('manual-entry-btn');
-        const priceCheckBtn = document.getElementById('price-check-btn');
-        document.querySelectorAll('.back-btn').forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.target)));
-
-        const cartContainer = document.getElementById('cart-container');
-        const cartItemsList = document.getElementById('cart-items-list');
-        const totalPriceDisplay = document.getElementById('total-price-display');
-        const finalizeSaleBtn = document.getElementById('finalize-sale-btn');
-        const clearCartBtn = document.getElementById('clear-cart-btn');
-
-        const scannerModal = document.getElementById('scanner-modal');
-        const stopScanBtn = document.getElementById('stop-scan-btn');
-        const manualEntryModal = document.getElementById('manual-entry-modal');
-        const closeManualModalBtn = document.getElementById('close-manual-modal-btn');
-        const manualEntryForm = document.getElementById('manual-entry-form');
-        const supervisorCodeModal = document.getElementById('supervisor-code-modal');
-        const supervisorCodeForm = document.getElementById('supervisor-code-form');
-        const closeCodeModalBtn = document.getElementById('close-code-modal-btn');
-        
-        const salesHistoryTableBody = document.querySelector('#sales-history-table tbody');
-
-        const priceSearchInput = document.getElementById('price-search-input');
-        const priceCheckResultsTableBody = document.querySelector('#price-check-results-table tbody');
-
-        let html5QrCode = null;
-        let currentUser = null;
-        let cart = [];
-        let products = [];
-        let tempManualAmount = 0;
-        let tempManualNotes = '';
-
-        const showToast = (message, type = 'success') => { toast.textContent = message; toast.className = type; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 4000); };
-        const switchView = (viewId) => { allViews.forEach(v => v.classList.remove('active')); document.getElementById(viewId)?.classList.add('active'); window.scrollTo(0,0); };
-        const showLoader = () => loader.style.display = 'flex';
-        const hideLoader = () => loader.style.display = 'none';
-        const formatCurrency = (number) => `${parseInt(number).toLocaleString()} <small>دینار</small>`;
-
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                currentUser = user;
-                userInfo.textContent = `بخێرهاتی, ${user.email.split('@')[0]}`;
-                mainHeader.style.display = 'flex';
-                switchView('dashboard-view');
-                loadInitialData();
-            } else {
-                currentUser = null;
-                products = [];
-                cart = [];
-                mainHeader.style.display = 'none';
-                switchView('login-view');
-                hideLoader();
-            }
-        });
-        
-        async function loadInitialData() {
-            showLoader();
-            await Promise.all([fetchSalesHistory(), fetchAllProducts()]);
-            hideLoader();
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
         }
+        const firestore = firebase.firestore();
 
-        loginForm.addEventListener('submit', async e => { e.preventDefault(); showLoader(); const email = document.getElementById('worker-email').value; const password = document.getElementById('worker-password').value; try { await auth.signInWithEmailAndPassword(email, password); } catch (error) { showToast(`خەلەتی د داخلبوونێ دا: ${error.message}`, 'danger'); hideLoader(); } });
-        logoutBtn.addEventListener('click', async () => { await auth.signOut(); cart = []; updateCartUI(); salesHistoryTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">...</td></tr>'; showToast('ب سەرکەفتی چوویە دەرڤە.'); });
-        
-        function updateCartUI() { if (cart.length === 0) { cartContainer.style.display = 'none'; return; } cartContainer.style.display = 'block'; cartItemsList.innerHTML = cart.map(item => `<li><span class="item-name">${item.name}</span><span class="item-price">${formatCurrency(item.price)}</span></li>`).join(''); const total = cart.reduce((sum, item) => sum + item.price, 0); totalPriceDisplay.innerHTML = formatCurrency(total); }
-        clearCartBtn.addEventListener('click', () => { if (confirm('تو پشتراستی دخوازی لیستێ ڤالا بکەی؟')) { cart = []; updateCartUI(); showToast('لیست هاتە ڤالاکرن.'); } });
+        const DEFAULT_IMG = "https://via.placeholder.com/300x450/cccccc/000000?text=No+Image";
 
-        const onScanSuccess = async (decodedText) => { stopScanner(); showLoader(); try { const product = products.find(p => p.barcode === decodedText); if (!product) { showToast('ئەڤ بەرهەمە د سیستەمی دا نینە!', 'danger'); return; } if (product.quantity <= 0) { showToast('کەمیا ڤی بەرهەمی د کۆگەهێ دا نەمایە!', 'danger'); return; } cart.push({ productId: product.id, name: product.name, price: product.sellingPrice, barcode: product.barcode }); updateCartUI(); showToast(`"${product.name}" بۆ لیستێ هاتە زێدەکرن`); } catch (error) { console.error("Error finding product:", error); showToast('خەلەتیەک د پرۆسێسا دیتنا بەرهەمی دا روویدا', 'danger'); } finally { hideLoader(); } };
-        const startScanner = () => { scannerModal.classList.add('active'); if (!html5QrCode) html5QrCode = new Html5Qrcode("scanner-reader"); html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, onScanSuccess).catch(err => { showToast('خەلەتی د ڤەکرنا کامیرێ دا.', 'danger'); scannerModal.classList.remove('active'); }); };
-        const stopScanner = () => { if (html5QrCode && html5QrCode.isScanning) { html5QrCode.stop().catch(err => {}); } scannerModal.classList.remove('active'); };
-        startScanBtn.addEventListener('click', startScanner);
-        stopScanBtn.addEventListener('click', stopScanner);
-
-        finalizeSaleBtn.addEventListener('click', async () => { if (cart.length === 0) { showToast('لیست ڤالایە، چ تشت نینە بۆ فرۆتنێ.', 'danger'); return; } showLoader(); const totalAmount = cart.reduce((sum, item) => sum + item.price, 0); const productQuantities = cart.reduce((acc, item) => { acc[item.productId] = (acc[item.productId] || 0) + 1; return acc; }, {}); try { const batch = db.batch(); const salesRef = db.collection('sales').doc(); batch.set(salesRef, { workerId: currentUser.uid, workerEmail: currentUser.email, timestamp: firebase.firestore.FieldValue.serverTimestamp(), totalAmount, type: 'scanned', items: cart }); for (const productId in productQuantities) { batch.update(db.collection('products').doc(productId), { quantity: firebase.firestore.FieldValue.increment(-productQuantities[productId]) }); } await batch.commit(); showToast('فرۆتن ب سەرکەفتی هاتە تۆمارکرن.'); cart = []; updateCartUI(); fetchSalesHistory(); } catch (error) { console.error("Error finalizing sale:", error); showToast('خەلەتی د تۆمارکرنا فرۆتنێ دا روویدا!', 'danger'); } finally { hideLoader(); } });
-
-        manualEntryBtn.addEventListener('click', () => manualEntryModal.classList.add('active'));
-        closeManualModalBtn.addEventListener('click', () => manualEntryModal.classList.remove('active'));
-        manualEntryForm.addEventListener('submit', e => { e.preventDefault(); const amount = parseInt(document.getElementById('manual-amount').value); if (isNaN(amount) || amount <= 0) { showToast('تکایە کۆژمەکێ دروست داخل بکە', 'danger'); return; } tempManualAmount = amount; tempManualNotes = document.getElementById('manual-notes').value; manualEntryModal.classList.remove('active'); supervisorCodeModal.classList.add('active'); document.getElementById('supervisor-code').focus(); });
-        
-        closeCodeModalBtn.addEventListener('click', () => supervisorCodeModal.classList.remove('active'));
-        supervisorCodeForm.addEventListener('submit', async e => { e.preventDefault(); const code = document.getElementById('supervisor-code').value; if (code !== "1234") { showToast('کۆدێ خەلەتە! پرۆسە هاتە راوەستاندن.', 'danger'); supervisorCodeForm.reset(); return; } supervisorCodeModal.classList.remove('active'); supervisorCodeForm.reset(); showLoader(); try { await db.collection('sales').add({ workerId: currentUser.uid, workerEmail: currentUser.email, timestamp: firebase.firestore.FieldValue.serverTimestamp(), totalAmount: tempManualAmount, type: 'manual', items: [{ name: tempManualNotes || "تۆمارا دەستی", price: tempManualAmount }] }); showToast('کار ب سەرکەفتی هاتە تۆمارکرن.'); manualEntryForm.reset(); fetchSalesHistory(); } catch (error) { console.error("Error saving manual entry:", error); showToast('خەلەتی د تۆمارکرنا کاری دا روویدا!', 'danger'); } finally { hideLoader(); } });
-
-        async function fetchSalesHistory() {
-            if (!currentUser) return;
-            try {
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                const snapshot = await db.collection('sales').where('workerId', '==', currentUser.uid).where('timestamp', '>=', today).orderBy('timestamp', 'desc').get();
-                if (snapshot.empty) { salesHistoryTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">چ فرۆتن بۆ ئەڤرۆ نەهاتینە تۆمارکرن.</td></tr>'; return; }
-                salesHistoryTableBody.innerHTML = snapshot.docs.map(doc => {
-                    const sale = doc.data();
-                    const saleTime = sale.timestamp ? sale.timestamp.toDate().toLocaleString('ar-IQ', { dateStyle: 'short', timeStyle: 'short' }) : 'N/A';
-                    const itemsSummary = sale.items.map(i => i.name).join(', ');
-                    return `<tr><td>${saleTime}</td><td class="amount-col">${formatCurrency(sale.totalAmount)}</td><td>${sale.type === 'scanned' ? 'سکان' : 'دەستی'}</td><td>${itemsSummary.substring(0, 50)}</td></tr>`;
-                }).join('');
-            } catch (error) {
-                console.error("Error fetching sales history:", error);
-                showToast('خەلەتی د ئینانا تۆمارێن فرۆتنێ دا! پشتراستبە تە ئیندێکس دروستکریە.', 'danger');
-                salesHistoryTableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--danger-color);">خەلەتی! تکایە پشتراستبە کو تە ئیندێکس ب دروستی دروستکریە.</td></tr>`;
+        // TRANSLATIONS
+        const translations = {
+            'badini': {
+                app_name: "پڕۆژێ ئیسلام", search_place: "لێگەریان...", all: "هەمی", fav: "دڵخواز ❤️", quran: "قورئان", aqida: "عەقیدە", hadith: "فەرموودە", history: "مێژوو", city_filter: "باژێڕ",
+                cart_title: "سەبەتە", price: "نرخ", discount: "داشکاندن", total: "کۆیێ گشتی", checkout: "تەمامکرنا داواکاریێ",
+                guest_title: "تکایە وەرە ژوور", guest_desc: "بۆ دیتنا داواکاری و زانیاریێن خۆ، پێدڤیە بچیە ژوور.",
+                login_btn: "چوونە ژوور / تۆمارکرن", login: "چوونە ژوور", create: "دروستکرن", no_account: "تە هەژمار نینە؟", new_account: "هەژمارا نوێ", register_btn: "تۆمارکرن", have_account: "تە هەژمار هەیە؟",
+                personal_info: "زانیاریێن کەسی", name: "ناڤ", phone: "مۆبایل", address: "ناونیشان", save: "پاشەکەوتکرن",
+                my_orders: "داواکاری و مێژوو", logout: "دەرکەڤتن ژ هەژمارێ",
+                pages: "لاپەڕ", investigation: "تەحقیق", paper: "جورێ کاغەزێ", volumes: "ژمارا بەرگان", summary: "پوختە", preview: "چاڤخشاندن", add_to_cart: "زیادکرن", view: "ببینە", related: "پەرتووکێن هەڤشێوە", points: "خاڵ",
+                wait: "چاڤەڕێکرن", approved: "وەرگرتن (ئەدمین)", delivered: "گەهشت (تەمام)", empty_cart: "سەبەتە یا بەتاڵە", sent_msg: "داواکاری هاتە هنارتن ✅",
+                lang_val: "کوردی", req_title: "کتێبەکەت نەدۆزیەوە؟", req_desc: "ناڤێ پەرتووکێ بنڤیسە، ئەم دێ بۆ تە دابین کەین.", send: "هنارتن",
+                req_sent: "داواکارییا پەرتووکێ گەهشت 📥", 
+                confirm_btn: "وەرگرتن (پشتڕاستکرن)", enter_code: "کۆدی بنڤیسە", code_desc: "کۆدێ د ئاگەهداریان دا بۆ تە هاتی بنڤیسە.",
+                wrong_code: "کۆد شاشە! ❌", code_success: "داواکاری گەهشت! سوپاس 💙", libraries: "پەرتووکخانە"
+            },
+            'sorani': {
+                app_name: "پڕۆژەی ئیسلام", search_place: "گەڕان...", all: "هەموو", fav: "دڵخواز ❤️", quran: "قورئان", aqida: "عەقیدە", hadith: "فەرموودە", history: "مێژوو", city_filter: "شار",
+                cart_title: "سەبەتە", price: "نرخ", discount: "داشکاندن", total: "کۆی گشتی", checkout: "تەواوکردنی داواکاری",
+                guest_title: "تکایە وەرە ژوورەوە", guest_desc: "بۆ بینینی داواکاری و زانیارییەکانت، پێویستە بچیتە ژوورەوە.",
+                login_btn: "چوونە ژوور / تۆمارکردن", login: "چوونە ژوور", create: "دروستکردن", no_account: "هەژمارت نییە؟", new_account: "هەژماری نوێ", register_btn: "تۆمارکردن", have_account: "هەژمارت هەیە؟",
+                personal_info: "زانیاری کەسی", name: "ناو", phone: "مۆبایل", address: "ناونیشان", save: "پاشەکەوتکردن",
+                my_orders: "داواکاری و مێژوو", logout: "دەرچوون",
+                pages: "لاپەڕە", investigation: "تەحقیق", paper: "جۆری کاغەز", volumes: "ژمارەی بەرگ", summary: "پوختە", preview: "پێداچوونەوە", add_to_cart: "زیادکردن", view: "بینین", related: "پەرتووکە هاوشێوەکان", points: "خاڵ",
+                wait: "چاەڕێکردن", approved: "وەرگیرا (ئەدمین)", delivered: "گەیشت (تەواو)", empty_cart: "سەبەتە بەتاڵە", sent_msg: "داواکاری نێردرا ✅",
+                lang_val: "کوردی", req_title: "کتێبەکەت نەدۆزیەوە؟", req_desc: "ناوی کتێبەکە بنووسە، بۆتی دابین دەکەین.", send: "ناردن",
+                req_sent: "داواکاری کتێب گەیشت 📥",
+                confirm_btn: "وەرگرتن (پشتڕاستکردن)", enter_code: "کۆد بنووسە", code_desc: "ئەو کۆدەی لە ئاگادارکردنەوە هاتوو بنووسە.",
+                wrong_code: "کۆد هەڵەیە! ❌", code_success: "داواکاری گەیشت! سوپاس 💙", libraries: "پەرتووکخانە"
+            },
+            'arabic': {
+                app_name: "مشروع الإسلام", search_place: "بحث...", all: "الكل", fav: "المفضلة ❤️", quran: "قرآن", aqida: "عقيدة", hadith: "حديث", history: "تاريخ", city_filter: "المدينة",
+                cart_title: "السلة", price: "السعر", discount: "الخصم", total: "المجموع الكلي", checkout: "إتمام الطلب",
+                guest_title: "يرجى تسجيل الدخول", guest_desc: "لمشاهدة طلباتك ومعلوماتك، يجب عليك تسجيل الدخول.",
+                login_btn: "دخول / تسجيل", login: "دخول", create: "إنشاء", no_account: "ليس لديك حساب؟", new_account: "حساب جديد", register_btn: "تسجيل", have_account: "لديك حساب؟",
+                personal_info: "المعلومات الشخصية", name: "الاسم", phone: "الهاتف", address: "العنوان", save: "حفظ",
+                my_orders: "الطلبات والسجل", logout: "تسجيل الخروج",
+                pages: "صفحات", investigation: "التحقيق", paper: "نوع الورق", volumes: "عدد المجلدات", summary: "ملخص", preview: "معاينة", add_to_cart: "إضافة", view: "عرض", related: "كتب مشابهة", points: "نقطة",
+                wait: "قيد الانتظار", approved: "تم القبول", delivered: "تم التوصيل", empty_cart: "السلة فارغة", sent_msg: "تم إرسال الطلب ✅",
+                lang_val: "العربية", req_title: "لم تجد كتابك؟", req_desc: "اكتب اسم الكتاب وسنوفره لك.", send: "إرسال",
+                req_sent: "تم استلام طلب الكتاب 📥",
+                confirm_btn: "استلام (تأكيد)", enter_code: "أدخل الرمز", code_desc: "أدخل الرمز الذي وصلك في الإشعارات.",
+                wrong_code: "الرمز خاطئ! ❌", code_success: "تم تسليم الطلب! شكراً 💙", libraries: "المكتبات"
             }
-        }
-        
-        priceCheckBtn.addEventListener('click', () => switchView('price-check-view'));
-        async function fetchAllProducts() {
-            try {
-                const snapshot = await db.collection('products').get();
-                products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            } catch (error) {
-                console.error("Error fetching products:", error);
-                showToast('خەلەتی د ئینانا لیستا بەرهەمان دا', 'danger');
-            }
-        }
+        };
 
-        priceSearchInput.addEventListener('input', e => {
-            const searchTerm = e.target.value.toLowerCase();
-            if (searchTerm.length < 2) {
-                priceCheckResultsTableBody.innerHTML = '<tr><td colspan="3" style="text-align:center;">ل ناڤ یان بارکۆد بگەڕێ...</td></tr>';
-                return;
+        const app = {
+            state: {
+                user: JSON.parse(localStorage.getItem('user_pro_max')) || null,
+                cart: JSON.parse(localStorage.getItem('cart_pro_max')) || [],
+                favs: JSON.parse(localStorage.getItem('favs_pro_max')) || [],
+                orders: [],
+                notifications: JSON.parse(localStorage.getItem('notifs_pro_max')) || [],
+                darkMode: localStorage.getItem('theme_pro_max') === 'dark',
+                lang: localStorage.getItem('lang_pro_max') || 'badini',
+                currentBook: null,
+                isEditMode: false,
+                sortAsc: true,
+                discount: 0,
+                pointsDiscount: 0,
+                verifyOrderId: null,
+                ordersListener: null,
+                activeLibFilter: null,
+                deliveryFee: 0,
+                
+                // Dynamic Data from Firebase
+                books: [],
+                libraries: [],
+                cities: [],
+                pointRules: []
+            },
+
+            init() {
+                if (this.state.darkMode) document.body.setAttribute('data-theme', 'dark');
+                this.updateTexts();
+                
+                // Fetch All Data Real-time
+                this.fetchAllData();
+                
+                this.updateCartUI();
+                this.checkHeaderStatus();
+                this.checkNotifications();
+                
+                if(this.state.user) {
+                    this.fetchLiveOrders();
+                    this.syncUserPoints();
+                }
+
+                this.setupInputListeners();
+            },
+
+            // --- FETCH DATA FROM FIREBASE (SYNC WITH ADMIN) ---
+            fetchAllData() {
+                // Fetch Books
+                firestore.collection('books').onSnapshot(snap => {
+                    this.state.books = [];
+                    snap.forEach(doc => {
+                        this.state.books.push({ docId: doc.id, ...doc.data() });
+                    });
+                    this.renderBooks(this.state.books);
+                });
+
+                // Fetch Libraries
+                firestore.collection('libraries').onSnapshot(snap => {
+                    this.state.libraries = [];
+                    snap.forEach(doc => {
+                        this.state.libraries.push({ docId: doc.id, ...doc.data() });
+                    });
+                    this.renderLibraries();
+                });
+
+                // Fetch Cities
+                firestore.collection('settings').doc('locations').onSnapshot(doc => {
+                    if(doc.exists) {
+                        this.state.cities = doc.data().list || [];
+                        this.renderCityOptions();
+                        this.renderCityFilters();
+                    }
+                });
+
+                // Fetch Point Rules
+                firestore.collection('settings').doc('points_rules_dynamic').onSnapshot(doc => {
+                    if(doc.exists) {
+                        this.state.pointRules = doc.data().rules || [];
+                        this.renderPointRedeemOptions();
+                    }
+                });
+            },
+
+            renderCityOptions() {
+                const options = this.state.cities.map(c => `<option value="${c}">${c}</option>`).join('');
+                const regSelect = document.getElementById('reg-city');
+                const profileSelect = document.getElementById('inp-city');
+                
+                if(regSelect) regSelect.innerHTML = options;
+                if(profileSelect) {
+                    profileSelect.innerHTML = options;
+                    if(this.state.user && this.state.user.city) profileSelect.value = this.state.user.city;
+                }
+            },
+
+            renderCityFilters() {
+                const container = document.getElementById('city-filters');
+                container.innerHTML = this.state.cities.map(c => 
+                    `<div class="cat-chip" onclick="app.filterCity('${c}')">${c}</div>`
+                ).join('');
+            },
+
+            renderPointRedeemOptions() {
+                const select = document.getElementById('points-select');
+                let html = `<option value="0">هەڵبژێرە</option>`;
+                this.state.pointRules.forEach(rule => {
+                    html += `<option value="${rule.points}">${rule.points} خاڵ (-${rule.discount * 100}%)</option>`;
+                });
+                select.innerHTML = html;
+            },
+
+            setupInputListeners() {
+                const phoneInputs = ['login-phone', 'reg-phone', 'verify-input', 'inp-phone'];
+                phoneInputs.forEach(id => {
+                    const el = document.getElementById(id);
+                    if(el) {
+                        el.addEventListener('input', function(e) {
+                            this.value = this.value.replace(/[^0-9]/g, '');
+                        });
+                    }
+                });
+            },
+
+            async syncUserPoints() {
+                if(!this.state.user) return;
+                try {
+                    const doc = await firestore.collection('users').doc(this.state.user.phone).get();
+                    if(doc.exists) {
+                        const data = doc.data();
+                        this.state.user.points = data.points || 0;
+                        this.saveUserLocally();
+                        this.updateProfileUI();
+                        this.updateCartUI(); // Update display in cart
+                    }
+                } catch(e) { console.log("Points sync error", e); }
+            },
+
+            fetchLiveOrders() {
+                if (!this.state.user) return;
+                if (this.state.ordersListener) this.state.ordersListener();
+                const userPhone = String(this.state.user.phone).trim();
+                this.state.ordersListener = firestore.collection('orders')
+                    .where('userId', '==', userPhone) 
+                    .onSnapshot((snapshot) => {
+                        this.state.orders = [];
+                        snapshot.forEach((doc) => {
+                            this.state.orders.push({ docId: doc.id, ...doc.data() });
+                        });
+                        this.state.orders.sort((a, b) => b.id - a.id);
+                        this.renderOrderHistory(); 
+                    }, (error) => {
+                        console.error("Error fetching orders:", error);
+                    });
+            },
+
+            renderOrderHistory() {
+                const list = document.getElementById('live-orders-list');
+                if (!list) return;
+                const t = translations[this.state.lang];
+                if(!this.state.user || this.state.orders.length === 0) {
+                    list.innerHTML = `<div style="text-align:center; padding:30px; opacity:0.6;"><i class="fas fa-box-open" style="font-size:3rem; margin-bottom:10px;"></i><p>هیچ داواکارییەک نینە</p></div>`;
+                    return;
+                }
+                list.innerHTML = this.state.orders.map(o => {
+                    let statusBadge = '', actionArea = '', cancelButton = '';
+                    if(o.status === 'waiting') {
+                        statusBadge = `<div class="track-status-badge st-wait"><i class="fas fa-clock"></i> ${t['wait']}</div>`;
+                        cancelButton = `<div class="btn-cancel-order" onclick="app.cancelOrder('${o.docId}')"><i class="fas fa-times"></i></div>`;
+                    } else if(o.status === 'approved') {
+                        statusBadge = `<div class="track-status-badge st-done"><i class="fas fa-check-circle"></i> ${t['approved']}</div>`;
+                        actionArea = `<button class="btn-confirm-order" onclick="app.openVerifyModal(${o.id})">${t['confirm_btn']}</button>`;
+                    } else if(o.status === 'delivered') {
+                        statusBadge = `<div class="track-status-badge st-del"><i class="fas fa-truck"></i> ${t['delivered']}</div>`;
+                    }
+                    const itemsText = o.items.map(i => `• ${i.title} <span style="font-size:0.8em; color:#888;">(x${i.qty})</span>`).join('<br>');
+                    return `
+                    <div class="track-card">
+                        <div class="track-header">
+                            <span class="track-id">#${o.id.toString().slice(-6)}</span>
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <div style="text-align:left;"><div class="track-date">${o.date}</div><div style="font-size:0.7rem; color:#aaa;">${o.time}</div></div>
+                                ${cancelButton}
+                            </div>
+                        </div>
+                        ${statusBadge}
+                        <div class="track-items">${itemsText}</div>
+                        <div class="track-footer"><span>${t['total']}</span><span class="track-total">${o.total.toLocaleString()} IQD</span></div>
+                        ${actionArea ? '<div style="margin-top:15px;">'+actionArea+'</div>' : ''}
+                    </div>
+                `}).join('');
+            },
+
+            async cancelOrder(docId) {
+                if(confirm("دڵنیای ل ژێبرنا داواکاریێ؟")) {
+                    try {
+                        await firestore.collection('orders').doc(docId).delete();
+                        this.showToast("داواکاری هاتە ژێبرن 🗑️");
+                        // Orders update automatically via listener
+                    } catch (err) {
+                        this.showToast("هەڵە ل ژێبرنێ! ❌");
+                    }
+                }
+            },
+
+            addNotification(text) {
+                const notif = { id: Date.now(), text: text, read: false, time: new Date().toLocaleTimeString() };
+                this.state.notifications.unshift(notif);
+                this.saveNotifications();
+                this.checkNotifications();
+            },
+
+            saveNotifications() { localStorage.setItem('notifs_pro_max', JSON.stringify(this.state.notifications)); },
+            checkNotifications() {
+                const unread = this.state.notifications.filter(n => !n.read).length;
+                const dot = document.getElementById('notif-dot');
+                if (unread > 0) dot.classList.add('show'); else dot.classList.remove('show');
+                this.renderNotifications();
+            },
+            toggleNotif() {
+                const dropdown = document.getElementById('notif-dropdown');
+                dropdown.classList.toggle('show');
+                if (dropdown.classList.contains('show')) {
+                    this.state.notifications.forEach(n => n.read = true);
+                    this.saveNotifications();
+                    document.getElementById('notif-dot').classList.remove('show');
+                }
+            },
+            renderNotifications() {
+                const list = document.getElementById('notif-dropdown');
+                if (this.state.notifications.length === 0) { list.innerHTML = `<div style="text-align:center; color:var(--text-light); padding:10px;">هیچ ئاگەهدارییەک نینە</div>`; } 
+                else {
+                    list.innerHTML = this.state.notifications.map(n => `<div class="notif-item"><i class="fas fa-info-circle"></i><div><div>${n.text}</div><div style="font-size:0.7rem; color:var(--text-light);">${n.time}</div></div></div>`).join('');
+                }
+            },
+
+            requestBook() {
+                const val = document.getElementById('req-book-input').value.trim();
+                const t = translations[this.state.lang];
+                if(!val) return this.showToast("تکایە ناڤێ پەرتووکێ بنڤیسە ⚠️");
+                
+                // Add to firestore (optional, but shows full connection)
+                firestore.collection('requests').add({
+                    bookName: val,
+                    user: this.state.user ? this.state.user.phone : 'Guest',
+                    date: new Date().toISOString()
+                });
+
+                this.addNotification(`${t['req_sent']}: ${val}`);
+                this.showToast(t['sent_msg']);
+                document.getElementById('req-book-input').value = "";
+            },
+
+            toggleLangMenu() { document.getElementById('lang-menu').classList.toggle('show'); },
+            setLang(langCode) {
+                this.state.lang = langCode;
+                localStorage.setItem('lang_pro_max', langCode);
+                this.updateTexts();
+                document.getElementById('lang-menu').classList.remove('show');
+                this.updateCartUI(); 
+                this.renderOrderHistory(); 
+                this.updateProfileUI();
+            },
+            updateTexts() {
+                const t = translations[this.state.lang];
+                document.querySelectorAll('[data-lang]').forEach(el => { const key = el.getAttribute('data-lang'); if (t[key]) el.innerText = t[key]; });
+                document.getElementById('search-input').placeholder = t['search_place'];
+                document.getElementById('req-book-input').placeholder = t['req_desc'].split('،')[0] + "...";
+            },
+
+            toggleAuthOverlay() { document.getElementById('auth-overlay').classList.toggle('hidden'); },
+            switchAuth(type) {
+                if(type === 'register') { document.getElementById('login-form').classList.add('hidden'); document.getElementById('register-form').classList.remove('hidden'); } 
+                else { document.getElementById('login-form').classList.remove('hidden'); document.getElementById('register-form').classList.add('hidden'); }
+            },
+            validatePhone(phone) { const cleaned = phone.replace(/\D/g, ''); return /^07\d{9}$/.test(cleaned); },
+
+            async register() {
+                const name = document.getElementById('reg-name').value.trim();
+                const phone = document.getElementById('reg-phone').value.trim();
+                const pass = document.getElementById('reg-pass').value.trim();
+                const address = document.getElementById('reg-address').value.trim();
+                const city = document.getElementById('reg-city').value;
+                const age = document.getElementById('reg-age').value.trim();
+                const gender = document.querySelector('input[name="gender"]:checked').value;
+
+                if (!name || !phone || !address || !age || !pass) return this.showToast("تکایە هەمی خانان پڕ بکە ⚠️");
+                if (!this.validatePhone(phone)) return this.showToast("ژمارا مۆبایلێ دڤێت 11 ژمارە بیت (07...) ⚠️");
+                
+                try {
+                    await firestore.collection('users').doc(phone).set({
+                        name, phone, password: pass, address, city, age, gender, points: 0,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    this.state.user = { name, phone, address, city, age, gender, points: 0 };
+                    this.saveUserLocally(); this.toggleAuthOverlay(); this.showToast("بەخێرهاتی! هەژمار دروست بوو ✅");
+                    this.checkHeaderStatus(); this.fetchLiveOrders();
+                } catch (error) { this.showToast("کێشەیەک هەیە! دووبارە هەوڵبدە ❌"); }
+            },
+
+            async login() {
+                const phone = document.getElementById('login-phone').value.trim();
+                const pass = document.getElementById('login-pass').value.trim();
+                if (!phone || !pass) return this.showToast("تکایە هەمی خانان پڕ بکە ⚠️");
+                try {
+                    const doc = await firestore.collection('users').doc(phone).get();
+                    if (doc.exists) {
+                        const userData = doc.data();
+                        if (userData.password === pass) {
+                            this.state.user = userData;
+                            if(!this.state.user.points) this.state.user.points = 0;
+                            this.saveUserLocally(); this.toggleAuthOverlay(); this.showToast("چوونە ژوور سەرکەفتی بوو ✅");
+                            this.checkHeaderStatus(); this.fetchLiveOrders();
+                        } else { this.showToast("وشەی نهێنی هەڵەیە! ❌"); }
+                    } else {
+                        if(confirm("ئەڤ ژمارە نینە. تە دڤێت هەژمارەکا نوێ دروست بکەی؟")) { this.switchAuth('register'); document.getElementById('reg-phone').value = phone; }
+                    }
+                } catch (error) { this.showToast("هەڵە هەیە! ئینتەرنێت پشکنە ❌"); }
+            },
+
+            logout() {
+                if(confirm("دڵنیای ل دەرکەڤتنێ؟")) {
+                    localStorage.removeItem('user_pro_max');
+                    this.state.user = null; this.state.orders = [];
+                    if(this.state.ordersListener) this.state.ordersListener(); 
+                    location.reload();
+                }
+            },
+            saveUserLocally() { localStorage.setItem('user_pro_max', JSON.stringify(this.state.user)); },
+            checkHeaderStatus() {
+                const icon = document.getElementById('header-user-status');
+                if(this.state.user) {
+                    icon.innerHTML = `<i class="fas fa-user-check"></i>`;
+                    document.getElementById('profile-guest').classList.add('hidden');
+                    document.getElementById('profile-user').classList.remove('hidden');
+                    document.getElementById('points-redeem-section').style.display = 'block';
+                    this.updateProfileUI(); this.renderOrderHistory();
+                } else {
+                    icon.innerHTML = `<i class="far fa-user"></i>`;
+                    document.getElementById('profile-guest').classList.remove('hidden');
+                    document.getElementById('profile-user').classList.add('hidden');
+                    document.getElementById('points-redeem-section').style.display = 'none';
+                }
+            },
+
+            // --- REDEEM POINTS LOGIC (DYNAMIC) ---
+            applyPointsDiscount() {
+                const select = document.getElementById('points-select');
+                const pointsNeeded = parseInt(select.value);
+                const currentPoints = this.state.user ? this.state.user.points : 0;
+                const msg = document.getElementById('points-msg');
+
+                if(pointsNeeded === 0) {
+                    this.state.pointsDiscount = 0;
+                    msg.innerText = "";
+                    this.updateCartUI();
+                    return;
+                }
+
+                // Find the rule matching pointsNeeded
+                const rule = this.state.pointRules.find(r => r.points === pointsNeeded);
+
+                if(currentPoints >= pointsNeeded && rule) {
+                    this.state.pointsDiscount = rule.discount;
+                    msg.innerText = "داشکاندن چالاک بوو ✅";
+                    msg.style.color = "var(--success)";
+                    this.updateCartUI();
+                } else {
+                    this.state.pointsDiscount = 0;
+                    msg.innerText = "خاڵێن تە تێر ناکەن ❌";
+                    msg.style.color = "var(--danger)";
+                    select.value = "0";
+                    this.updateCartUI();
+                }
+            },
+
+            async smartCheckout() {
+                const t = translations[this.state.lang];
+                if(this.state.cart.length === 0) return this.showToast(t['empty_cart'] + " 🛒");
+                
+                if(!this.state.user) {
+                    this.showToast("تکایە سەرەتا چوونە ژوورێ بکە 🔒");
+                    this.toggleAuthOverlay();
+                    return;
+                }
+
+                const verificationCode = Math.floor(1000 + Math.random() * 9000).toString();
+                const totalBooks = this.state.cart.reduce((a, b) => a + (b.price * b.qty), 0);
+                
+                // Wholesale Logic (Dynamic from Book data if needed, but keeping simple rule for now)
+                let wholesaleDiscount = 0;
+                const totalQty = this.state.cart.reduce((a, b) => a + b.qty, 0);
+                // Check if any book supports bulk discount
+                // (Simplified: if total qty > 5, apply 5%)
+                if(totalQty >= 5) wholesaleDiscount = 0.05;
+
+                // Delivery Logic (Dynamic)
+                let delivery = this.state.deliveryFee;
+                // Free delivery logic check from current library
+                if (this.state.cart.length > 0) {
+                    const libId = this.state.cart[0].libId;
+                    const lib = this.state.libraries.find(l => l.id === libId);
+                    if(lib && lib.freeDeliveryLimit && totalBooks >= lib.freeDeliveryLimit) {
+                        delivery = 0;
+                    }
+                }
+                
+                const totalDiscountPercent = this.state.discount + this.state.pointsDiscount + wholesaleDiscount;
+                const discountAmount = totalBooks * totalDiscountPercent;
+                const finalTotal = (totalBooks + delivery) - discountAmount;
+                
+                // Points Deduction Logic
+                const pointsUsed = parseInt(document.getElementById('points-select').value);
+                
+                // Points Earning (Net Payment / 2000)
+                const earnedPoints = Math.floor(finalTotal / 2000);
+
+                const orderId = Date.now();
+                const userPhone = String(this.state.user.phone).trim();
+
+                const newOrder = {
+                    id: orderId,
+                    userId: userPhone,
+                    userName: this.state.user.name,
+                    userAddress: this.state.user.address,
+                    userCity: this.state.user.city || "",
+                    date: new Date().toLocaleDateString('ku-IQ'),
+                    time: new Date().toLocaleTimeString(),
+                    items: [...this.state.cart], 
+                    total: finalTotal,
+                    deliveryFee: delivery,
+                    earnedPoints: earnedPoints,
+                    pointsUsed: pointsUsed,
+                    status: 'waiting', 
+                    code: verificationCode
+                };
+
+                try {
+                    await firestore.collection('orders').doc(orderId.toString()).set(newOrder);
+                    
+                    // Update User Points (Subtract used, Add earned)
+                    let newPoints = (this.state.user.points - pointsUsed) + earnedPoints;
+                    if(newPoints < 0) newPoints = 0;
+
+                    await firestore.collection('users').doc(userPhone).update({
+                        points: newPoints
+                    });
+                    
+                    this.state.user.points = newPoints;
+                    this.saveUserLocally();
+
+                    this.addNotification(`داواکارییا نوێ #${orderId.toString().slice(-6)} هاتە تۆمارکرن 📝`);
+                    this.state.cart = [];
+                    this.saveCart();
+                    this.showToast(t['sent_msg']);
+                    
+                    // Reset Points Selection
+                    document.getElementById('points-select').value = "0";
+                    this.state.pointsDiscount = 0;
+
+                    setTimeout(() => {
+                        const profileBtn = document.querySelectorAll('.nav-item')[2];
+                        this.nav('profile', profileBtn);
+                    }, 800);
+
+                    // Note: Admin approval is manual in Admin panel, so removed auto-approve simulation
+                    
+                } catch (error) {
+                    console.error("Order failed:", error);
+                    this.showToast("هەڵە! داواکاری نەچوو ❌");
+                }
+            },
+
+            openVerifyModal(orderId) {
+                this.state.verifyOrderId = orderId;
+                document.getElementById('verify-input').value = '';
+                document.getElementById('verify-modal').style.display = 'flex';
+            },
+            closeVerifyModal() { document.getElementById('verify-modal').style.display = 'none'; this.state.verifyOrderId = null; },
+            async submitVerify() {
+                const inputCode = document.getElementById('verify-input').value.trim();
+                const orderId = this.state.verifyOrderId;
+                const order = this.state.orders.find(o => o.id === orderId);
+                // Note: Checking order from state (which comes from Firestore)
+                if (order && inputCode === order.code) {
+                    try {
+                        await firestore.collection('orders').doc(orderId.toString()).update({ status: 'delivered' });
+                        this.showToast(translations[this.state.lang]['code_success']);
+                        this.closeVerifyModal();
+                    } catch (err) { this.showToast("هەڵە ل نوێکرنێ! ❌"); }
+                } else {
+                    this.showToast(translations[this.state.lang]['wrong_code']);
+                }
+            },
+
+            renderLibraries() {
+                // Identify libraries with discounts (Based on book originalPrice vs price)
+                const libsWithDiscount = this.state.libraries.map(lib => {
+                    // Check if this lib has any discounted books
+                    const hasDiscount = this.state.books.some(b => b.libId === lib.id && b.originalPrice && b.originalPrice > b.price) || (lib.discountPercent > 0);
+                    return { ...lib, hasDiscount };
+                });
+
+                // Sort: Discounted first
+                libsWithDiscount.sort((a, b) => (b.hasDiscount ? 1 : 0) - (a.hasDiscount ? 1 : 0));
+
+                const con = document.getElementById('stories-list');
+                con.innerHTML = libsWithDiscount.map(lib => `
+                    <div class="story-item ${lib.hasDiscount ? 'has-discount' : ''}" onclick="app.filterByLibrary(${lib.id}, this)">
+                        <div class="story-ring">
+                            <img src="${lib.img}" class="story-img" onerror="this.src='${DEFAULT_IMG}'">
+                            ${lib.hasDiscount ? '<div class="discount-badge-story">%</div>' : ''}
+                        </div>
+                        <div class="story-name">${lib.name}</div>
+                    </div>
+                `).join('');
+            },
+
+            filterByLibrary(libId, el) {
+                document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+                if (this.state.activeLibFilter === libId) {
+                    this.state.activeLibFilter = null;
+                    el.classList.remove('active-lib');
+                    document.querySelector('.cat-chip[onclick*="all"]').classList.add('active');
+                    this.renderBooks(this.state.books);
+                } else {
+                    this.state.activeLibFilter = libId;
+                    document.querySelectorAll('.story-item').forEach(s => s.classList.remove('active-lib'));
+                    el.classList.add('active-lib');
+                    const filtered = this.state.books.filter(b => b.libId === libId);
+                    this.renderBooks(filtered);
+                    const libName = this.state.libraries.find(l => l.id === libId).name;
+                    this.showToast(`پەرتووکێن: ${libName}`);
+                }
+            },
+
+            openPreview() {
+                // Dynamic preview images from current book
+                const b = this.state.currentBook;
+                if(b && b.previewImages && b.previewImages.length > 0) {
+                     const container = document.getElementById('preview-container');
+                     container.innerHTML = b.previewImages.map(src => `<img src="${src}" class="preview-page" onerror="this.style.display='none'">`).join('');
+                     document.getElementById('preview-modal').style.display = 'block';
+                } else {
+                    this.showToast("پێشاندانی نییە");
+                }
+            },
+            closePreview() { document.getElementById('preview-modal').style.display = 'none'; },
+            showToast(msg) {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                toast.className = 'toast';
+                toast.innerHTML = `<div class="toast-icon"><i class="fas fa-check"></i></div> <div>${msg}</div>`;
+                if(msg.includes('⚠️') || msg.includes('❌')) { toast.querySelector('.toast-icon').classList.add('error'); toast.querySelector('.toast-icon').innerHTML = '<i class="fas fa-exclamation"></i>'; }
+                container.appendChild(toast);
+                requestAnimationFrame(() => toast.classList.add('show'));
+                setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
+            },
+
+            async applyCoupon() {
+                const code = document.getElementById('coupon-input').value.trim().toUpperCase();
+                const msg = document.getElementById('coupon-msg');
+                if(!code) return;
+                try {
+                    const doc = await firestore.collection('coupons').doc(code).get();
+                    if (doc.exists) {
+                        const data = doc.data();
+                        this.state.discount = data.discount; 
+                        msg.innerText = `پیرۆزە! داشکاندن (%${data.discount * 100}) چالاک بوو ✅`;
+                        msg.style.color = "var(--success)";
+                    } else {
+                         this.state.discount = 0;
+                         msg.innerText = "کۆد شاشە ❌";
+                         msg.style.color = "var(--danger)";
+                    }
+                } catch (err) { this.state.discount = 0; msg.innerText = "کێشە هەیە ❌"; }
+                this.updateCartUI();
+            },
+
+            toggleTheme() {
+                this.state.darkMode = !this.state.darkMode;
+                if (this.state.darkMode) { document.body.setAttribute('data-theme', 'dark'); localStorage.setItem('theme_pro_max', 'dark'); } 
+                else { document.body.removeAttribute('data-theme'); localStorage.setItem('theme_pro_max', 'light'); }
+            },
+
+            nav(screenId, el) {
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                document.getElementById(screenId).classList.add('active');
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                if(el) el.classList.add('active');
+                window.scrollTo(0, 0);
+                if(screenId === 'profile') { this.renderOrderHistory(); this.updateProfileUI(); }
+            },
+
+            renderBooks(list) {
+                const grid = document.getElementById('book-grid');
+                if(list.length === 0) {
+                     grid.innerHTML = `<p style="text-align:center; width:200%; padding:20px;">هیچ پەرتووکێک نەدۆزرایەوە.</p>`;
+                     return;
+                }
+                grid.innerHTML = list.map(b => {
+                    const isFav = this.state.favs.includes(b.id);
+                    const lib = this.state.libraries.find(l => l.id === b.libId);
+                    const libName = lib ? lib.name : "Library";
+                    
+                    // Price Logic for Card
+                    let priceDisplay = `<span class="price">${b.price.toLocaleString()}</span>`;
+                    if(b.originalPrice && b.originalPrice > b.price) {
+                        priceDisplay = `
+                            <span class="price discount-price">${b.price.toLocaleString()}</span>
+                            <span class="old-price">${b.originalPrice.toLocaleString()}</span>
+                        `;
+                    }
+
+                    return `
+                    <div class="card">
+                        <div class="card-img-c" onclick="app.openModal(${b.id})">
+                            <span class="card-badge">${b.cat || 'General'}</span>
+                            <img src="${b.img}" class="card-img" onerror="this.onerror=null;this.src='${DEFAULT_IMG}';">
+                            <div class="lib-tag"><i class="fas fa-building"></i> ${libName}</div>
+                        </div>
+                        <div class="card-fav ${isFav ? 'active' : ''}" onclick="app.toggleFav(${b.id}, this)">
+                            <i class="${isFav ? 'fas' : 'far'} fa-heart"></i>
+                        </div>
+                        <div class="card-body" onclick="app.openModal(${b.id})">
+                            <div class="card-title">${b.title}</div>
+                            <div class="card-author">${b.author}</div>
+                            <div class="card-footer">
+                                <div>${priceDisplay}</div>
+                                <div class="btn-add"><i class="fas fa-plus"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                `}).join('');
+            },
+
+            toggleFav(id, btn) {
+                const idx = this.state.favs.indexOf(id);
+                if (idx > -1) {
+                    this.state.favs.splice(idx, 1);
+                    btn.classList.remove('active');
+                    btn.querySelector('i').classList.replace('fas', 'far');
+                } else {
+                    this.state.favs.push(id);
+                    btn.classList.add('active');
+                    btn.querySelector('i').classList.replace('far', 'fas');
+                    this.showToast("هاتە زێدەکرن بۆ دڵخوازان ❤️");
+                }
+                localStorage.setItem('favs_pro_max', JSON.stringify(this.state.favs));
+            },
+
+            search(query) {
+                if (!query) return this.renderBooks(this.state.books);
+                const filtered = this.state.books.filter(b => b.title.includes(query) || b.author.includes(query));
+                this.renderBooks(filtered);
+            },
+
+            filter(cat, el) {
+                this.state.activeLibFilter = null;
+                document.querySelectorAll('.story-item').forEach(s => s.classList.remove('active-lib'));
+                document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+                el.classList.add('active');
+                
+                // Toggle City Filter
+                if(cat === 'city') {
+                    const cityDiv = document.getElementById('city-filters');
+                    cityDiv.style.display = cityDiv.style.display === 'none' ? 'flex' : 'none';
+                    return; 
+                } else {
+                    document.getElementById('city-filters').style.display = 'none';
+                }
+
+                if (cat === 'all') this.renderBooks(this.state.books);
+                else if (cat === 'favorites') this.renderBooks(this.state.books.filter(b => this.state.favs.includes(b.id)));
+                else this.renderBooks(this.state.books.filter(b => b.cat === cat));
+            },
+
+            filterCity(cityName) {
+                const libIds = this.state.libraries.filter(l => l.city === cityName).map(l => l.id);
+                const filtered = this.state.books.filter(b => libIds.includes(b.libId));
+                this.renderBooks(filtered);
+                this.showToast(`پەرتووکخانێن: ${cityName}`);
+            },
+
+            toggleSort() {
+                this.state.sortAsc = !this.state.sortAsc;
+                const icon = document.getElementById('sort-icon');
+                icon.className = this.state.sortAsc ? 'fas fa-sort-amount-down-alt' : 'fas fa-sort-amount-up';
+                this.state.books.sort((a,b) => this.state.sortAsc ? a.price - b.price : b.price - a.price);
+                const activeChip = document.querySelector('.cat-chip.active');
+                if (activeChip) activeChip.click(); else this.renderBooks(this.state.books);
+                this.showToast(this.state.sortAsc ? "ئەرزان بۆ گران 🔽" : "گران بۆ ئەرزان 🔼");
+            },
+
+            openModal(id) {
+                const b = this.state.books.find(x => x.id === id);
+                const lib = this.state.libraries.find(l => l.id === b.libId);
+                this.state.currentBook = b;
+                
+                document.getElementById('m-img').src = b.img;
+                document.getElementById('m-img').onerror = function() { this.src = DEFAULT_IMG; };
+                document.getElementById('m-title').innerText = b.title;
+                document.getElementById('m-cat').innerText = b.cat || 'General';
+                document.getElementById('m-lib').innerText = lib ? lib.name : 'Unknown';
+                document.getElementById('m-author').innerText = b.author;
+                document.getElementById('m-desc').innerText = b.desc || 'هیچ زانیارییەک نییە.';
+                document.getElementById('m-price').innerText = b.price.toLocaleString() + ' IQD';
+
+                document.getElementById('m-pages').innerText = b.pages || "-";
+                document.getElementById('m-tahqiq').innerText = b.tahqiq || "ن/أ";
+                document.getElementById('m-paper').innerText = b.paper || "-";
+                document.getElementById('m-volumes').innerText = b.volumes || "1";
+                
+                // Wholesale & Free info updates
+                document.getElementById('m-bulk-qty').innerText = b.bulkQty || 5;
+                document.getElementById('m-free-limit').innerText = lib ? (lib.freeDeliveryLimit || 50000).toLocaleString() : '50,000';
+
+                const relatedContainer = document.getElementById('related-books-container');
+                const relatedBooks = this.state.books.filter(book => book.id !== b.id && book.libId === b.libId && (book.author === b.author || book.cat === b.cat));
+
+                if(relatedBooks.length > 0) {
+                    document.querySelector('.related-books-section').style.display = 'block';
+                    relatedContainer.innerHTML = relatedBooks.map(rb => `<div class="related-card" onclick="app.openModal(${rb.id})"><img src="${rb.img}" class="related-img" onerror="this.src='${DEFAULT_IMG}'"><div class="related-name">${rb.title}</div></div>`).join('');
+                } else {
+                    document.querySelector('.related-books-section').style.display = 'none';
+                }
+                document.getElementById('product-modal').classList.add('open');
+            },
+
+            closeModal() { document.getElementById('product-modal').classList.remove('open'); },
+            shareBook() {
+                const b = this.state.currentBook;
+                if(navigator.share) {
+                    navigator.share({ title: b.title, text: `بەرێخوە بدە ڤێ پەرتووکێ: ${b.title}`, url: window.location.href });
+                } else { this.showToast("پارڤەکرن ل سەر ڤی ئامێری نینە"); }
+            },
+
+            addToCartFromModal() {
+                const b = this.state.currentBook;
+                if (this.state.cart.length > 0) {
+                    const existingLibId = this.state.cart[0].libId;
+                    if (existingLibId !== b.libId) { return this.showToast("نابێت لە دوو پەرتووکخانە داواکاری بکەی! تکایە داواکاریێ پێشێ بنێرە ⚠️"); }
+                }
+                const exist = this.state.cart.find(x => x.id === b.id);
+                if (exist) exist.qty++; else this.state.cart.push({ ...b, qty: 1 });
+                this.saveCart(); this.closeModal(); this.showToast("هاتە زێدەکرن بۆ سەبەتەیێ ✅");
+            },
+
+            saveCart() { localStorage.setItem('cart_pro_max', JSON.stringify(this.state.cart)); this.updateCartUI(); },
+
+            updateCartUI() {
+                const count = this.state.cart.reduce((a, b) => a + b.qty, 0);
+                document.getElementById('cart-count').innerText = count;
+                document.getElementById('my-current-points').innerText = this.state.user ? (this.state.user.points || 0) : 0;
+
+                const list = document.getElementById('cart-list');
+                const t = translations[this.state.lang];
+                let totalBooks = 0;
+                
+                // Dynamic Delivery Calculation
+                let deliveryFee = 0;
+                let freeLimit = 50000;
+
+                if (this.state.cart.length > 0 && this.state.user) {
+                    const libId = this.state.cart[0].libId;
+                    const lib = this.state.libraries.find(l => l.id === libId);
+                    const userCity = this.state.user.city || "";
+                    if (lib) {
+                        freeLimit = lib.freeDeliveryLimit || 50000;
+                        if (userCity && lib.city === userCity) {
+                            deliveryFee = lib.localPrice || 2000; 
+                        } else {
+                            deliveryFee = lib.foreignPrice || 5000; 
+                        }
+                    } else deliveryFee = 5000; 
+                }
+                
+                // FREE Delivery Check
+                if (this.state.cart.length > 0) {
+                    const rawTotal = this.state.cart.reduce((a, b) => a + (b.price * b.qty), 0);
+                    if(rawTotal >= freeLimit) deliveryFee = 0;
+                }
+                this.state.deliveryFee = deliveryFee;
+
+                if (this.state.cart.length === 0) {
+                    list.innerHTML = `<p style="text-align:center; color:var(--text-light); margin-top:20px;">${t['empty_cart']}</p>`;
+                    this.state.discount = 0;
+                    this.state.deliveryFee = 0;
+                    document.getElementById('coupon-msg').innerText = '';
+                    document.getElementById('coupon-input').value = '';
+                } else {
+                    list.innerHTML = this.state.cart.map(item => {
+                        totalBooks += item.price * item.qty;
+                        return `
+                            <div class="cart-item">
+                                <img src="${item.img}" class="cart-img" onerror="this.onerror=null;this.src='${DEFAULT_IMG}';">
+                                <div style="flex:1;">
+                                    <div style="font-weight:bold; color:var(--text-main);">${item.title}</div>
+                                    <div style="color:var(--primary);">${item.price.toLocaleString()} IQD</div>
+                                </div>
+                                <div class="qty-control">
+                                    <div class="qty-btn" onclick="app.changeQty(${item.id}, -1)">-</div>
+                                    <span style="padding:0 5px; color:var(--text-main);">${item.qty}</span>
+                                    <div class="qty-btn" onclick="app.changeQty(${item.id}, 1)">+</div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+                
+                // Wholesale Logic (Simple >5 items = 5%)
+                let wholesaleDiscount = 0;
+                if(count >= 5) wholesaleDiscount = 0.05;
+
+                const totalDiscountPercent = this.state.discount + this.state.pointsDiscount + wholesaleDiscount;
+                const discountAmount = totalBooks * totalDiscountPercent;
+                const finalAmount = (totalBooks + this.state.deliveryFee) - discountAmount;
+
+                document.getElementById('sub-total').innerText = totalBooks.toLocaleString() + ' IQD';
+                document.getElementById('delivery-fee').innerText = this.state.deliveryFee.toLocaleString() + ' IQD';
+                document.getElementById('discount-val').innerText = '-' + discountAmount.toLocaleString() + ' IQD';
+                document.getElementById('final-total').innerText = finalAmount.toLocaleString() + ' IQD';
+            },
+
+            changeQty(id, delta) {
+                const item = this.state.cart.find(x => x.id === id);
+                if (item) {
+                    item.qty += delta;
+                    if (item.qty <= 0) this.state.cart = this.state.cart.filter(x => x.id !== id);
+                    this.saveCart();
+                }
+            },
+
+            updateProfileUI() {
+                const u = this.state.user;
+                if(!u) return;
+                document.getElementById('p-name-display').innerText = u.name;
+                document.getElementById('p-phone-display').innerText = u.phone;
+                document.getElementById('p-points-display').innerText = u.points || 0;
+                
+                document.getElementById('val-name').innerText = u.name;
+                document.getElementById('val-phone').innerText = u.phone;
+                document.getElementById('val-city').innerText = u.city || "--";
+                document.getElementById('val-address').innerText = u.address;
+                
+                document.getElementById('inp-name').value = u.name;
+                document.getElementById('inp-phone').value = u.phone;
+                
+                // City Select needs to be populated first (done in renderCityOptions)
+                if(document.getElementById('inp-city').options.length > 0) {
+                    document.getElementById('inp-city').value = u.city || "Duhok";
+                }
+                document.getElementById('inp-address').value = u.address;
+            },
+
+            toggleEditMode() {
+                this.state.isEditMode = !this.state.isEditMode;
+                const icon = document.getElementById('edit-icon');
+                const logoutBtn = document.getElementById('btn-logout-edit');
+                if (this.state.isEditMode) { icon.className = 'fas fa-check'; logoutBtn.classList.remove('hidden'); } 
+                else { icon.className = 'fas fa-edit'; logoutBtn.classList.add('hidden'); }
+                document.querySelectorAll('.info-val').forEach(el => el.classList.toggle('hidden'));
+                document.querySelectorAll('.edit-input').forEach(el => el.classList.toggle('hidden'));
+                document.getElementById('save-btn-container').classList.toggle('hidden');
+            },
+
+            async saveProfileChanges() {
+                const newName = document.getElementById('inp-name').value;
+                const newAddress = document.getElementById('inp-address').value;
+                const newCity = document.getElementById('inp-city').value;
+                const currentPhone = this.state.user.phone; 
+                if(newName && newAddress && newCity) {
+                    try {
+                        await firestore.collection('users').doc(currentPhone).update({ name: newName, address: newAddress, city: newCity });
+                        this.state.user.name = newName; this.state.user.address = newAddress; this.state.user.city = newCity;
+                        this.saveUserLocally(); this.toggleEditMode(); this.updateProfileUI(); this.showToast("زانیاری هاتنە نوێکرن ✅");
+                    } catch(err) { this.showToast("هەڵە هەیە ل نوێکرنێ! ❌"); }
+                } else { this.showToast("نابێت خانە بەتاڵ بن ⚠️"); }
             }
-            const filteredProducts = products.filter(p => p.name.toLowerCase().includes(searchTerm) || (p.barcode && p.barcode.includes(searchTerm)));
-            if (filteredProducts.length === 0) {
-                priceCheckResultsTableBody.innerHTML = '<tr><td colspan="3" style="text-align:center;">چ بەرهەم نەهاتنە دیتن.</td></tr>';
-                return;
-            }
-            priceCheckResultsTableBody.innerHTML = filteredProducts.map(p => `
-                <tr>
-                    <td>${p.name}</td>
-                    <td>${p.barcode || 'N/A'}</td>
-                    <td class="price-col">${formatCurrency(p.sellingPrice)}</td>
-                </tr>
-            `).join('');
-        });
-    });
+        };
+
+        app.init();
     </script>
 </body>
 </html>
