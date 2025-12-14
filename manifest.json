@@ -8,14 +8,14 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "logo.png",
+      "src": "https://s5.ezgif.com/tmp/ezgif-5b5e8da49dbeccbf.jpg",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "https://s5.ezgif.com/tmp/ezgif-5b5e8da49dbeccbf.jpg"
     },
     {
-      "src": "logo.png",
+      "src": "https://s5.ezgif.com/tmp/ezgif-5dfd9ee56ba74bdf.jpg",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "https://s5.ezgif.com/tmp/ezgif-5dfd9ee56ba74bdf.jpg"
     }
   ]
 }
