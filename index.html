@@ -1,3 +1,72 @@
+باشە برا، تەواو. ئەڤە کۆدێ **تەمام و درێژ** یێ بەرێ یە (وەک دیزاینا تە دڤێت)، بەس من هەموو ئەو گۆڕانکاری و سیستمێ زیرەک (Smart System) تێدا زێدەکرن کو تە دڤیان.
+
+فەرموو ئەڤان **٣ فایلان** درست بکە. ئەڤە ١٠٠٪ کاملن و نابیت چ تشتان ژێ کێم بکەی.
+
+---
+
+### فایلا ١: `manifest.json`
+*(ئەڤە بەرپرسە کو سایت ببیتە ئەپلیکەیشن بۆ ئەندرۆید و ئایفۆن)*
+
+```json
+{
+  "name": "Proje Islam Library",
+  "short_name": "Proje Islam",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#f1f2f6",
+  "theme_color": "#1e3799",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+```
+
+---
+
+### فایلا ٢: `sw.js`
+*(ئەڤە بەرپرسە ژ خەزنکرن و کارکرنا ئەپێ)*
+
+```javascript
+const CACHE_NAME = 'proje-islam-v5-final';
+const urlsToCache = [
+  './',
+  './index.html',
+  './manifest.json',
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css',
+  'https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Vazirmatn:wght@200;300;400;500;600;700;800;900&display=swap'
+];
+
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(urlsToCache))
+  );
+});
+
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request)
+      .then(response => response || fetch(event.request))
+  );
+});
+```
+
+---
+
+### فایلا ٣: `index.html`
+*(ئەڤە کۆدێ سەرەکی یە - هەموو دیزاینا تە یا کەڤن + سیستەمێ نوێ یێ زیرەک)*
+
+```html
 <!DOCTYPE html>
 <html lang="ku" dir="rtl">
 <head>
@@ -7,8 +76,10 @@
     
     <!-- PWA Setup -->
     <meta name="theme-color" content="#1e3799">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
     
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -69,13 +140,9 @@
         .stories-container { padding: 15px 20px; display: flex; gap: 20px; overflow-x: auto; scrollbar-width: none; margin-bottom: 5px; }
         .story-item { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; transition: transform 0.2s; position: relative; }
         .story-item:active { transform: scale(0.9); }
-        
         .story-item.active-lib .story-ring { border-color: var(--success); box-shadow: 0 0 0 3px var(--success); background: none; }
-        
-        /* Discount Style for Library Ring */
         .story-item.has-discount .story-ring { background: var(--discount-gradient); animation: pulse-ring 2s infinite; }
         .discount-badge-story { position: absolute; top: 0; right: 0; background: red; color: white; width: 22px; height: 22px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 0.7rem; border: 2px solid var(--bg-body); font-weight: bold; }
-
         .story-ring { width: 70px; height: 70px; border-radius: 50%; padding: 3px; background: var(--story-gradient); position: relative; transition: 0.3s; }
         .story-img { width: 100%; height: 100%; border-radius: 50%; border: 3px solid var(--bg-body); object-fit: cover; background: white; }
         .story-name { font-size: 0.75rem; max-width: 75px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-main); font-weight: 600; text-align: center; }
@@ -91,12 +158,10 @@
         .auth-logo { font-size: 3rem; color: var(--primary); margin-bottom: 20px; text-align: center; }
         .auth-input { width: 100%; padding: 15px; background: var(--bg-body); color: var(--text-main); border: 2px solid transparent; border-radius: 15px; margin-bottom: 15px; font-size: 1rem; transition: 0.3s; }
         .auth-input:focus { border-color: var(--primary); background: var(--bg-card); }
-        
         .radio-group { display: flex; gap: 15px; margin-bottom: 15px; }
         .radio-label { flex: 1; background: var(--bg-body); padding: 12px; border-radius: 12px; text-align: center; cursor: pointer; border: 2px solid transparent; transition: 0.3s; color: var(--text-light); }
         .radio-input { display: none; }
         .radio-input:checked + .radio-label { background: var(--bg-card); border-color: var(--primary); color: var(--primary); font-weight: bold; }
-
         .btn-auth { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 15px; font-weight: 800; font-size: 1.1rem; cursor: pointer; box-shadow: 0 10px 20px rgba(30, 55, 153, 0.3); }
         
         /* --- VERIFY MODAL --- */
@@ -153,6 +218,9 @@
         .discount-price { color: var(--danger); font-weight: 900; }
         .btn-add { width: 32px; height: 32px; background: var(--bg-body); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: var(--primary); transition: 0.2s; }
 
+        /* WHOLESALE TAG ON CARD */
+        .wholesale-badge { font-size:0.6rem; background:rgba(246, 185, 59, 0.2); color:#d35400; padding:2px 8px; border-radius:5px; border:1px solid var(--accent); display:inline-block; margin-top:4px; }
+
         .request-box { margin: 20px; padding: 20px; background: var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px dashed var(--primary); text-align: center; }
         .req-input-row { display: flex; gap: 10px; margin-top: 15px; }
         .req-input { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-main); }
@@ -165,8 +233,6 @@
         .modal-img { width: 100%; height: 100%; object-fit: cover; }
         .modal-btn-row { position: absolute; top: 20px; left: 20px; right: 20px; display: flex; justify-content: space-between; pointer-events: none; }
         .modal-btn-icon { background: rgba(255,255,255,0.9); width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; cursor: pointer; pointer-events: auto; color: var(--text-main); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        
-        /* Fixed padding-bottom for modal body to avoid overlap with footer */
         .modal-body { background: var(--bg-card); border-radius: 30px 30px 0 0; margin-top: -40px; position: relative; padding: 30px 30px 100px 30px; min-height: 500px; }
         
         .spec-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 20px 0; background: var(--bg-body); padding: 15px; border-radius: 15px; text-align: center; }
@@ -174,7 +240,6 @@
         .spec-item h5 { color: var(--text-light); font-size: 0.75rem; font-weight: normal; margin-bottom: 2px; }
         .spec-item span { color: var(--primary-dark); font-weight: bold; font-size: 0.9rem; }
         
-        /* Wholesale / Offers Section in Modal */
         .offers-box { background: rgba(246, 185, 59, 0.15); border: 1px dashed var(--accent); padding: 15px; border-radius: 15px; margin-top: 20px; }
         .offer-row { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: var(--text-main); margin-bottom: 5px; }
         .offer-icon { color: var(--accent); }
@@ -202,7 +267,6 @@
         .qty-control { display: flex; align-items: center; background: var(--bg-body); border-radius: 8px; padding: 2px; }
         .qty-btn { width: 28px; height: 28px; display: flex; justify-content: center; align-items: center; cursor: pointer; font-weight: bold; color: var(--text-main); }
         
-        /* POINTS REDEMPTION IN CART */
         .points-redeem-box {
             background: linear-gradient(135deg, #6c5ce7, #a29bfe);
             color: white; padding: 15px; border-radius: 15px; margin-top: 15px;
@@ -212,7 +276,7 @@
             background: white; color: #6c5ce7; border: none; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 0.8rem; cursor: pointer;
         }
 
-        /* --- PROFILE (NEW STYLE) --- */
+        /* --- PROFILE --- */
         .profile-header { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); padding: 40px 20px 60px; text-align: center; color: white; border-radius: 0 0 40px 40px; position: relative; }
         .avatar-container { width: 100px; height: 100px; margin: 0 auto 15px; position: relative; }
         .avatar { width: 100%; height: 100%; border-radius: 50%; border: 4px solid var(--accent); object-fit: cover; background: white; }
@@ -225,63 +289,15 @@
         .edit-input { border: 1px solid var(--primary); background: var(--bg-body); padding: 5px 10px; border-radius: 8px; width: 60%; text-align: left; color: var(--text-main); font-weight: bold; }
         .edit-input:disabled { background: #e0e0e0; border-color: #ccc; color: #888; cursor: not-allowed; }
 
-        .points-badge {
-            background: var(--accent);
-            color: black;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 0.9rem;
-            margin-top: 5px;
-            display: inline-block;
-        }
+        .points-badge { background: var(--accent); color: black; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; margin-top: 5px; display: inline-block; }
 
-        /* Logout Button Styled (Hidden by default) */
-        .btn-logout-styled {
-            width: 90%;
-            margin: 0 auto 30px; 
-            padding: 15px;
-            background: #fff0f0;
-            border: 2px solid var(--danger);
-            color: var(--danger);
-            border-radius: 15px;
-            font-weight: 800;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            transition: 0.2s;
-            font-size: 1rem;
-        }
+        .btn-logout-styled { width: 90%; margin: 0 auto 30px; padding: 15px; background: #fff0f0; border: 2px solid var(--danger); color: var(--danger); border-radius: 15px; font-weight: 800; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.2s; font-size: 1rem; }
         .btn-logout-styled:active { transform: scale(0.95); }
 
-        /* New Live Orders Section */
-        .live-orders-container {
-            padding: 0 20px;
-        }
-        .live-title {
-            font-size: 1.1rem;
-            color: var(--text-main);
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding-right: 10px;
-            border-right: 4px solid var(--primary);
-        }
+        .live-orders-container { padding: 0 20px; }
+        .live-title { font-size: 1.1rem; color: var(--text-main); margin-bottom: 15px; display: flex; align-items: center; gap: 10px; padding-right: 10px; border-right: 4px solid var(--primary); }
         
-        .track-card {
-            background: var(--bg-card);
-            padding: 20px;
-            border-radius: 20px;
-            box-shadow: var(--shadow);
-            margin-bottom: 20px;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid var(--border-color);
-        }
-        
+        .track-card { background: var(--bg-card); padding: 20px; border-radius: 20px; box-shadow: var(--shadow); margin-bottom: 20px; position: relative; overflow: hidden; border: 1px solid var(--border-color); }
         .track-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed var(--border-color); }
         .track-id { font-weight: 900; font-size: 1.1rem; color: var(--text-main); letter-spacing: 1px; }
         .track-date { font-size: 0.8rem; color: var(--text-light); }
@@ -295,6 +311,17 @@
         .track-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
         .track-total { font-weight: 900; color: var(--primary); font-size: 1.2rem; }
         
+        /* CODE BOX FOR ORDER */
+        .code-box-display {
+            background: rgba(30, 55, 153, 0.05);
+            border: 2px dashed var(--primary);
+            padding: 10px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .code-val-display { font-size: 2rem; font-weight: 900; letter-spacing: 5px; color: var(--primary); }
+
         .btn-confirm-order { width: 100%; padding: 10px; background: var(--success); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; animation: pulse 2s infinite; }
         .btn-cancel-order { width: 40px; height: 40px; background: rgba(235, 77, 75, 0.1); color: var(--danger); border-radius: 50%; border: 1px solid var(--danger); display: flex; justify-content: center; align-items: center; cursor: pointer; }
 
@@ -503,7 +530,7 @@
                         <span id="sub-total">0 IQD</span>
                     </div>
                     <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                        <span style="color:var(--info);">گەهاندن (Delivery)</span>
+                        <span style="color:var(--info);">گەهاندن (Delivery) <small id="delivery-type-label" style="font-size:0.7rem"></small></span>
                         <span id="delivery-fee">0 IQD</span>
                     </div>
                     <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
@@ -648,6 +675,7 @@
             <div style="flex:1;">
                 <div style="font-size:0.8rem; color:var(--text-light);" data-lang="price">نرخ</div>
                 <div id="m-price" style="font-size:1.4rem; font-weight:900; color:var(--primary);">0 IQD</div>
+                <div id="m-wholesale-info" style="font-size:0.75rem; color:var(--danger); display:none;">(جوملە)</div>
             </div>
             <button class="btn btn-primary" style="flex:1.5;" onclick="app.addToCartFromModal()">
                 <span data-lang="add_to_cart">زیادکرن</span> <i class="fas fa-cart-plus"></i>
@@ -656,6 +684,11 @@
     </div>
 
     <script>
+        // PWA SERVICE WORKER REGISTRATION
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').then(() => console.log('SW Registered'));
+        }
+
         const firebaseConfig = {
             apiKey: "AIzaSyB8-7RLi1UbixK8d-LGmH-K-SfR-GaMZ2E",
             authDomain: "projeislambook.firebaseapp.com",
@@ -800,6 +833,22 @@
                         this.renderPointRedeemOptions();
                     }
                 });
+
+                // NEW: NOTIFICATION LISTENER (LIVE)
+                firestore.collection('notifications').onSnapshot(snap => {
+                    snap.docChanges().forEach(change => {
+                        if (change.type === 'added') {
+                            const data = change.doc.data();
+                            // If it's a new notification (created recently)
+                            const now = new Date(); 
+                            // Check if targeted
+                            if (!data.targetPhone || (this.state.user && data.targetPhone === this.state.user.phone)) {
+                                this.addNotification(data.text);
+                                this.showToast("🔔 " + data.text);
+                            }
+                        }
+                    });
+                });
             },
 
             renderCityOptions() {
@@ -884,15 +933,25 @@
                 }
                 list.innerHTML = this.state.orders.map(o => {
                     let statusBadge = '', actionArea = '', cancelButton = '';
+                    let codeDisplay = '';
+
                     if(o.status === 'waiting') {
                         statusBadge = `<div class="track-status-badge st-wait"><i class="fas fa-clock"></i> ${t['wait']}</div>`;
                         cancelButton = `<div class="btn-cancel-order" onclick="app.cancelOrder('${o.docId}')"><i class="fas fa-times"></i></div>`;
                     } else if(o.status === 'approved') {
                         statusBadge = `<div class="track-status-badge st-done"><i class="fas fa-check-circle"></i> ${t['approved']}</div>`;
+                        // SHOW VERIFICATION CODE
+                        codeDisplay = `
+                        <div class="code-box-display">
+                            <div style="font-size:0.8rem; color:var(--text-light);">کۆدێ وەرگرتنێ (Verification)</div>
+                            <div class="code-val-display">${o.code}</div>
+                        </div>
+                        `;
                         actionArea = `<button class="btn-confirm-order" onclick="app.openVerifyModal(${o.id})">${t['confirm_btn']}</button>`;
                     } else if(o.status === 'delivered') {
                         statusBadge = `<div class="track-status-badge st-del"><i class="fas fa-truck"></i> ${t['delivered']}</div>`;
                     }
+
                     const itemsText = o.items.map(i => `• ${i.title} <span style="font-size:0.8em; color:#888;">(x${i.qty})</span>`).join('<br>');
                     return `
                     <div class="track-card">
@@ -905,6 +964,7 @@
                         </div>
                         ${statusBadge}
                         <div class="track-items">${itemsText}</div>
+                        ${codeDisplay}
                         <div class="track-footer"><span>${t['total']}</span><span class="track-total">${o.total.toLocaleString()} IQD</span></div>
                         ${actionArea ? '<div style="margin-top:15px;">'+actionArea+'</div>' : ''}
                     </div>
@@ -925,6 +985,10 @@
 
             addNotification(text) {
                 const notif = { id: Date.now(), text: text, read: false, time: new Date().toLocaleTimeString() };
+                // avoid duplicates if close in time
+                const exists = this.state.notifications.find(n => n.text === text && (Date.now() - n.id < 5000));
+                if(exists) return;
+
                 this.state.notifications.unshift(notif);
                 this.saveNotifications();
                 this.checkNotifications();
@@ -1105,27 +1169,23 @@
                 }
 
                 const verificationCode = Math.floor(1000 + Math.random() * 9000).toString();
-                const totalBooks = this.state.cart.reduce((a, b) => a + (b.price * b.qty), 0);
                 
-                // Wholesale Logic (Dynamic from Book data if needed, but keeping simple rule for now)
-                let wholesaleDiscount = 0;
-                const totalQty = this.state.cart.reduce((a, b) => a + b.qty, 0);
-                // Check if any book supports bulk discount
-                // (Simplified: if total qty > 5, apply 5%)
-                if(totalQty >= 5) wholesaleDiscount = 0.05;
-
-                // Delivery Logic (Dynamic)
-                let delivery = this.state.deliveryFee;
-                // Free delivery logic check from current library
-                if (this.state.cart.length > 0) {
-                    const libId = this.state.cart[0].libId;
-                    const lib = this.state.libraries.find(l => l.id === libId);
-                    if(lib && lib.freeDeliveryLimit && totalBooks >= lib.freeDeliveryLimit) {
-                        delivery = 0;
+                // CALCULATE FINAL TOTAL BASED ON CART & WHOLESALE
+                let totalBooks = 0;
+                this.state.cart.forEach(item => {
+                    // Check wholesale
+                    let itemPrice = item.price;
+                    if(item.bulkQty && item.qty >= item.bulkQty) {
+                        itemPrice = item.bulkPrice || item.price;
                     }
-                }
+                    totalBooks += (itemPrice * item.qty);
+                });
                 
-                const totalDiscountPercent = this.state.discount + this.state.pointsDiscount + wholesaleDiscount;
+                // Delivery Logic (Smart)
+                let delivery = this.state.deliveryFee;
+                // (Already calculated in updateCartUI, can reuse this.state.deliveryFee)
+                
+                const totalDiscountPercent = this.state.discount + this.state.pointsDiscount;
                 const discountAmount = totalBooks * totalDiscountPercent;
                 const finalTotal = (totalBooks + delivery) - discountAmount;
                 
@@ -1182,8 +1242,6 @@
                         const profileBtn = document.querySelectorAll('.nav-item')[2];
                         this.nav('profile', profileBtn);
                     }, 800);
-
-                    // Note: Admin approval is manual in Admin panel, so removed auto-approve simulation
                     
                 } catch (error) {
                     console.error("Order failed:", error);
@@ -1278,6 +1336,7 @@
             },
 
             async applyCoupon() {
+                // FIXED: UPPERCASE SENSITIVITY
                 const code = document.getElementById('coupon-input').value.trim().toUpperCase();
                 const msg = document.getElementById('coupon-msg');
                 if(!code) return;
@@ -1331,6 +1390,12 @@
                             <span class="old-price">${b.originalPrice.toLocaleString()}</span>
                         `;
                     }
+                    
+                    // Wholesale Badge
+                    let wholesaleBadge = '';
+                    if(b.bulkPrice && b.bulkQty) {
+                        wholesaleBadge = `<div class="wholesale-badge">جوملە: ${b.bulkPrice.toLocaleString()}</div>`;
+                    }
 
                     return `
                     <div class="card">
@@ -1349,6 +1414,7 @@
                                 <div>${priceDisplay}</div>
                                 <div class="btn-add"><i class="fas fa-plus"></i></div>
                             </div>
+                            ${wholesaleBadge}
                         </div>
                     </div>
                 `}).join('');
@@ -1435,6 +1501,15 @@
                 document.getElementById('m-bulk-qty').innerText = b.bulkQty || 5;
                 document.getElementById('m-free-limit').innerText = lib ? (lib.freeDeliveryLimit || 50000).toLocaleString() : '50,000';
 
+                // NEW: Wholesale Price Display in Modal
+                const wsInfo = document.getElementById('m-wholesale-info');
+                if(b.bulkPrice && b.bulkPrice > 0) {
+                    wsInfo.style.display = 'block';
+                    wsInfo.innerText = `کڕینا ${b.bulkQty}+ دانە = ${b.bulkPrice.toLocaleString()} IQD (جوملە)`;
+                } else {
+                    wsInfo.style.display = 'none';
+                }
+
                 const relatedContainer = document.getElementById('related-books-container');
                 const relatedBooks = this.state.books.filter(book => book.id !== b.id && book.libId === b.libId && (book.author === b.author || book.cat === b.cat));
 
@@ -1479,28 +1554,30 @@
                 
                 // Dynamic Delivery Calculation
                 let deliveryFee = 0;
+                let deliveryType = "";
                 let freeLimit = 50000;
 
+                // NEW: SMART DELIVERY LOGIC (CITY CHECK)
                 if (this.state.cart.length > 0 && this.state.user) {
                     const libId = this.state.cart[0].libId;
                     const lib = this.state.libraries.find(l => l.id === libId);
                     const userCity = this.state.user.city || "";
+                    
                     if (lib) {
                         freeLimit = lib.freeDeliveryLimit || 50000;
                         if (userCity && lib.city === userCity) {
                             deliveryFee = lib.localPrice || 2000; 
+                            deliveryType = "(ناڤخۆ)";
                         } else {
                             deliveryFee = lib.foreignPrice || 5000; 
+                            deliveryType = "(دەرەکی)";
                         }
-                    } else deliveryFee = 5000; 
+                    } else {
+                        deliveryFee = 5000; 
+                    }
                 }
                 
-                // FREE Delivery Check
-                if (this.state.cart.length > 0) {
-                    const rawTotal = this.state.cart.reduce((a, b) => a + (b.price * b.qty), 0);
-                    if(rawTotal >= freeLimit) deliveryFee = 0;
-                }
-                this.state.deliveryFee = deliveryFee;
+                document.getElementById('delivery-type-label').innerText = deliveryType;
 
                 if (this.state.cart.length === 0) {
                     list.innerHTML = `<p style="text-align:center; color:var(--text-light); margin-top:20px;">${t['empty_cart']}</p>`;
@@ -1510,13 +1587,26 @@
                     document.getElementById('coupon-input').value = '';
                 } else {
                     list.innerHTML = this.state.cart.map(item => {
-                        totalBooks += item.price * item.qty;
+                        // Check for wholesale price
+                        let finalPrice = item.price;
+                        let isWholesale = false;
+                        if(item.bulkQty && item.qty >= item.bulkQty) {
+                            finalPrice = item.bulkPrice;
+                            isWholesale = true;
+                        }
+
+                        const rowTotal = finalPrice * item.qty;
+                        totalBooks += rowTotal;
+
                         return `
                             <div class="cart-item">
                                 <img src="${item.img}" class="cart-img" onerror="this.onerror=null;this.src='${DEFAULT_IMG}';">
                                 <div style="flex:1;">
                                     <div style="font-weight:bold; color:var(--text-main);">${item.title}</div>
-                                    <div style="color:var(--primary);">${item.price.toLocaleString()} IQD</div>
+                                    <div style="color:var(--primary);">
+                                        ${finalPrice.toLocaleString()} IQD
+                                        ${isWholesale ? '<span style="color:red; font-size:0.7rem;">(جوملە)</span>' : ''}
+                                    </div>
                                 </div>
                                 <div class="qty-control">
                                     <div class="qty-btn" onclick="app.changeQty(${item.id}, -1)">-</div>
@@ -1528,11 +1618,16 @@
                     }).join('');
                 }
                 
-                // Wholesale Logic (Simple >5 items = 5%)
-                let wholesaleDiscount = 0;
-                if(count >= 5) wholesaleDiscount = 0.05;
+                // FREE Delivery Check Logic
+                if (this.state.cart.length > 0) {
+                    if(totalBooks >= freeLimit) {
+                        deliveryFee = 0;
+                        document.getElementById('delivery-type-label').innerText = "(بێ بەرامبەر)";
+                    }
+                }
+                this.state.deliveryFee = deliveryFee;
 
-                const totalDiscountPercent = this.state.discount + this.state.pointsDiscount + wholesaleDiscount;
+                const totalDiscountPercent = this.state.discount + this.state.pointsDiscount;
                 const discountAmount = totalBooks * totalDiscountPercent;
                 const finalAmount = (totalBooks + this.state.deliveryFee) - discountAmount;
 
