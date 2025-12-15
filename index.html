@@ -73,6 +73,7 @@
         .story-item:active { transform: scale(0.9); }
         .story-item.active-lib .story-ring { border-color: var(--success); box-shadow: 0 0 0 3px var(--success); background: none; }
         .story-item.has-discount .story-ring { background: var(--discount-gradient); animation: pulse-ring 2s infinite; }
+        /* Only show badge if library specifically has a discount */
         .discount-badge-story { position: absolute; top: 0; right: 0; background: red; color: white; width: 22px; height: 22px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 0.7rem; border: 2px solid var(--bg-body); font-weight: bold; }
         .story-ring { width: 70px; height: 70px; border-radius: 50%; padding: 3px; background: var(--story-gradient); position: relative; transition: 0.3s; }
         .story-img { width: 100%; height: 100%; border-radius: 50%; border: 3px solid var(--bg-body); object-fit: cover; background: white; }
@@ -149,40 +150,85 @@
         .discount-price { color: var(--danger); font-weight: 900; }
         .btn-add { width: 32px; height: 32px; background: var(--bg-body); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: var(--primary); transition: 0.2s; }
 
-        /* WHOLESALE TAG ON CARD */
-        .wholesale-badge { font-size:0.6rem; background:rgba(246, 185, 59, 0.2); color:#d35400; padding:2px 8px; border-radius:5px; border:1px solid var(--accent); display:inline-block; margin-top:4px; }
-
         .request-box { margin: 20px; padding: 20px; background: var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px dashed var(--primary); text-align: center; }
         .req-input-row { display: flex; gap: 10px; margin-top: 15px; }
         .req-input { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-main); }
         .btn-req { padding: 0 15px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; }
 
-        /* --- PRODUCT MODAL --- */
+        /* --- UPDATED PRODUCT MODAL (CLEANER) --- */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-body); z-index: 2000; overflow-y: auto; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
         .modal.open { transform: translateY(0); }
-        .modal-header { height: 300px; position: relative; }
-        .modal-img { width: 100%; height: 100%; object-fit: cover; }
-        .modal-btn-row { position: absolute; top: 20px; left: 20px; right: 20px; display: flex; justify-content: space-between; pointer-events: none; }
-        .modal-btn-icon { background: rgba(255,255,255,0.9); width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; cursor: pointer; pointer-events: auto; color: var(--text-main); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        .modal-body { background: var(--bg-card); border-radius: 30px 30px 0 0; margin-top: -40px; position: relative; padding: 30px 30px 100px 30px; min-height: 500px; }
         
-        .spec-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 20px 0; background: var(--bg-body); padding: 15px; border-radius: 15px; text-align: center; }
-        .spec-item { padding: 5px; }
-        .spec-item h5 { color: var(--text-light); font-size: 0.75rem; font-weight: normal; margin-bottom: 2px; }
-        .spec-item span { color: var(--primary-dark); font-weight: bold; font-size: 0.9rem; }
+        .modal-hero {
+            height: 320px;
+            width: 100%;
+            position: relative;
+        }
+        .modal-hero img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .modal-hero-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.3), transparent 60%, var(--bg-card));
+        }
+
+        .modal-btn-row { position: absolute; top: 20px; left: 20px; right: 20px; display: flex; justify-content: space-between; pointer-events: none; z-index: 10; }
+        .modal-btn-icon { background: rgba(255,255,255,0.9); width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.3rem; cursor: pointer; pointer-events: auto; color: var(--text-main); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+
+        .modal-content-container {
+            background: var(--bg-card);
+            border-radius: 30px 30px 0 0;
+            margin-top: -50px;
+            position: relative;
+            padding: 30px 25px 120px 25px;
+            min-height: 500px;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.1);
+        }
+
+        .m-header-info { text-align: center; margin-bottom: 25px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; }
+        .m-cat-tag { background: var(--primary); color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; margin-bottom: 10px; display: inline-block; }
+        .m-lib-tag { background: #34495e; color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; margin-bottom: 10px; display: inline-block; margin-right:5px; }
         
-        .offers-box { background: rgba(246, 185, 59, 0.15); border: 1px dashed var(--accent); padding: 15px; border-radius: 15px; margin-top: 20px; }
-        .offer-row { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: var(--text-main); margin-bottom: 5px; }
-        .offer-icon { color: var(--accent); }
+        .m-title { font-size: 1.6rem; font-weight: 800; color: var(--text-main); margin: 10px 0; line-height: 1.4; }
+        .m-author { color: var(--text-light); font-size: 1rem; font-weight: 500; }
+
+        .m-spec-box {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .m-spec-item {
+            background: var(--bg-body);
+            padding: 15px;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        .m-spec-icon { color: var(--primary); font-size: 1.2rem; }
+        .m-spec-label { font-size: 0.75rem; color: var(--text-light); }
+        .m-spec-val { font-weight: bold; color: var(--text-main); font-size: 0.95rem; }
+
+        .m-desc-box { background: #f8f9fa; padding: 20px; border-radius: 15px; border: 1px solid var(--border-color); margin-bottom: 25px; line-height: 1.8; color: #4b5563; text-align: justify; font-size: 0.95rem; }
+
+        .m-offers { background: rgba(46, 204, 113, 0.1); border: 1px solid var(--success); padding: 15px; border-radius: 15px; margin-bottom: 25px; }
+        .m-offer-row { display: flex; gap: 10px; align-items: center; font-size: 0.9rem; margin-bottom: 8px; color: #1e8449; }
+        .m-offer-row:last-child { margin-bottom: 0; }
 
         .related-books-section { margin-top: 30px; }
-        .related-title { font-weight: bold; margin-bottom: 10px; color: var(--text-main); font-size: 1rem; border-bottom: 2px solid var(--border-color); display: inline-block; padding-bottom: 5px; }
-        .related-scroll { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; padding-bottom: 10px; }
-        .related-card { min-width: 100px; width: 100px; cursor: pointer; }
-        .related-img { width: 100px; height: 140px; border-radius: 10px; object-fit: cover; }
-        .related-name { font-size: 0.75rem; font-weight: bold; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 5px; color: var(--text-main); }
+        .related-title { font-weight: bold; margin-bottom: 15px; color: var(--text-main); font-size: 1.1rem; border-right: 4px solid var(--primary); padding-right: 10px; }
+        .related-scroll { display: flex; gap: 15px; overflow-x: auto; scrollbar-width: none; padding-bottom: 10px; }
+        .related-card { min-width: 110px; width: 110px; cursor: pointer; }
+        .related-img { width: 110px; height: 160px; border-radius: 12px; object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .related-name { font-size: 0.8rem; font-weight: bold; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 8px; color: var(--text-main); }
 
-        .modal-footer { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bg-card); padding: 20px; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 15px; z-index: 2001; }
+        .modal-footer { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bg-card); padding: 15px 25px; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 15px; z-index: 2001; }
         
         #preview-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-body); z-index: 8000; display: none; overflow-y: auto; }
         .preview-header { position: sticky; top: 0; background: var(--bg-card); padding: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 8001; }
@@ -242,16 +288,8 @@
         .track-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
         .track-total { font-weight: 900; color: var(--primary); font-size: 1.2rem; }
         
-        /* CODE BOX FOR ORDER */
-        .code-box-display {
-            background: rgba(30, 55, 153, 0.05);
-            border: 2px dashed var(--primary);
-            padding: 10px;
-            border-radius: 12px;
-            text-align: center;
-            margin: 10px 0;
-        }
-        .code-val-display { font-size: 2rem; font-weight: 900; letter-spacing: 5px; color: var(--primary); }
+        /* CODE BOX FOR ORDER - HIDDEN FOR USER IN NEW LOGIC BUT KEPT FOR ADMIN LOGIC IF NEEDED */
+        .code-box-display { display: none; } 
 
         .btn-confirm-order { width: 100%; padding: 10px; background: var(--success); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; animation: pulse 2s infinite; }
         .btn-cancel-order { width: 40px; height: 40px; background: rgba(235, 77, 75, 0.1); color: var(--danger); border-radius: 50%; border: 1px solid var(--danger); display: flex; justify-content: center; align-items: center; cursor: pointer; }
@@ -271,28 +309,27 @@
         
         /* --- NEW DELIVERY DESIGN --- */
         .delivery-box {
-            background: white;
+            background: var(--bg-card);
             border-radius: 20px;
             padding: 0;
             margin: 20px 0;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            box-shadow: var(--shadow);
             border: 1px solid var(--border-color);
             overflow: hidden;
         }
         .delivery-header {
-            background: #fdf2e9;
+            background: linear-gradient(135deg, #FF9966 0%, #FF5E62 100%);
             padding: 15px;
             display: flex;
             align-items: center;
             gap: 10px;
-            color: #d35400;
+            color: white;
             font-weight: bold;
-            font-size: 1rem;
-            border-bottom: 1px solid #fad390;
+            font-size: 1.1rem;
         }
-        .delivery-body { padding: 15px; }
+        .delivery-body { padding: 20px; }
         .input-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             position: relative;
         }
         .input-group-icon {
@@ -300,23 +337,26 @@
             right: 15px;
             top: 50%;
             transform: translateY(-50%);
-            color: var(--text-light);
+            color: var(--primary);
             pointer-events: none;
+            font-size: 1.2rem;
         }
         .delivery-select, .delivery-input {
             width: 100%;
-            padding: 15px 45px 15px 15px; /* space for icon */
+            padding: 18px 50px 18px 20px; /* space for icon */
             border-radius: 15px;
             border: 2px solid var(--border-color);
-            font-size: 0.95rem;
+            font-size: 1rem;
             background: var(--bg-body);
             color: var(--text-main);
             transition: 0.3s;
             appearance: none;
+            outline: none;
         }
         .delivery-select:focus, .delivery-input:focus {
             border-color: var(--primary);
-            background: white;
+            background: var(--bg-card);
+            box-shadow: 0 0 0 4px rgba(30, 55, 153, 0.1);
         }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -453,6 +493,7 @@
             
             <div class="categories">
                 <div class="cat-chip active" onclick="app.filter('all', this)" data-lang="all">هەمی</div>
+                <div class="cat-chip" onclick="app.filter('discounted', this)" data-lang="discount_filter">داشکاندن 🔥</div>
                 <div class="cat-chip" onclick="app.filter('favorites', this)" data-lang="fav">دڵخواز ❤️</div>
                 <div class="cat-chip" onclick="app.filter('قورئان', this)" data-lang="quran">قورئان</div>
                 <div class="cat-chip" onclick="app.filter('عەقیدە', this)" data-lang="aqida">عەقیدە</div>
@@ -515,7 +556,7 @@
                     <!-- NEW DELIVERY DESIGN -->
                     <div class="delivery-box">
                         <div class="delivery-header">
-                            <i class="fas fa-shipping-fast"></i> زانیاریێن گەهاندنێ
+                            <i class="fas fa-truck-moving"></i> &nbsp; زانیاریێن گەهاندنێ
                         </div>
                         <div class="delivery-body">
                             <div class="input-group">
@@ -526,7 +567,7 @@
                                 </select>
                             </div>
                             <div class="input-group">
-                                <i class="fas fa-pen input-group-icon"></i>
+                                <i class="fas fa-pen-alt input-group-icon"></i>
                                 <input type="text" id="delivery-details" class="delivery-input" placeholder="تێبینی (ناڤێ تاخی، نێزیک مزگەفتێ...)">
                             </div>
                         </div>
@@ -634,36 +675,56 @@
         </nav>
     </div>
 
-    <!-- PRODUCT MODAL -->
+    <!-- UPDATED PRODUCT MODAL -->
     <div id="product-modal" class="modal">
-        <div class="modal-header">
+        <div class="modal-hero">
+            <div class="modal-hero-overlay"></div>
+            <img src="" id="m-img">
             <div class="modal-btn-row">
                 <div class="modal-btn-icon" onclick="app.closeModal()"><i class="fas fa-times"></i></div>
                 <div class="modal-btn-icon" onclick="app.shareBook()"><i class="fas fa-share-alt"></i></div>
             </div>
-            <img src="" id="m-img" class="modal-img">
         </div>
-        <div class="modal-body">
-            <span id="m-cat" style="background:var(--accent); color:black; padding:5px 15px; border-radius:20px; font-size:0.8rem; font-weight:bold;">Cat</span>
-            <span id="m-lib" style="background:var(--primary); color:white; padding:5px 15px; border-radius:20px; font-size:0.8rem; font-weight:bold; margin-right:5px;">Lib</span>
-            <h1 id="m-title" style="margin:15px 0 5px; color:var(--primary-dark); font-size:1.6rem;">Title</h1>
-            <p id="m-author" style="color:var(--text-light);">Author</p>
+        
+        <div class="modal-content-container">
+            <div class="m-header-info">
+                <span id="m-cat" class="m-cat-tag">Cat</span>
+                <span id="m-lib" class="m-lib-tag">Lib</span>
+                <h1 id="m-title" class="m-title">Title</h1>
+                <p id="m-author" class="m-author">Author</p>
+            </div>
+
+            <div class="m-spec-box">
+                <div class="m-spec-item" id="row-pages">
+                    <i class="fas fa-file-alt m-spec-icon"></i>
+                    <span class="m-spec-label" data-lang="pages">لاپەڕ</span>
+                    <span class="m-spec-val" id="m-pages">0</span>
+                </div>
+                <div class="m-spec-item" id="row-tahqiq">
+                    <i class="fas fa-check-double m-spec-icon"></i>
+                    <span class="m-spec-label" data-lang="investigation">تەحقیق</span>
+                    <span class="m-spec-val" id="m-tahqiq">-</span>
+                </div>
+                <div class="m-spec-item" id="row-paper">
+                    <i class="fas fa-copy m-spec-icon"></i>
+                    <span class="m-spec-label" data-lang="paper">جورێ کاغەزێ</span>
+                    <span class="m-spec-val" id="m-paper">-</span>
+                </div>
+                <div class="m-spec-item" id="row-volumes">
+                    <i class="fas fa-book m-spec-icon"></i>
+                    <span class="m-spec-label" data-lang="volumes">ژمارا بەرگان</span>
+                    <span class="m-spec-val" id="m-volumes">1</span>
+                </div>
+            </div>
+
+            <div class="m-offers">
+                <div class="m-offer-row"><i class="fas fa-truck"></i> <span>گەهاندن بێ بەرامبەرە بۆ کڕینا سەرووی <span id="m-free-limit">50,000</span> IQD</span></div>
+                <div class="m-offer-row" id="m-wholesale-row"><i class="fas fa-tags"></i> <span>داشکاندن هەیە بۆ کڕینا <span id="m-bulk-qty" style="font-weight:bold;">5</span>+ دانە</span></div>
+            </div>
+
+            <h4 style="margin-bottom:10px; color:var(--text-main);" data-lang="summary">پوختە</h4>
+            <div id="m-desc" class="m-desc-box">...</div>
             
-            <div class="spec-grid">
-                <div class="spec-item"><h5 data-lang="pages">لاپەڕ</h5><span id="m-pages">0</span></div>
-                <div class="spec-item"><h5 data-lang="investigation">تەحقیق</h5><span id="m-tahqiq">-</span></div>
-                <div class="spec-item"><h5 data-lang="paper">جورێ کاغەزێ</h5><span id="m-paper">-</span></div>
-                <div class="spec-item"><h5 data-lang="volumes">ژمارا بەرگان</h5><span id="m-volumes">1</span></div>
-            </div>
-
-            <!-- Wholesale & Free Delivery Info -->
-            <div class="offers-box">
-                <div class="offer-row"><i class="fas fa-truck offer-icon"></i> <span>گەهاندن بێ بەرامبەرە بۆ کڕینا سەرووی <span id="m-free-limit">50,000</span> IQD</span></div>
-                <div class="offer-row"><i class="fas fa-tags offer-icon"></i> <span>کڕینا +<span id="m-bulk-qty">5</span> دانە = داشکاندن (جوملە)</span></div>
-            </div>
-
-            <h4 style="margin-bottom:10px; margin-top:20px; color:var(--text-main);" data-lang="summary">پوختە</h4>
-            <p id="m-desc" style="line-height:1.8; color:var(--text-main); text-align:justify;">...</p>
             <button class="btn btn-outline" onclick="app.openPreview()">
                 <i class="fas fa-book-reader"></i> <span data-lang="preview">چاڤخشاندن (نموونە)</span>
             </button>
@@ -674,11 +735,11 @@
                 <div class="related-scroll" id="related-books-container"></div>
             </div>
         </div>
+
         <div class="modal-footer">
             <div style="flex:1;">
                 <div style="font-size:0.8rem; color:var(--text-light);" data-lang="price">نرخ</div>
                 <div id="m-price" style="font-size:1.4rem; font-weight:900; color:var(--primary);">0 IQD</div>
-                <div id="m-wholesale-info" style="font-size:0.75rem; color:var(--danger); display:none;">(جوملە)</div>
             </div>
             <button class="btn btn-primary" style="flex:1.5;" onclick="app.addToCartFromModal()">
                 <span data-lang="add_to_cart">زیادکرن</span> <i class="fas fa-cart-plus"></i>
@@ -723,7 +784,7 @@
                 lang_val: "کوردی", req_title: "کتێبەکەت نەدۆزیەوە؟", req_desc: "ناڤێ پەرتووکێ بنڤیسە، ئەم دێ بۆ تە دابین کەین.", send: "هنارتن",
                 req_sent: "داواکارییا پەرتووکێ گەهشت 📥", 
                 confirm_btn: "وەرگرتن (پشتڕاستکرن)", enter_code: "کۆدی بنڤیسە", code_desc: "کۆدێ د ئاگەهداریان دا بۆ تە هاتی بنڤیسە.",
-                wrong_code: "کۆد شاشە! ❌", code_success: "داواکاری گەهشت! سوپاس 💙", libraries: "پەرتووکخانە"
+                wrong_code: "کۆد شاشە! ❌", code_success: "داواکاری گەهشت! سوپاس 💙", libraries: "پەرتووکخانە", discount_filter: "داشکاندن 🔥"
             },
             'sorani': {
                 app_name: "پڕۆژەی ئیسلام", search_place: "گەڕان...", all: "هەموو", fav: "دڵخواز ❤️", quran: "قورئان", aqida: "عەقیدە", hadith: "فەرموودە", history: "مێژوو", city_filter: "شار",
@@ -737,7 +798,7 @@
                 lang_val: "کوردی", req_title: "کتێبەکەت نەدۆزیەوە؟", req_desc: "ناوی کتێبەکە بنووسە، بۆتی دابین دەکەین.", send: "ناردن",
                 req_sent: "داواکاری کتێب گەیشت 📥",
                 confirm_btn: "وەرگرتن (پشتڕاستکردن)", enter_code: "کۆد بنووسە", code_desc: "ئەو کۆدەی لە ئاگادارکردنەوە هاتوو بنووسە.",
-                wrong_code: "کۆد هەڵەیە! ❌", code_success: "داواکاری گەیشت! سوپاس 💙", libraries: "پەرتووکخانە"
+                wrong_code: "کۆد هەڵەیە! ❌", code_success: "داواکاری گەیشت! سوپاس 💙", libraries: "پەرتووکخانە", discount_filter: "داشکاندن 🔥"
             },
             'arabic': {
                 app_name: "مشروع الإسلام", search_place: "بحث...", all: "الكل", fav: "المفضلة ❤️", quran: "قرآن", aqida: "عقيدة", hadith: "حديث", history: "تاريخ", city_filter: "المدينة",
@@ -751,7 +812,7 @@
                 lang_val: "العربية", req_title: "لم تجد كتابك؟", req_desc: "اكتب اسم الكتاب وسنوفره لك.", send: "إرسال",
                 req_sent: "تم استلام طلب الكتاب 📥",
                 confirm_btn: "استلام (تأكيد)", enter_code: "أدخل الرمز", code_desc: "أدخل الرمز الذي وصلك في الإشعارات.",
-                wrong_code: "الرمز خاطئ! ❌", code_success: "تم تسليم الطلب! شكراً 💙", libraries: "المكتبات"
+                wrong_code: "الرمز خاطئ! ❌", code_success: "تم تسليم الطلب! شكراً 💙", libraries: "المكتبات", discount_filter: "خصومات 🔥"
             }
         };
 
@@ -834,23 +895,19 @@
                         if (change.type === 'added') {
                             const data = change.doc.data();
                             
-                            // 1. Check if user is logged in
                             if (!this.state.user) return;
-
-                            // 2. Check if notification targets this user
                             if (!data.targetPhone || data.targetPhone === this.state.user.phone) {
                                 
                                 const notifTime = data.id || Date.now();
+                                // Track the ID of the last seen notification
+                                const lastSeenId = parseInt(localStorage.getItem('last_seen_notif_time')) || 0;
                                 
-                                // 3. Retrieve last seen notification time from LocalStorage
-                                const lastSeenTime = parseInt(localStorage.getItem('last_notif_time_pro')) || 0;
-                                
-                                // 4. Only show toast if this is a NEW notification (newer than what we've seen)
-                                if (notifTime > lastSeenTime) {
+                                // Only show TOAST if the notification is newer than what we've seen
+                                if (notifTime > lastSeenId) {
                                     this.showToast("🔔 " + data.text);
-                                    localStorage.setItem('last_notif_time_pro', notifTime);
+                                    localStorage.setItem('last_seen_notif_time', notifTime);
                                 }
-                                
+                                // Always add to the list
                                 this.addNotification(data.text, notifTime);
                             }
                         }
@@ -965,14 +1022,16 @@
                 }
                 list.innerHTML = this.state.orders.map(o => {
                     let statusBadge = '', actionArea = '', cancelButton = '';
-                    let codeDisplay = '';
+                    
+                    // Code display hidden for user, only used in backend
+                    let codeDisplay = ''; 
 
                     if(o.status === 'waiting') {
                         statusBadge = `<div class="track-status-badge st-wait"><i class="fas fa-clock"></i> ${t['wait']}</div>`;
                         cancelButton = `<div class="btn-cancel-order" onclick="app.cancelOrder('${o.docId}')"><i class="fas fa-times"></i></div>`;
                     } else if(o.status === 'approved') {
                         statusBadge = `<div class="track-status-badge st-done"><i class="fas fa-check-circle"></i> ${t['approved']}</div>`;
-                        codeDisplay = `<div class="code-box-display"><div style="font-size:0.8rem; color:var(--text-light);">کۆدێ وەرگرتنێ (Verification)</div><div class="code-val-display">${o.code}</div></div>`;
+                        // User enters code to confirm receipt
                         actionArea = `<button class="btn-confirm-order" onclick="app.openVerifyModal(${o.id})">${t['confirm_btn']}</button>`;
                     } else if(o.status === 'delivered') {
                         statusBadge = `<div class="track-status-badge st-del"><i class="fas fa-truck"></i> ${t['delivered']}</div>`;
@@ -1008,7 +1067,6 @@
 
             addNotification(text, id) {
                 const notifId = id || Date.now();
-                // Check if notification already exists based on ID
                 const exists = this.state.notifications.find(n => n.id === notifId);
                 if(exists) return;
 
@@ -1189,11 +1247,23 @@
 
                 const verificationCode = Math.floor(1000 + Math.random() * 9000).toString();
                 
+                // Calculate Totals again for security
                 let totalBooks = 0;
+                
+                const libId = this.state.cart[0].libId;
+                const lib = this.state.libraries.find(l => l.id === libId);
+                const libDiscount = (lib && lib.discountPercent) ? lib.discountPercent : 0;
+
                 this.state.cart.forEach(item => {
                     let itemPrice = item.price;
+                    // Apply Library Discount first
+                    if(libDiscount > 0) {
+                        itemPrice = itemPrice - (itemPrice * libDiscount);
+                    }
+                    // Wholesale logic usually overrides or applies after. 
+                    // Simplified: if wholesale quantity reached, use wholesale price (no lib discount on top of wholesale typically, but let's stick to logic)
                     if(item.bulkQty && item.qty >= item.bulkQty) {
-                        itemPrice = item.bulkPrice || item.price;
+                        itemPrice = item.bulkPrice || itemPrice;
                     }
                     totalBooks += (itemPrice * item.qty);
                 });
@@ -1323,11 +1393,14 @@
             },
 
             renderLibraries() {
+                // Determine if a library has a discount (explicitly set in DB)
                 const libsWithDiscount = this.state.libraries.map(lib => {
-                    const hasDiscount = this.state.books.some(b => b.libId === lib.id && b.originalPrice && b.originalPrice > b.price) || (lib.discountPercent > 0);
+                    const hasDiscount = lib.discountPercent && lib.discountPercent > 0;
                     return { ...lib, hasDiscount };
                 });
+                
                 libsWithDiscount.sort((a, b) => (b.hasDiscount ? 1 : 0) - (a.hasDiscount ? 1 : 0));
+                
                 const con = document.getElementById('stories-list');
                 con.innerHTML = libsWithDiscount.map(lib => `
                     <div class="story-item ${lib.hasDiscount ? 'has-discount' : ''}" onclick="app.filterByLibrary(${lib.id}, this)">
@@ -1427,17 +1500,32 @@
                     const lib = this.state.libraries.find(l => l.id === b.libId);
                     const libName = lib ? lib.name : "Library";
                     
-                    let priceDisplay = `<span class="price">${b.price.toLocaleString()}</span>`;
-                    if(b.originalPrice && b.originalPrice > b.price) {
-                        priceDisplay = `
-                            <span class="price discount-price">${b.price.toLocaleString()}</span>
-                            <span class="old-price">${b.originalPrice.toLocaleString()}</span>
-                        `;
+                    // Logic: Library Discount
+                    let priceDisplay = b.price.toLocaleString();
+                    let finalPrice = b.price;
+                    let hasDiscount = false;
+                    let originalPriceDisplay = "";
+
+                    if(lib && lib.discountPercent && lib.discountPercent > 0) {
+                        finalPrice = b.price - (b.price * lib.discountPercent);
+                        priceDisplay = finalPrice.toLocaleString();
+                        originalPriceDisplay = b.price.toLocaleString();
+                        hasDiscount = true;
+                    }
+                    
+                    let priceHtml = `<span class="price">${priceDisplay}</span>`;
+                    if(hasDiscount) {
+                        priceHtml = `<span class="price discount-price">${priceDisplay}</span>
+                                     <span class="old-price">${originalPriceDisplay}</span>`;
+                    } else if(b.originalPrice && b.originalPrice > b.price) {
+                         // Manual single book discount
+                         priceHtml = `<span class="price discount-price">${b.price.toLocaleString()}</span>
+                                     <span class="old-price">${b.originalPrice.toLocaleString()}</span>`;
                     }
                     
                     let wholesaleBadge = '';
-                    if(b.bulkPrice && b.bulkQty) {
-                        wholesaleBadge = `<div class="wholesale-badge">جوملە: ${b.bulkPrice.toLocaleString()}</div>`;
+                    if(b.bulkQty) {
+                        wholesaleBadge = `<div class="wholesale-badge">داشکاندنا جوملە هەیە</div>`;
                     }
 
                     return `
@@ -1454,7 +1542,7 @@
                             <div class="card-title">${b.title}</div>
                             <div class="card-author">${b.author}</div>
                             <div class="card-footer">
-                                <div>${priceDisplay}</div>
+                                <div>${priceHtml}</div>
                                 <div class="btn-add"><i class="fas fa-plus"></i></div>
                             </div>
                             ${wholesaleBadge}
@@ -1500,6 +1588,14 @@
 
                 if (cat === 'all') this.renderBooks(this.state.books);
                 else if (cat === 'favorites') this.renderBooks(this.state.books.filter(b => this.state.favs.includes(b.id)));
+                else if (cat === 'discounted') {
+                    // Filter books where library has discount OR book has manual discount
+                    const discountedBooks = this.state.books.filter(b => {
+                        const lib = this.state.libraries.find(l => l.id === b.libId);
+                        return (lib && lib.discountPercent > 0) || (b.originalPrice && b.originalPrice > b.price);
+                    });
+                    this.renderBooks(discountedBooks);
+                }
                 else this.renderBooks(this.state.books.filter(b => b.cat === cat));
             },
 
@@ -1529,26 +1625,62 @@
                 document.getElementById('m-img').onerror = function() { this.src = DEFAULT_IMG; };
                 document.getElementById('m-title').innerText = b.title;
                 document.getElementById('m-cat').innerText = b.cat || 'General';
-                document.getElementById('m-lib').innerText = lib ? lib.name : 'Unknown';
+                document.getElementById('m-lib').innerText = lib ? lib.name : 'Library';
                 document.getElementById('m-author').innerText = b.author;
                 document.getElementById('m-desc').innerText = b.desc || 'هیچ زانیارییەک نییە.';
-                document.getElementById('m-price').innerText = b.price.toLocaleString() + ' IQD';
-
-                document.getElementById('m-pages').innerText = b.pages || "-";
-                document.getElementById('m-tahqiq').innerText = b.tahqiq || "ن/أ";
-                document.getElementById('m-paper').innerText = b.paper || "-";
-                document.getElementById('m-volumes').innerText = b.volumes || "1";
                 
-                document.getElementById('m-bulk-qty').innerText = b.bulkQty || 5;
-                document.getElementById('m-free-limit').innerText = lib ? (lib.freeDeliveryLimit || 50000).toLocaleString() : '50,000';
-
-                const wsInfo = document.getElementById('m-wholesale-info');
-                if(b.bulkPrice && b.bulkPrice > 0) {
-                    wsInfo.style.display = 'block';
-                    wsInfo.innerText = `کڕینا ${b.bulkQty}+ دانە = ${b.bulkPrice.toLocaleString()} IQD (جوملە)`;
-                } else {
-                    wsInfo.style.display = 'none';
+                // Price Calculation
+                let finalPrice = b.price;
+                if(lib && lib.discountPercent && lib.discountPercent > 0) {
+                     finalPrice = b.price - (b.price * lib.discountPercent);
                 }
+                document.getElementById('m-price').innerText = finalPrice.toLocaleString() + ' IQD';
+
+                // Display Logic for Specs (Hide if empty)
+                const pagesEl = document.getElementById('row-pages');
+                if(b.pages) {
+                    pagesEl.style.display = 'flex';
+                    document.getElementById('m-pages').innerText = b.pages;
+                } else {
+                    pagesEl.style.display = 'none';
+                }
+
+                const tahqiqEl = document.getElementById('row-tahqiq');
+                if(b.tahqiq) {
+                    tahqiqEl.style.display = 'flex';
+                    document.getElementById('m-tahqiq').innerText = b.tahqiq;
+                } else {
+                    tahqiqEl.style.display = 'none';
+                }
+
+                const paperEl = document.getElementById('row-paper');
+                if(b.paper) {
+                    paperEl.style.display = 'flex';
+                    document.getElementById('m-paper').innerText = b.paper;
+                } else {
+                    paperEl.style.display = 'none';
+                }
+
+                const volumesEl = document.getElementById('row-volumes');
+                if(b.volumes) {
+                    volumesEl.style.display = 'flex';
+                    document.getElementById('m-volumes').innerText = b.volumes;
+                } else {
+                    volumesEl.style.display = 'none';
+                }
+                
+                // Wholesale Logic (Hidden Price)
+                const wsRow = document.getElementById('m-wholesale-row');
+                if(b.bulkQty && b.bulkQty > 0) {
+                    wsRow.style.display = 'flex';
+                    document.getElementById('m-bulk-qty').innerText = b.bulkQty;
+                } else {
+                    wsRow.style.display = 'none';
+                }
+
+                // Free delivery logic
+                const freeLimit = lib ? (lib.freeDeliveryLimit || 50000) : 50000;
+                document.getElementById('m-free-limit').innerText = freeLimit.toLocaleString();
 
                 const relatedContainer = document.getElementById('related-books-container');
                 const relatedBooks = this.state.books.filter(book => book.id !== b.id && book.libId === b.libId && (book.author === b.author || book.cat === b.cat));
@@ -1596,13 +1728,17 @@
                 let freeLimit = 50000;
                 
                 const selectedCity = document.getElementById('delivery-city-select') ? document.getElementById('delivery-city-select').value : "";
-
-                if (this.state.cart.length > 0 && this.state.user) {
+                
+                // Get library discount
+                let libDiscount = 0;
+                if (this.state.cart.length > 0) {
                     const libId = this.state.cart[0].libId;
                     const lib = this.state.libraries.find(l => l.id === libId);
                     
                     if (lib) {
                         freeLimit = lib.freeDeliveryLimit || 50000;
+                        if(lib.discountPercent) libDiscount = lib.discountPercent;
+
                         if (selectedCity && lib.city === selectedCity) {
                             deliveryFee = lib.localPrice || 2000; 
                         } else if(selectedCity) {
@@ -1624,9 +1760,16 @@
                 } else {
                     list.innerHTML = this.state.cart.map(item => {
                         let finalPrice = item.price;
+                        // Apply Library discount to individual item for display if needed, 
+                        // BUT logic usually applies it to final total or unit price. 
+                        // Let's apply to unit price here for visual consistency.
+                        if(libDiscount > 0) {
+                             finalPrice = finalPrice - (finalPrice * libDiscount);
+                        }
+
                         let isWholesale = false;
                         if(item.bulkQty && item.qty >= item.bulkQty) {
-                            finalPrice = item.bulkPrice;
+                            finalPrice = item.bulkPrice || finalPrice; // Bulk price typically overrides lib discount or is net
                             isWholesale = true;
                         }
                         const rowTotal = finalPrice * item.qty;
@@ -1651,6 +1794,7 @@
                     }).join('');
                 }
                 
+                // Free delivery logic check
                 if (this.state.cart.length > 0 && selectedCity) {
                     if(totalBooks >= freeLimit) {
                         deliveryFee = 0;
