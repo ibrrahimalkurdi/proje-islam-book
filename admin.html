@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin V5 - Ultimate Control</title>
+    <title>ISLAMBOOK - ADMIN SYSTEM V9.1 (UPDATED)</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <!-- FONTS & ICONS -->
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <!-- FIREBASE SDK -->
@@ -13,897 +14,960 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <style>
+        /* === GLOBAL VARIABLES === */
         :root {
-            --bg-dark: #0f172a;
-            --panel-dark: #1e293b;
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --bg-input: #0f172a;
             --primary: #3b82f6;
+            --secondary: #64748b;
             --accent: #f59e0b;
             --danger: #ef4444;
             --success: #10b981;
             --text-main: #f8fafc;
-            --text-muted: #94a3b8;
+            --text-sub: #94a3b8;
             --border: #334155;
-            --header-h: 70px;
+            --nav-height: 70px;
+            --radius: 12px;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Vazirmatn', sans-serif; outline: none; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg-dark); color: var(--text-main); height: 100vh; overflow-x: hidden; }
+        /* === RESET & BASE === */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Vazirmatn', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
+        body { background: var(--bg-body); color: var(--text-main); height: 100vh; overflow-x: hidden; padding-bottom: 90px; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-body); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
 
-        /* HEADER */
-        .top-bar { position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: var(--panel-dark); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 1000; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
-        .menu-btn { font-size: 1.5rem; cursor: pointer; padding: 10px; }
-        .admin-title { font-weight: 900; font-size: 1.2rem; color: var(--primary); letter-spacing: 1px; }
+        /* === HEADER === */
+        .header {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(12px);
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+        .header-title { font-size: 1.3rem; font-weight: 900; color: var(--primary); letter-spacing: 1px; }
+        .status-badge { display:flex; align-items:center; gap:8px; font-size:0.8rem; background:rgba(16, 185, 129, 0.1); color:var(--success); padding:5px 10px; border-radius:20px; border:1px solid rgba(16, 185, 129, 0.3); }
+        .live-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; animation: pulse 1.5s infinite; }
 
-        /* SIDEBAR */
-        .sidebar { position: fixed; top: 0; right: -280px; width: 280px; height: 100%; background: var(--panel-dark); z-index: 2000; box-shadow: -5px 0 30px rgba(0,0,0,0.5); transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; }
-        .sidebar.active { right: 0; }
-        .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        .menu { flex: 1; overflow-y: auto; padding: 20px 10px; }
-        .menu-item { padding: 15px; margin-bottom: 5px; border-radius: 12px; cursor: pointer; color: var(--text-muted); display: flex; align-items: center; gap: 15px; font-weight: 600; transition: 0.2s; }
-        .menu-item.active { background: var(--primary); color: white; }
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1500; display: none; backdrop-filter: blur(3px); }
-        .overlay.active { display: block; }
+        /* === NAVIGATION === */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: var(--nav-height);
+            background: var(--bg-card); border-top: 1px solid var(--border);
+            display: flex; justify-content: space-around; align-items: center;
+            z-index: 1000; padding-bottom: 5px; box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: var(--text-sub); font-size: 0.75rem; gap: 5px; cursor: pointer; flex: 1; height: 100%;
+            transition: all 0.2s ease;
+        }
+        .nav-item i { font-size: 1.4rem; transition: 0.2s; }
+        .nav-item.active { color: var(--primary); }
+        .nav-item.active i { transform: translateY(-3px); }
 
-        /* CONTENT */
-        .content { padding: calc(var(--header-h) + 20px) 20px 100px 20px; }
-        .section { display: none; animation: fadeIn 0.3s; }
+        /* === SECTIONS === */
+        .section { display: none; padding: 20px; max-width: 900px; margin: 0 auto; animation: fadeIn 0.4s ease; }
         .section.active { display: block; }
 
-        /* COMPONENTS */
-        .card { background: var(--panel-dark); padding: 20px; border-radius: 15px; border: 1px solid var(--border); margin-bottom: 20px; }
+        /* === CARDS & LAYOUT === */
+        .card { background: var(--bg-card); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; border: 1px solid var(--border); position: relative; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
-        
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 0.85rem; }
-        .input { width: 100%; padding: 12px; background: var(--bg-dark); border: 1px solid var(--border); border-radius: 10px; color: white; }
-        .input:focus { border-color: var(--primary); }
-        
-        .btn { padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; color: white; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+        /* === TYPOGRAPHY === */
+        h2, h3, h4 { margin-bottom: 15px; color: var(--text-main); }
+        .text-muted { color: var(--text-sub); font-size: 0.85rem; }
+        .text-success { color: var(--success); }
+        .text-danger { color: var(--danger); }
+        .text-accent { color: var(--accent); }
+
+        /* === FORMS & INPUTS === */
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; margin-bottom: 8px; color: var(--text-sub); font-size: 0.9rem; }
+        .input {
+            width: 100%; padding: 14px; background: var(--bg-input); border: 1px solid var(--border);
+            border-radius: 10px; color: white; font-size: 1rem; transition: 0.3s;
+        }
+        .input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+        textarea.input { resize: vertical; min-height: 100px; }
+
+        /* === BUTTONS === */
+        .btn {
+            width: 100%; padding: 14px; border-radius: 10px; border: none; font-weight: 700;
+            font-size: 1rem; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px;
+            color: white; transition: 0.2s; position: relative; overflow: hidden;
+        }
+        .btn:active { transform: scale(0.98); }
         .btn-primary { background: var(--primary); }
         .btn-success { background: var(--success); }
         .btn-danger { background: var(--danger); }
-        .btn-warning { background: var(--accent); color: black; }
-        .btn-info { background: #6366f1; }
-        .btn-sm { width: auto; padding: 5px 15px; font-size: 0.9rem; }
+        .btn-warning { background: var(--accent); color: #000; }
+        .btn-sm { width: auto; padding: 6px 15px; font-size: 0.85rem; border-radius: 8px; }
 
-        /* TABLES */
-        .table-responsive { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        th, td { padding: 15px; text-align: right; border-bottom: 1px solid var(--border); }
-        th { color: var(--text-muted); }
+        /* === LIST ITEMS === */
+        .list-item {
+            display: flex; align-items: center; justify-content: space-between; gap: 15px;
+            background: var(--bg-card); padding: 15px; border-radius: 12px; border: 1px solid var(--border);
+            margin-bottom: 10px; cursor: pointer; transition: 0.2s;
+        }
+        .list-item:active { background: #2d3e54; }
+        .list-img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; background: #333; }
+        .list-info { flex: 1; }
+        .list-info h4 { margin: 0 0 5px 0; font-size: 1rem; }
+        .list-info p { margin: 0; font-size: 0.85rem; color: var(--text-sub); }
 
-        /* MODAL */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 20px; }
-        .modal-box { background: var(--panel-dark); width: 100%; max-width: 650px; padding: 25px; border-radius: 20px; position: relative; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); }
+        /* === BADGES === */
+        .badge { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; }
+        .bg-wait { background: rgba(245, 158, 11, 0.15); color: var(--accent); border: 1px solid var(--accent); }
+        .bg-ok { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid var(--success); }
+
+        /* === MODALS === */
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 2000; display: none;
+            justify-content: center; align-items: center; padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+        .modal-box {
+            background: var(--bg-card); width: 100%; max-width: 650px; max-height: 90vh;
+            border-radius: 20px; padding: 25px; overflow-y: auto; border: 1px solid var(--border);
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* === SPECIAL ELEMENTS === */
+        .verify-box {
+            background: rgba(16, 185, 129, 0.1); border: 2px dashed var(--success);
+            padding: 15px; border-radius: 12px; text-align: center; margin: 20px 0;
+        }
+        .verify-code { font-size: 2rem; font-weight: 900; letter-spacing: 5px; color: var(--success); font-family: monospace; }
         
-        .city-tag, .point-rule-tag { background: var(--bg-dark); border: 1px solid var(--border); padding: 5px 10px; border-radius: 15px; display: inline-flex; align-items: center; gap: 10px; margin: 3px; font-size: 0.9rem; }
-        
-        /* ORDER DETAILS SPECIFIC CSS */
-        .order-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 10px; }
-        .info-row { display: flex; align-items: center; gap: 10px; color: var(--text-muted); font-size: 0.9rem; }
-        .info-row b { color: var(--text-main); }
-        .verify-code-display { text-align: center; background: rgba(16, 185, 129, 0.1); border: 2px dashed var(--success); padding: 15px; border-radius: 10px; margin: 20px 0; }
-        .verify-code-val { font-size: 2.5rem; font-weight: 900; letter-spacing: 8px; color: var(--success); font-family: monospace; }
-        .receipt-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed var(--border); }
+        .toast {
+            position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+            background: var(--success); color: white; padding: 12px 25px; border-radius: 50px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 3000; display: none;
+            align-items: center; gap: 10px; font-weight: bold; animation: popIn 0.3s;
+        }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* === TAB SYSTEM === */
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; overflow-x: auto; }
+        .tab { padding: 8px 15px; cursor: pointer; color: var(--text-sub); border-radius: 8px; font-weight: 600; white-space: nowrap; }
+        .tab.active { background: var(--primary); color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s; }
+
+        @keyframes pulse { 0% { opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { opacity: 1; box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); } 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes popIn { from { transform: translate(-50%, 20px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+
     </style>
 </head>
 <body>
 
-    <!-- TOP BAR -->
-    <div class="top-bar">
-        <div class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></div>
-        <div class="admin-title">ADMIN V5 <i class="fas fa-shield-alt"></i></div>
-        <div></div>
-    </div>
-    <div class="overlay" onclick="toggleMenu()"></div>
+    <!-- NOTIFICATION SOUND -->
+    <audio id="notif-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
-    <!-- SIDEBAR -->
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <span>لیستا سەرەکی</span>
-            <i class="fas fa-times" onclick="toggleMenu()" style="cursor:pointer; color:var(--danger);"></i>
-        </div>
-        <div class="menu">
-            <div class="menu-item active" onclick="nav('dashboard', this)"><i class="fas fa-home"></i> سەرەکی</div>
-            <div class="menu-item" onclick="nav('users', this)"><i class="fas fa-users-cog"></i> بکارئینەر (Full Control)</div>
-            <div class="menu-item" onclick="nav('books', this)"><i class="fas fa-book"></i> پەرتووک (دەستکاری)</div>
-            <div class="menu-item" onclick="nav('libraries', this)"><i class="fas fa-building"></i> پەرتووکخانە</div>
-            <div class="menu-item" onclick="nav('marketing', this)"><i class="fas fa-tags"></i> مارکێتینگ & خاڵ</div>
-            <div class="menu-item" onclick="nav('settings', this)"><i class="fas fa-map-marker-alt"></i> باژێڕ & ڕێکخستن</div>
+    <!-- TOAST ALERT -->
+    <div id="toast" class="toast">
+        <i class="fas fa-check-circle"></i> <span id="toast-msg">سەرکەوتوو بوو</span>
+    </div>
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-title">ISLAMBOOK <span style="font-size:0.8rem; opacity:0.7;">ADMIN V9.1</span></div>
+        <div class="status-badge">
+            <div class="live-dot"></div>
+            <span>Online</span>
         </div>
     </div>
 
-    <!-- CONTENT -->
-    <div class="content">
-
-        <!-- 1. DASHBOARD -->
-        <div id="dashboard" class="section active">
-            <h2 style="margin-bottom:20px;">داشبۆرد</h2>
-            <div class="grid-4">
-                <div class="card" style="text-align:center;">
-                    <i class="fas fa-wallet fa-2x" style="color:var(--success); margin-bottom:10px;"></i>
-                    <h2 id="d-revenue">0</h2>
-                    <small>داهات (IQD)</small>
-                </div>
-                <div class="card" style="text-align:center;">
-                    <i class="fas fa-shopping-cart fa-2x" style="color:var(--accent); margin-bottom:10px;"></i>
-                    <h2 id="d-orders">0</h2>
-                    <small>داواکاری</small>
-                </div>
-                <div class="card" style="text-align:center;">
-                    <i class="fas fa-book fa-2x" style="color:var(--primary); margin-bottom:10px;"></i>
-                    <h2 id="d-books">0</h2>
-                    <small>پەرتووک</small>
-                </div>
-                <div class="card" style="text-align:center;">
-                    <i class="fas fa-users fa-2x" style="color:var(--danger); margin-bottom:10px;"></i>
-                    <h2 id="d-users">0</h2>
-                    <small>بکارئینەر</small>
-                </div>
+    <!-- 1. DASHBOARD -->
+    <div id="dashboard" class="section active">
+        <h2 style="margin-bottom:20px;">داتایێن گشتی</h2>
+        
+        <div class="grid-2">
+            <div class="card" style="text-align:center; border-color:var(--success);">
+                <i class="fas fa-wallet fa-2x" style="color:var(--success); margin-bottom:10px;"></i>
+                <h2 id="d-revenue">0</h2>
+                <small class="text-muted">داهاتێ گشتی (IQD)</small>
             </div>
-            
-            <div class="card">
-                <h3>داواکاریێن داویێ</h3>
-                <div class="table-responsive">
-                    <table id="dash-orders-table"></table>
-                </div>
+            <div class="card" style="text-align:center; border-color:var(--primary);">
+                <i class="fas fa-shopping-bag fa-2x" style="color:var(--primary); margin-bottom:10px;"></i>
+                <h2 id="d-orders-count">0</h2>
+                <small class="text-muted">ژمارا داواکاریان</small>
+            </div>
+        </div>
+        
+        <div class="grid-2">
+             <div class="card" style="text-align:center;">
+                <h3 id="d-users-count">0</h3>
+                <small>بکارئینەر</small>
+            </div>
+            <div class="card" style="text-align:center;">
+                <h3 id="d-books-count">0</h3>
+                <small>پەرتووک</small>
             </div>
         </div>
 
-        <!-- 2. USERS (FULL DETAILS) -->
-        <div id="users" class="section">
-            <h2 style="margin-bottom:15px;">کۆنترۆڵا بکارئینەران (Advanced)</h2>
-            <input type="text" class="input" placeholder="لێگەریان (مۆبایل یان ناڤ)..." oninput="admin.searchUser(this.value)" style="margin-bottom:20px;">
-            <div class="table-responsive card">
-                <table id="users-table"></table>
-            </div>
+        <div style="display:flex; gap:10px; margin-bottom:15px; overflow-x:auto; padding-bottom:5px;">
+            <button class="btn btn-sm btn-primary" onclick="admin.filterOrders('all')">هەموو</button>
+            <button class="btn btn-sm btn-warning" onclick="admin.filterOrders('pending')">نەگەهشتی</button>
+            <button class="btn btn-sm btn-success" onclick="admin.filterOrders('completed')">تەمام</button>
         </div>
 
-        <!-- 3. BOOKS (FULL EDIT) -->
-        <div id="books" class="section">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h2>پەرتووکەکان</h2>
-                <button class="btn btn-primary btn-sm" onclick="admin.openBookModal()">+ زێدەکرن</button>
-            </div>
-            <input type="text" class="input" placeholder="لێگەریان..." oninput="admin.searchBook(this.value)" style="margin-bottom:15px;">
-            <div class="table-responsive card">
-                <table id="books-table"></table>
-            </div>
+        <h3 class="text-muted">داواکاریێن نوێ</h3>
+        <div id="orders-list">
+            <div style="text-align:center; padding:20px; color:var(--text-sub);">Loading...</div>
         </div>
-
-        <!-- 4. LIBRARIES -->
-        <div id="libraries" class="section">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h2>پەرتووکخانەکان</h2>
-                <button class="btn btn-success btn-sm" onclick="admin.openLibModal()">+ زێدەکرن</button>
-            </div>
-            <div id="lib-list" style="display:grid; gap:15px;"></div>
-        </div>
-
-        <!-- 5. MARKETING (POINTS RULES & NOTIFICATIONS) -->
-        <div id="marketing" class="section">
-            <h2>مارکێتینگ & داشکاندن</h2>
-            
-            <!-- Dynamic Points System -->
-            <div class="card" style="margin-top:20px;">
-                <h3 style="margin-bottom:15px; color:var(--accent);">⭐ ڕێکخستنا خاڵان (Dynamic)</h3>
-                <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:10px;">لێرە یاسایێن خاڵان دانێ (چەند خاڵ دبنە چەند داشکاندن):</p>
-                <div id="points-rules-container" style="margin-bottom:15px; display:flex; flex-wrap:wrap;">
-                    <!-- JS Fills this -->
-                </div>
-                <div class="grid-2">
-                    <input type="number" id="new-rule-pts" class="input" placeholder="خاڵ (مەسەلەن: 100)">
-                    <input type="number" id="new-rule-disc" class="input" placeholder="داشکاندن (0.05 واتە 5%)">
-                </div>
-                <button class="btn btn-warning" onclick="admin.addPointRule()" style="margin-top:10px;">زێدەکرنا یاسایێ</button>
-            </div>
-
-            <!-- Targeted Notification -->
-            <div class="card">
-                <h3>🔔 هنارتنا ئاگەهداری</h3>
-                <div class="form-group">
-                    <label>جۆرێ هنارتنێ</label>
-                    <select id="notif-type" class="input" onchange="toggleNotifInput()">
-                        <option value="all">بۆ هەمیان (All Users)</option>
-                        <option value="single">بۆ کەسەکێ تایبەت (Single)</option>
-                        <option value="limit">بۆ (X) کەسێن چالاک</option>
-                    </select>
-                </div>
-                
-                <!-- Hidden inputs based on selection -->
-                <div class="form-group" id="target-single-div" style="display:none;">
-                    <label>ژمارا مۆبایلا کەسی</label>
-                    <input type="text" id="notif-single-phone" class="input" placeholder="07xxxxxxxxx">
-                </div>
-                <div class="form-group" id="target-limit-div" style="display:none;">
-                    <label>ژمارا کەسان</label>
-                    <input type="number" id="notif-count" class="input" placeholder="50">
-                </div>
-
-                <div class="form-group">
-                    <label>پەیام</label>
-                    <textarea id="notif-msg" class="input" rows="3" placeholder="ناڤەرۆکا ئاگەهداریێ..."></textarea>
-                </div>
-                <button class="btn btn-primary" onclick="admin.sendNotif()"><i class="fas fa-paper-plane"></i> هنارتن</button>
-            </div>
-            
-            <div class="card">
-                <h3>🎟️ کۆدێن داشکاندنێ</h3>
-                <div class="grid-2">
-                    <input type="text" id="coupon-code" class="input" placeholder="کۆد (RAMAZAN)">
-                    <input type="number" id="coupon-val" class="input" placeholder="ڕێژە (0.10)">
-                </div>
-                <button class="btn btn-success" onclick="admin.addCoupon()">زێدەکرن</button>
-            </div>
-        </div>
-
-        <!-- 6. SETTINGS (CITIES) -->
-        <div id="settings" class="section">
-            <h2>بەڕێوەبرنا باژێڕان (Locations)</h2>
-            <div class="card">
-                <div style="display:flex; gap:10px; margin-bottom:15px;">
-                    <input type="text" id="new-city" class="input" placeholder="ناڤێ باژێڕێ نوی">
-                    <button class="btn btn-success btn-sm" onclick="admin.addCity()">زێدەکرن</button>
-                </div>
-                <div id="cities-container" style="display:flex; flex-wrap:wrap;"></div>
-            </div>
-        </div>
-
     </div>
 
-    <!-- === MODALS === -->
+    <!-- 2. BOOKS (FULL) -->
+    <div id="books" class="section">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h2>پەرتووکخانە</h2>
+            <button class="btn btn-primary btn-sm" onclick="admin.openBookModal()">
+                <i class="fas fa-plus"></i> زێدەکرن
+            </button>
+        </div>
+        
+        <input type="text" class="input" placeholder="لێگەریان (ناڤ، نڤیسەر)..." oninput="admin.searchBook(this.value)" style="margin-bottom:20px;">
+        
+        <div id="books-list"></div>
+    </div>
 
-    <!-- 1. ORDER DETAILS MODAL (ADDED NEW) -->
+    <!-- 3. USERS (FULL) -->
+    <div id="users" class="section">
+        <h2>بکارئینەر & کۆنترۆڵ</h2>
+        <input type="text" class="input" placeholder="لێگەریان (مۆبایل، ناڤ)..." oninput="admin.searchUser(this.value)" style="margin-bottom:20px;">
+        <div id="users-list"></div>
+    </div>
+
+    <!-- 4. LIBRARIES (EDITABLE) -->
+    <div id="libraries" class="section">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h2>پەرتووکخانە & گەهاندن</h2>
+            <button class="btn btn-success btn-sm" onclick="admin.openLibModal()">
+                <i class="fas fa-plus"></i> زێدەکرن
+            </button>
+        </div>
+        <div id="libs-list"></div>
+    </div>
+
+    <!-- 5. SETTINGS & MARKETING -->
+    <div id="settings" class="section">
+        <h2>ڕێکخستن & مارکێتینگ</h2>
+        
+        <!-- Points System -->
+        <div class="card">
+            <h4><i class="fas fa-star text-warning"></i> سیستەمێ خاڵان (Points)</h4>
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <input type="number" id="p-points" class="input" placeholder="خاڵ (1000)">
+                <input type="number" id="p-discount" class="input" placeholder="داشکاندن (0.05 بۆ 5%)">
+                <button class="btn btn-warning btn-sm" onclick="admin.addPointRule()">+</button>
+            </div>
+            <div id="points-list" style="margin-bottom:10px;"></div>
+        </div>
+
+        <!-- Cities -->
+        <div class="card">
+            <h4><i class="fas fa-map-marker-alt text-accent"></i> باژێڕەکان (Locations)</h4>
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <input type="text" id="new-city" class="input" placeholder="ناڤێ باژێڕی">
+                <button class="btn btn-success btn-sm" onclick="admin.addCity()">+</button>
+            </div>
+            <div id="cities-list" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+        </div>
+
+        <!-- Notification -->
+        <div class="card">
+            <h4><i class="fas fa-bell text-primary"></i> ئاگەهداری (Push Notification)</h4>
+            <div class="input-group">
+                <select id="notif-type" class="input" onchange="toggleNotifTarget()">
+                    <option value="all">بۆ هەمیان (All)</option>
+                    <option value="single">بۆ کەسەکێ (Specific User)</option>
+                </select>
+            </div>
+            <input type="text" id="notif-target" class="input" placeholder="ژمارا مۆبایلێ..." style="display:none; margin-bottom:15px;">
+            <textarea id="notif-msg" class="input" placeholder="پەیام بنڤیسە..." style="min-height:80px;"></textarea>
+            <button class="btn btn-primary" onclick="admin.sendNotif()" style="margin-top:10px;">هنارتن</button>
+        </div>
+
+        <!-- Coupons -->
+        <div class="card">
+            <h4><i class="fas fa-ticket-alt text-success"></i> کۆدێن داشکاندنێ</h4>
+            <div class="grid-2">
+                <input type="text" id="cp-code" class="input" placeholder="CODE (RAMAZAN)">
+                <input type="number" id="cp-val" class="input" placeholder="ڕێژە (0.10)">
+            </div>
+            <button class="btn btn-warning" onclick="admin.addCoupon()" style="margin-top:10px;">زێدەکرن</button>
+            <div id="coupons-list" style="margin-top:15px;"></div>
+        </div>
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="nav('dashboard', this)">
+            <i class="fas fa-home"></i> <span>سەرەکی</span>
+        </div>
+        <div class="nav-item" onclick="nav('books', this)">
+            <i class="fas fa-book"></i> <span>پەرتووک</span>
+        </div>
+        <div class="nav-item" onclick="nav('libraries', this)">
+            <i class="fas fa-building"></i> <span>کتێبخانە</span>
+        </div>
+        <div class="nav-item" onclick="nav('users', this)">
+            <i class="fas fa-users"></i> <span>بکارئینەر</span>
+        </div>
+        <div class="nav-item" onclick="nav('settings', this)">
+            <i class="fas fa-cog"></i> <span>زیاتر</span>
+        </div>
+    </div>
+
+    <!-- ================= MODALS ================= -->
+
+    <!-- 1. ORDER DETAILS -->
     <div id="order-modal" class="modal">
         <div class="modal-box">
-            <div style="display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid var(--border); padding-bottom:10px;">
-                <h3>وردەکاریێن داواکاریێ <span id="vo-id" style="color:var(--primary);">#ID</span></h3>
-                <i class="fas fa-times" onclick="closeModal('order-modal')" style="cursor:pointer; font-size:1.2rem; color:var(--danger);"></i>
-            </div>
-
-            <div class="verify-code-display">
-                <div style="margin-bottom:5px; color:var(--success);">کۆدێ وەرگرتنێ (Verification Code)</div>
-                <div class="verify-code-val" id="vo-code">----</div>
-            </div>
-
-            <div class="order-info-grid">
-                <div class="info-row"><i class="fas fa-user"></i> <b id="vo-name">Name</b></div>
-                <div class="info-row"><i class="fas fa-phone"></i> <b id="vo-phone">07xxxx</b></div>
-                <div class="info-row"><i class="fas fa-map-marker-alt"></i> <span id="vo-address">Address</span></div>
-                <div class="info-row"><i class="fas fa-city"></i> <span id="vo-city">City</span></div>
-            </div>
-
-            <h4 style="margin-bottom:10px; color:var(--text-muted);">لیستا پەرتووکان</h4>
-            <div id="vo-items" style="max-height:200px; overflow-y:auto; margin-bottom:15px;"></div>
-
-            <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:10px;">
-                <div style="display:flex; justify-content:space-between;"><span>گەهاندن:</span> <span id="vo-delivery">0</span></div>
-                <div style="display:flex; justify-content:space-between; color:var(--danger);"><span>داشکاندن:</span> <span id="vo-discount">0</span></div>
-                <div style="display:flex; justify-content:space-between; font-size:1.3rem; font-weight:900; color:var(--success); margin-top:10px; border-top:1px dashed var(--border); padding-top:10px;">
-                    <span>کۆی گشتی:</span> <span id="vo-total">0 IQD</span>
-                </div>
-            </div>
-
-            <div style="margin-top:25px; display:flex; gap:10px;">
-                <button class="btn btn-success" style="flex:1;" onclick="admin.updateOrderStatus('approved')">✅ قەبوڵکرن</button>
-                <button class="btn btn-info" style="flex:1;" onclick="admin.updateOrderStatus('delivered')">🚚 گەهاندن (تەمام)</button>
-                <button class="btn btn-danger" style="flex:1;" onclick="admin.deleteCurrentOrder()">🗑️ ژێبرن</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 2. USER DETAILS MODAL -->
-    <div id="user-details-modal" class="modal">
-        <div class="modal-box" style="width:100%; max-width:700px;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
-                <h3>پڕۆفایل & کۆنترۆڵ</h3>
-                <i class="fas fa-times" onclick="closeModal('user-details-modal')" style="cursor:pointer;"></i>
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                <h3 id="om-title">Order #123</h3>
+                <i class="fas fa-times" onclick="closeModal('order-modal')" style="font-size:1.5rem; cursor:pointer;"></i>
             </div>
             
+            <div class="verify-box">
+                <div style="margin-bottom:5px; opacity:0.8;">کۆدێ وەرگرتنێ</div>
+                <div class="verify-code" id="om-code">----</div>
+            </div>
+
+            <div class="card" style="background:rgba(255,255,255,0.03);">
+                <div id="om-user-info"></div>
+            </div>
+
+            <h4 class="text-muted">لیستا پەرتووکان</h4>
+            <div id="om-items" style="max-height:200px; overflow-y:auto; margin-bottom:20px;"></div>
+
+            <div class="card" style="border:1px dashed var(--border);">
+                <div style="display:flex; justify-content:space-between;"><span>گەهاندن:</span> <span id="om-delivery">0</span></div>
+                <div style="display:flex; justify-content:space-between; font-size:1.2rem; font-weight:bold; margin-top:10px; color:var(--success);">
+                    <span>کۆی گشتی:</span> <span id="om-total">0</span>
+                </div>
+            </div>
+
             <div class="grid-2">
-                <!-- Editable Profile -->
-                <div class="card">
-                    <h4 style="margin-bottom:10px; color:var(--primary);">زانیاریێن کەسی (دەستکاری)</h4>
-                    <div class="form-group"><label>ناڤ</label><input type="text" id="ud-name-edit" class="input"></div>
-                    <div class="form-group"><label>مۆبایل</label><input type="text" id="ud-phone-edit" class="input"></div>
-                    <div class="form-group"><label>باژێڕ</label><input type="text" id="ud-city-edit" class="input"></div>
-                    <div class="form-group"><label>ناڤنیشان</label><input type="text" id="ud-address-edit" class="input"></div>
-                    
-                    <div class="grid-2">
-                        <button class="btn btn-warning btn-sm" onclick="admin.saveUserEdits()">نوێکرن</button>
-                        <button class="btn btn-danger btn-sm" onclick="admin.deleteUser()">ژێبرنا ئەکاونتی</button>
-                    </div>
-                </div>
-
-                <!-- Points Control -->
-                <div class="card" style="text-align:center;">
-                    <h1 id="ud-points" style="color:var(--accent);">0</h1>
-                    <small>خاڵێن ماین</small>
-                    <div style="display:flex; gap:5px; margin-top:10px;">
-                        <input type="number" id="ud-mod-points" class="input" style="padding:5px;" placeholder="250">
-                        <button class="btn btn-success btn-sm" onclick="admin.modUserPoints('add')">+</button>
-                        <button class="btn btn-danger btn-sm" onclick="admin.modUserPoints('sub')">-</button>
-                    </div>
-                </div>
+                <button class="btn btn-success" onclick="admin.orderAction('approved')"><i class="fas fa-check"></i> قەبوڵکرن</button>
+                <button class="btn btn-primary" onclick="admin.orderAction('delivered')"><i class="fas fa-truck"></i> گەهاندن</button>
             </div>
-
-            <h4 style="margin:15px 0;">مێژوویا داواکاریان & کۆی گشتی</h4>
-            <div style="margin-bottom:10px; font-weight:bold; color:var(--success);">
-                کۆی گشتی کڕینێ: <span id="ud-total-spent">0</span> IQD
-            </div>
-            <div class="table-responsive card">
-                <table id="ud-orders-table"></table>
-            </div>
+            <button class="btn btn-danger" onclick="admin.orderAction('delete')" style="margin-top:10px;"><i class="fas fa-trash"></i> ژێبرن</button>
         </div>
     </div>
 
-    <!-- 3. BOOK MODAL -->
+    <!-- 2. BOOK MODAL (UPDATED WITH PREVIEW & CATEGORY) -->
     <div id="book-modal" class="modal">
         <div class="modal-box">
-            <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-                <h3><i class="fas fa-book"></i> زێدەکرن / دەستکاری</h3>
-                <i class="fas fa-times" onclick="closeModal('book-modal')" style="cursor:pointer; color:var(--danger);"></i>
-            </div>
+            <h3>زێدەکرن / دەستکاری</h3>
             <input type="hidden" id="b-id">
-            
-            <div class="form-group"><label>ناڤێ پەرتووکێ</label><input type="text" id="b-title" class="input"></div>
-            <div class="grid-2">
-                <div class="form-group"><label>نڤیسەر</label><input type="text" id="b-author" class="input"></div>
-                <div class="form-group"><label>پەرتووکخانە</label><select id="b-lib" class="input"></select></div>
-            </div>
-            
-            <div class="grid-2">
-                <div class="form-group"><label>نرخ (تاک)</label><input type="number" id="b-price" class="input"></div>
-                <div class="form-group"><label>نرخ (ئەسڵی - بۆ داشکاندن)</label><input type="number" id="b-orig-price" class="input" placeholder="ئەگەر داشکاندن هەبیت"></div>
+
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab(this, 'tab-basic')">سەرەتایی</div>
+                <div class="tab" onclick="switchTab(this, 'tab-details')">وردەکاری</div>
+                <div class="tab" onclick="switchTab(this, 'tab-media')">وێنە & چاڤخشاندن</div>
+                <div class="tab" onclick="switchTab(this, 'tab-bulk')">جوملە</div>
             </div>
 
-            <div class="card" style="padding:10px; border:1px dashed var(--accent);">
-                <label style="color:var(--accent);">جوملە (Wholesale)</label>
+            <!-- TAB 1: BASIC -->
+            <div id="tab-basic" class="tab-content active">
+                <div class="input-group"><label>ناڤێ پەرتووکێ</label><input type="text" id="b-title" class="input"></div>
+                <div class="input-group">
+                    <label>جۆر (Category)</label>
+                    <select id="b-cat" class="input">
+                        <option value="General">گشتی</option>
+                        <option value="قورئان">قورئان</option>
+                        <option value="عەقیدە">عەقیدە</option>
+                        <option value="فەرموودە">فەرموودە</option>
+                        <option value="مێژوو">مێژوو</option>
+                        <option value="فقهـ">فقهـ</option>
+                        <option value="زمان">زمان</option>
+                    </select>
+                </div>
                 <div class="grid-2">
-                    <div class="input-group"><label>ژمارە (Qty)</label><input type="number" id="b-bulk-qty" class="input" placeholder="10"></div>
-                    <div class="input-group"><label>نرخێ کۆم (Price)</label><input type="number" id="b-bulk-price" class="input" placeholder="4000"></div>
+                    <div class="input-group"><label>نرخ (تاک)</label><input type="number" id="b-price" class="input"></div>
+                    <div class="input-group"><label>نرخێ ئەسڵی (بۆ داشکاندن)</label><input type="number" id="b-orig" class="input"></div>
+                </div>
+                <div class="input-group"><label>پەرتووکخانە</label><select id="b-lib-sel" class="input"></select></div>
+            </div>
+
+            <!-- TAB 2: DETAILS -->
+            <div id="tab-details" class="tab-content">
+                <div class="grid-2">
+                    <div class="input-group"><label>نڤیسەر</label><input type="text" id="b-auth" class="input"></div>
+                    <div class="input-group"><label>لاپەڕ</label><input type="text" id="b-pages" class="input"></div>
+                    <div class="input-group"><label>بەرگ (Volumes)</label><input type="text" id="b-vol" class="input"></div>
+                    <div class="input-group"><label>جۆرێ کاغەزێ</label><input type="text" id="b-paper" class="input"></div>
+                    <div class="input-group"><label>تەحقیق</label><input type="text" id="b-tahqiq" class="input"></div>
+                </div>
+                <div class="input-group"><label>پوختە</label><textarea id="b-desc" class="input"></textarea></div>
+            </div>
+
+            <!-- TAB 3: MEDIA (NEW PREVIEW) -->
+            <div id="tab-media" class="tab-content">
+                <div class="input-group"><label>وێنە سەرەکی (URL)</label><input type="text" id="b-img" class="input"></div>
+                <div class="input-group">
+                    <label>وێنێن چاڤخشاندنێ (هەر لینکەک د دێڕەکێ دا)</label>
+                    <textarea id="b-preview" class="input" placeholder="https://example.com/page1.jpg&#10;https://example.com/page2.jpg"></textarea>
                 </div>
             </div>
 
-            <div class="grid-2">
-                <div class="form-group"><label>لاپەڕ</label><input type="text" id="b-pages" class="input"></div>
-                <div class="form-group"><label>تەحقیق</label><input type="text" id="b-tahqiq" class="input"></div>
-                <div class="form-group"><label>بەرگ (Vol)</label><input type="text" id="b-volumes" class="input"></div>
-                <div class="form-group"><label>کاغەز</label><input type="text" id="b-paper" class="input"></div>
+            <!-- TAB 4: BULK -->
+            <div id="tab-bulk" class="tab-content">
+                <div class="card" style="border:1px dashed var(--accent);">
+                    <h4 class="text-accent">فرۆشتنا جوملە</h4>
+                    <div class="grid-2">
+                        <div class="input-group"><label>ژمارە (Qty)</label><input type="number" id="b-qty" class="input" placeholder="10"></div>
+                        <div class="input-group"><label>نرخێ دانەکێ (Price/Unit)</label><input type="number" id="b-bulk-price" class="input" placeholder="4000"></div>
+                    </div>
+                </div>
             </div>
 
-            <div class="form-group"><label>پوختە</label><textarea id="b-desc" class="input" rows="3"></textarea></div>
-            <div class="form-group"><label>وێنێ سەرەکی (URL)</label><input type="text" id="b-img" class="input"></div>
-            <div class="form-group"><label>وێنێن چاڤخشاندنێ (URLs - هەر هێڵەک وێنەیەک)</label><textarea id="b-preview-imgs" class="input" rows="3"></textarea></div>
-
-            <button class="btn btn-primary" onclick="admin.saveBook()">پاشەکەوتکرن</button>
+            <div style="margin-top:20px;">
+                <button class="btn btn-primary" onclick="admin.saveBook()">پاشەکەوتکرن</button>
+                <button class="btn btn-danger" onclick="closeModal('book-modal')" style="margin-top:10px; background:transparent; border:1px solid var(--border);">داخستن</button>
+            </div>
         </div>
     </div>
 
-    <!-- 4. LIBRARY MODAL -->
-    <div id="lib-modal" class="modal">
+    <!-- 3. USER MODAL (FULL) -->
+    <div id="user-modal" class="modal">
         <div class="modal-box">
-            <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-                <h3><i class="fas fa-building"></i> پەرتووکخانە & گەهاندن</h3>
-                <i class="fas fa-times" onclick="closeModal('lib-modal')" style="cursor:pointer; color:var(--danger);"></i>
-            </div>
+            <h3>پڕۆفایلێ بکارئینەری</h3>
             
-            <div class="form-group"><label>ناڤ</label><input type="text" id="l-name" class="input"></div>
-            
-            <!-- City Dropdown -->
-            <div class="form-group">
-                <label>باژێڕ (Location)</label>
-                <select id="l-city" class="input"></select>
-            </div>
+            <div class="input-group"><label>ناڤ</label><input type="text" id="u-name" class="input"></div>
+            <div class="input-group"><label>مۆبایل</label><input type="text" id="u-phone" class="input"></div>
+            <div class="input-group"><label>ناڤنیشان</label><input type="text" id="u-address" class="input"></div>
 
-            <div class="form-group"><label>وێنە URL</label><input type="text" id="l-img" class="input"></div>
-            <div class="form-group"><label>داشکاندنا گشتی (%)</label><input type="number" id="l-discount" class="input" placeholder="0"></div>
+            <div class="verify-box">
+                <label class="text-success">🔐 ڕەقەم سری (Password)</label>
+                <input type="text" id="u-pass" class="input" style="text-align:center; font-weight:bold; letter-spacing:2px; font-size:1.2rem; margin-top:10px;">
+                <button class="btn btn-warning btn-sm" style="margin-top:10px; width:100%;" onclick="admin.updateUserPass()">نوێکرنا پاسوۆردی</button>
+            </div>
 
             <div class="card">
-                <label>نرخێ گەهاندنێ (دینار)</label>
-                <div class="grid-2">
-                    <div class="form-group"><label>گەهاندنا ناوخۆ (هەمان باژێڕ)</label><input type="number" id="l-local" class="input" placeholder="2000"></div>
-                    <div class="form-group"><label>گەهاندنا دەرەکی (باژێڕێن دی)</label><input type="number" id="l-foreign" class="input" placeholder="5000"></div>
+                <label>خاڵ (Points)</label>
+                <div style="display:flex; gap:10px;">
+                    <input type="number" id="u-points" class="input">
+                    <button class="btn btn-success btn-sm" onclick="admin.updateUserPoints()">Save</button>
                 </div>
-                <div class="form-group"><label>گەهاندنا بێ بەرامبەر (سەرووی..)</label><input type="number" id="l-free" class="input" placeholder="50000"></div>
             </div>
 
-            <button class="btn btn-success" onclick="admin.saveLib()">زێدەکرن / نوێکرن</button>
+            <h4 style="margin-top:15px;">مێژوویا کڕینێ</h4>
+            <div id="u-history" style="max-height:150px; overflow-y:auto; background:rgba(0,0,0,0.2); padding:10px; border-radius:10px; margin-bottom:15px;"></div>
+
+            <div class="grid-2">
+                <button class="btn btn-primary" onclick="admin.saveUserInfo()">نوێکرنا زانیاریان</button>
+                <button class="btn btn-danger" onclick="admin.deleteUser()">ژێبرنا ئەکاونتی</button>
+            </div>
+            <button class="btn" onclick="closeModal('user-modal')" style="margin-top:10px; background:var(--border);">داخستن</button>
+        </div>
+    </div>
+
+    <!-- 4. LIBRARY MODAL (EDIT & ADD & DISCOUNT) -->
+    <div id="lib-modal" class="modal">
+        <div class="modal-box">
+            <h3>پەرتووکخانە</h3>
+            <input type="hidden" id="l-id">
+            
+            <div class="input-group"><label>ناڤ</label><input type="text" id="l-name" class="input"></div>
+            
+            <div class="input-group">
+                <label>باژێڕ</label>
+                <select id="l-city-sel" class="input"></select>
+            </div>
+            
+            <div class="input-group"><label>وێنە URL</label><input type="text" id="l-img" class="input"></div>
+
+            <div class="card" style="border:1px dashed var(--danger);">
+                <h4 class="text-danger">داشکاندن (Global Discount)</h4>
+                <div class="input-group">
+                    <label>ڕێژە (نموونە: 0.10 بۆ 10%)</label>
+                    <input type="number" id="l-discount" class="input" placeholder="0.0">
+                </div>
+            </div>
+
+            <div class="card">
+                <h4>نرخێ گەهاندنێ</h4>
+                <div class="grid-2">
+                    <div class="input-group"><label>ناڤخۆ</label><input type="number" id="l-local" class="input"></div>
+                    <div class="input-group"><label>دەرەکی</label><input type="number" id="l-foreign" class="input"></div>
+                </div>
+                <div class="input-group"><label>گەهاندنا بێ بەرامبەر (Limit)</label><input type="number" id="l-free" class="input"></div>
+            </div>
+
+            <button class="btn btn-success" onclick="admin.saveLib()">پاشەکەوتکرن</button>
+            <button class="btn" onclick="closeModal('lib-modal')" style="margin-top:10px; background:var(--border);">داخستن</button>
         </div>
     </div>
 
     <script>
+        // === FIREBASE CONFIG ===
         const firebaseConfig = {
             apiKey: "AIzaSyB8-7RLi1UbixK8d-LGmH-K-SfR-GaMZ2E",
             authDomain: "projeislambook.firebaseapp.com",
             projectId: "projeislambook",
             storageBucket: "projeislambook.firebasestorage.app",
             messagingSenderId: "577300732966",
-            appId: "1:577300732966:web:df3000e0db45adf4e51ae7",
-            measurementId: "G-SJ97S3FWYE"
+            appId: "1:577300732966:web:df3000e0db45adf4e51ae7"
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // === UTILITIES ===
+        const $ = id => document.getElementById(id);
+        const nav = (id, el) => {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            $(id).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+        };
+        const closeModal = id => $(id).style.display = 'none';
+        const showToast = (msg) => {
+            $('toast-msg').innerText = msg;
+            $('toast').style.display = 'flex';
+            setTimeout(() => $('toast').style.display = 'none', 3000);
+        };
+        const switchTab = (el, tabId) => {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            $(tabId).classList.add('active');
+        };
+        const toggleNotifTarget = () => {
+            $('notif-target').style.display = $('notif-type').value === 'single' ? 'block' : 'none';
         };
 
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        const firestore = firebase.firestore();
-
-        // UI HELPERS
-        function toggleMenu() {
-            document.querySelector('.sidebar').classList.toggle('active');
-            document.querySelector('.overlay').classList.toggle('active');
-        }
-        function nav(id, btn) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
-            btn.classList.add('active');
-            toggleMenu();
-        }
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-        
-        function toggleNotifInput() {
-            const val = document.getElementById('notif-type').value;
-            document.getElementById('target-single-div').style.display = (val === 'single') ? 'block' : 'none';
-            document.getElementById('target-limit-div').style.display = (val === 'limit') ? 'block' : 'none';
-        }
-
-        // ADMIN LOGIC
-        let currentViewOrderId = null;
-
+        // === MAIN ADMIN LOGIC ===
         const admin = {
-            data: { orders: [], books: [], users: [], libs: [], cities: [], pointRules: [] },
-            selectedUserId: null,
+            data: { orders: [], books: [], users: [], libs: [], cities: [], coupons: [], points: [] },
+            selectedId: null,
 
             init() {
-                this.listen();
-                this.loadCities();
-                this.loadPointRules();
+                console.log("Admin V9.1 Starting...");
+                this.listenOrders();
+                this.listenBooks();
+                this.listenUsers();
+                this.listenLibs();
+                this.listenCities();
+                this.listenCoupons();
+                this.listenPoints();
             },
 
-            listen() {
-                // Orders
-                firestore.collection('orders').orderBy('id', 'desc').onSnapshot(snap => {
+            // --- ORDERS SYSTEM ---
+            listenOrders() {
+                db.collection('orders').orderBy('id', 'desc').onSnapshot(snap => {
+                    let isNew = false;
+                    snap.docChanges().forEach(change => { if(change.type === 'added') isNew = true; });
+                    if(isNew && this.data.orders.length > 0) $('notif-sound').play().catch(e => console.log('Sound blocked'));
+
                     this.data.orders = [];
                     let revenue = 0;
+                    
                     snap.forEach(doc => {
                         const o = { docId: doc.id, ...doc.data() };
                         this.data.orders.push(o);
-                        if(o.status === 'delivered') revenue += o.total;
+                        if(o.status === 'delivered') revenue += (o.total || 0);
                     });
-                    document.getElementById('d-revenue').innerText = revenue.toLocaleString();
-                    document.getElementById('d-orders').innerText = this.data.orders.length;
-                    this.renderOrders();
-                });
 
-                // Users
-                firestore.collection('users').onSnapshot(snap => {
-                    this.data.users = [];
-                    snap.forEach(doc => this.data.users.push({ docId: doc.id, ...doc.data() }));
-                    document.getElementById('d-users').innerText = this.data.users.length;
-                    this.renderUsers();
+                    // Update Dashboard Stats
+                    $('d-revenue').innerText = revenue.toLocaleString();
+                    $('d-orders-count').innerText = this.data.orders.length;
+                    
+                    this.renderOrders(this.data.orders);
                 });
+            },
+            renderOrders(list) {
+                $('orders-list').innerHTML = list.map(o => {
+                    let statusClass = o.status === 'approved' ? 'bg-ok' : (o.status === 'delivered' ? 'bg-ok' : 'bg-wait');
+                    let statusIcon = o.status === 'approved' ? 'check' : (o.status === 'delivered' ? 'truck' : 'clock');
+                    
+                    return `
+                    <div class="list-item" onclick="admin.viewOrder('${o.docId}')">
+                        <div class="list-info">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                                <h4 style="color:var(--primary); font-weight:800;">#${o.id}</h4>
+                                <span class="badge ${statusClass}"><i class="fas fa-${statusIcon}"></i> ${o.status}</span>
+                            </div>
+                            <div style="font-weight:bold; font-size:1rem;">${o.userName}</div>
+                            <p>${o.items.length} پەرتووک • <span class="text-success">${(o.total||0).toLocaleString()} IQD</span></p>
+                            <p style="font-size:0.75rem; opacity:0.7;">${new Date(o.id).toLocaleString('ku')}</p>
+                        </div>
+                        <i class="fas fa-chevron-left text-muted"></i>
+                    </div>`;
+                }).join('');
+            },
+            filterOrders(type) {
+                if(type === 'all') this.renderOrders(this.data.orders);
+                else if(type === 'pending') this.renderOrders(this.data.orders.filter(o => o.status !== 'delivered'));
+                else if(type === 'completed') this.renderOrders(this.data.orders.filter(o => o.status === 'delivered'));
+            },
+            viewOrder(id) {
+                this.selectedId = id;
+                const o = this.data.orders.find(x => x.docId === id);
+                if(!o) return;
 
-                // Books
-                firestore.collection('books').onSnapshot(snap => {
+                $('om-title').innerText = "Order #" + o.id;
+                $('om-code').innerText = o.code || '----';
+                $('om-user-info').innerHTML = `
+                    <div style="margin-bottom:5px;"><i class="fas fa-user"></i> ${o.userName}</div>
+                    <div style="margin-bottom:5px;"><i class="fas fa-phone"></i> ${o.userId}</div>
+                    <div><i class="fas fa-map-marker-alt"></i> ${o.userCity} - ${o.userAddress}</div>
+                `;
+                $('om-items').innerHTML = o.items.map(i => `
+                    <div style="display:flex; gap:10px; padding:10px 0; border-bottom:1px dashed var(--border);">
+                        <img src="${i.img}" style="width:50px; height:60px; object-fit:cover; border-radius:5px;">
+                        <div>
+                            <div>${i.title}</div>
+                            <small class="text-muted">${i.price} x ${i.qty}</small>
+                        </div>
+                    </div>
+                `).join('');
+                $('om-delivery').innerText = (o.deliveryFee||0).toLocaleString();
+                $('om-total').innerText = (o.total||0).toLocaleString() + ' IQD';
+
+                $('order-modal').style.display = 'flex';
+            },
+            async orderAction(action) {
+                if(action === 'delete') {
+                    if(confirm('دڵنیای ژێبرنێ؟')) await db.collection('orders').doc(this.selectedId).delete();
+                } else {
+                    await db.collection('orders').doc(this.selectedId).update({status: action});
+                    showToast('ڕەوش هاتە گۆڕین');
+                }
+                closeModal('order-modal');
+            },
+
+            // --- BOOKS SYSTEM ---
+            listenBooks() {
+                db.collection('books').onSnapshot(snap => {
                     this.data.books = [];
-                    snap.forEach(doc => this.data.books.push({ docId: doc.id, ...doc.data() }));
-                    document.getElementById('d-books').innerText = this.data.books.length;
+                    snap.forEach(d => this.data.books.push({ docId: d.id, ...d.data() }));
+                    $('d-books-count').innerText = this.data.books.length;
                     this.renderBooks();
                 });
-
-                // Libs
-                firestore.collection('libraries').onSnapshot(snap => {
-                    this.data.libs = [];
-                    const sel = document.getElementById('b-lib');
-                    sel.innerHTML = '';
-                    snap.forEach(doc => {
-                        const l = { docId: doc.id, ...doc.data() };
-                        this.data.libs.push(l);
-                        sel.innerHTML += `<option value="${l.id}">${l.name}</option>`;
-                    });
-                    this.renderLibs();
-                });
             },
-
-            // --- CITIES MANAGER ---
-            async loadCities() {
-                firestore.collection('settings').doc('locations').onSnapshot(doc => {
-                    if(doc.exists) {
-                        this.data.cities = doc.data().list || [];
-                        this.renderCities();
-                        this.updateLibCityDropdown();
-                    }
-                });
-            },
-            renderCities() {
-                const con = document.getElementById('cities-container');
-                con.innerHTML = this.data.cities.map(c => `
-                    <div class="city-tag">
-                        ${c} <i class="fas fa-times" style="cursor:pointer; color:red;" onclick="admin.removeCity('${c}')"></i>
+            renderBooks(list = this.data.books) {
+                $('books-list').innerHTML = list.map(b => `
+                    <div class="list-item">
+                        <img src="${b.img}" class="list-img" onerror="this.src='https://via.placeholder.com/50'">
+                        <div class="list-info">
+                            <h4>${b.title}</h4>
+                            <p class="text-muted">${b.cat || 'General'} | ${b.author || 'نڤیسەر دیار نینە'}</p>
+                            <div class="text-success" style="font-weight:bold;">${b.price} IQD</div>
+                        </div>
+                        <button class="btn btn-sm btn-primary" onclick="admin.editBook('${b.docId}')">دەستکاری</button>
                     </div>
                 `).join('');
             },
-            updateLibCityDropdown() {
-                const sel = document.getElementById('l-city');
-                sel.innerHTML = this.data.cities.map(c => `<option value="${c}">${c}</option>`).join('');
+            searchBook(val) {
+                const q = val.toLowerCase();
+                this.renderBooks(this.data.books.filter(b => b.title.toLowerCase().includes(q) || (b.author && b.author.toLowerCase().includes(q))));
             },
-            async addCity() {
-                const c = document.getElementById('new-city').value;
-                if(c) {
-                    await firestore.collection('settings').doc('locations').set({
-                        list: firebase.firestore.FieldValue.arrayUnion(c)
-                    }, {merge:true});
-                    document.getElementById('new-city').value = '';
+            openBookModal() {
+                // Reset Fields
+                document.querySelectorAll('#book-modal input, #book-modal textarea').forEach(i => i.value = '');
+                $('b-id').value = '';
+                $('b-lib-sel').innerHTML = this.data.libs.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
+                $('b-cat').value = 'General';
+                
+                // Go to tab 1
+                switchTab(document.querySelector('.tab'), 'tab-basic');
+                $('book-modal').style.display = 'flex';
+            },
+            editBook(docId) {
+                this.openBookModal();
+                const b = this.data.books.find(x => x.docId === docId);
+                $('b-id').value = docId;
+                $('b-title').value = b.title;
+                $('b-cat').value = b.cat || 'General';
+                $('b-price').value = b.price;
+                $('b-orig').value = b.originalPrice || '';
+                $('b-lib-sel').value = b.libId || '';
+                $('b-img').value = b.img || '';
+                $('b-auth').value = b.author || '';
+                $('b-pages').value = b.pages || '';
+                $('b-vol').value = b.volumes || '';
+                $('b-paper').value = b.paper || '';
+                $('b-tahqiq').value = b.tahqiq || '';
+                $('b-desc').value = b.desc || '';
+                $('b-qty').value = b.bulkQty || '';
+                $('b-bulk-price').value = b.bulkPrice || '';
+                
+                // Handle Preview Images array to Textarea
+                if (b.previewImages && Array.isArray(b.previewImages)) {
+                    $('b-preview').value = b.previewImages.join('\n');
+                } else {
+                    $('b-preview').value = '';
                 }
             },
-            async removeCity(c) {
-                if(confirm('ژێبرن؟')) {
-                    await firestore.collection('settings').doc('locations').update({
+            async saveBook() {
+                const docId = $('b-id').value;
+                const previewText = $('b-preview').value.trim();
+                const previewArr = previewText ? previewText.split('\n').map(l => l.trim()).filter(l => l.length > 0) : [];
+
+                const data = {
+                    title: $('b-title').value,
+                    cat: $('b-cat').value,
+                    price: Number($('b-price').value),
+                    originalPrice: Number($('b-orig').value)||0,
+                    libId: $('b-lib-sel').value,
+                    img: $('b-img').value,
+                    author: $('b-auth').value,
+                    pages: $('b-pages').value,
+                    volumes: $('b-vol').value,
+                    paper: $('b-paper').value,
+                    tahqiq: $('b-tahqiq').value,
+                    desc: $('b-desc').value,
+                    bulkQty: Number($('b-qty').value)||0,
+                    bulkPrice: Number($('b-bulk-price').value)||0,
+                    previewImages: previewArr
+                };
+
+                if(docId) await db.collection('books').doc(docId).update(data);
+                else { data.id = Date.now(); await db.collection('books').add(data); }
+                
+                closeModal('book-modal');
+                showToast('پەرتووک پاشەکەوت بوو');
+            },
+
+            // --- USERS SYSTEM ---
+            listenUsers() {
+                db.collection('users').onSnapshot(snap => {
+                    this.data.users = [];
+                    snap.forEach(d => this.data.users.push({ docId: d.id, ...d.data() }));
+                    $('d-users-count').innerText = this.data.users.length;
+                    this.renderUsers();
+                });
+            },
+            renderUsers(list = this.data.users) {
+                $('users-list').innerHTML = list.map(u => `
+                    <div class="list-item" onclick="admin.openUserModal('${u.docId}')">
+                        <div class="list-info">
+                            <h4>${u.name}</h4>
+                            <p>${u.phone}</p>
+                        </div>
+                        <div style="text-align:left;">
+                            <span class="badge bg-ok">${u.points||0} Pts</span>
+                        </div>
+                    </div>
+                `).join('');
+            },
+            searchUser(val) {
+                const q = val.toLowerCase();
+                this.renderUsers(this.data.users.filter(u => u.name.toLowerCase().includes(q) || u.phone.includes(q)));
+            },
+            openUserModal(docId) {
+                this.selectedId = docId;
+                const u = this.data.users.find(x => x.docId === docId);
+                
+                $('u-name').value = u.name;
+                $('u-phone').value = u.phone;
+                $('u-address').value = u.address || '';
+                $('u-pass').value = u.password || u.code || '';
+                $('u-points').value = u.points || 0;
+
+                // History
+                const userOrders = this.data.orders.filter(o => o.userId === u.phone);
+                $('u-history').innerHTML = userOrders.length ? userOrders.map(o => `
+                    <div style="border-bottom:1px solid rgba(255,255,255,0.1); padding:5px 0; font-size:0.85rem;">
+                        <span class="${o.status==='delivered'?'text-success':'text-accent'}">${o.status}</span> 
+                        - ${o.total.toLocaleString()} IQD
+                        <br><small>${new Date(o.id).toLocaleDateString()}</small>
+                    </div>
+                `).join('') : '<small style="color:var(--text-sub)">هیچ داواکاری نییە</small>';
+
+                $('user-modal').style.display = 'flex';
+            },
+            async saveUserInfo() {
+                await db.collection('users').doc(this.selectedId).update({
+                    name: $('u-name').value,
+                    phone: $('u-phone').value,
+                    address: $('u-address').value
+                });
+                showToast('زانیاری هاتنە گۆڕین');
+            },
+            async updateUserPass() {
+                const p = $('u-pass').value;
+                await db.collection('users').doc(this.selectedId).update({ password: p, code: p });
+                showToast('پاسوۆرد هاتە گۆڕین');
+            },
+            async updateUserPoints() {
+                await db.collection('users').doc(this.selectedId).update({ points: Number($('u-points').value) });
+                showToast('خاڵ هاتنە گۆڕین');
+            },
+            async deleteUser() {
+                if(confirm('دڵنیای؟ ئەکاونت نامینیت!')) {
+                    await db.collection('users').doc(this.selectedId).delete();
+                    closeModal('user-modal');
+                }
+            },
+
+            // --- LIBRARIES & CITIES SYSTEM ---
+            listenLibs() {
+                db.collection('libraries').onSnapshot(snap => {
+                    this.data.libs = [];
+                    snap.forEach(d => this.data.libs.push({ docId: d.id, ...d.data() }));
+                    $('libs-list').innerHTML = this.data.libs.map(l => `
+                        <div class="list-item">
+                            <div class="list-info">
+                                <h4>${l.name}</h4>
+                                <p>${l.city}</p>
+                                <small class="text-success">${(l.discountPercent*100)||0}% OFF</small>
+                            </div>
+                            <button class="btn btn-sm btn-warning" onclick="admin.editLib('${l.docId}')"><i class="fas fa-pen"></i></button>
+                            <button class="btn btn-sm btn-danger" onclick="admin.delLib('${l.docId}')" style="margin-right:5px;"><i class="fas fa-trash"></i></button>
+                        </div>
+                    `).join('');
+                });
+            },
+            listenCities() {
+                db.collection('settings').doc('locations').onSnapshot(doc => {
+                    if(doc.exists) {
+                        this.data.cities = doc.data().list || [];
+                        $('cities-list').innerHTML = this.data.cities.map(c => 
+                            `<span class="badge bg-wait" style="font-size:0.9rem; padding:8px 12px; cursor:pointer;" onclick="admin.delCity('${c}')">${c} <i class="fas fa-times text-danger"></i></span>`
+                        ).join('');
+                        
+                        // Populate Lib Dropdown
+                        $('l-city-sel').innerHTML = this.data.cities.map(c => `<option value="${c}">${c}</option>`).join('');
+                    }
+                });
+            },
+            async addCity() {
+                const c = $('new-city').value;
+                if(c) {
+                    await db.collection('settings').doc('locations').set({
+                        list: firebase.firestore.FieldValue.arrayUnion(c)
+                    }, {merge:true});
+                    $('new-city').value = '';
+                }
+            },
+            async delCity(c) {
+                if(confirm('ژێبرنا باژێڕێ ' + c + '؟')) {
+                    await db.collection('settings').doc('locations').update({
                         list: firebase.firestore.FieldValue.arrayRemove(c)
                     });
                 }
             },
+            openLibModal() {
+                document.querySelectorAll('#lib-modal input').forEach(i => i.value = '');
+                $('l-id').value = '';
+                $('lib-modal').style.display = 'flex';
+            },
+            editLib(docId) {
+                const l = this.data.libs.find(x => x.docId === docId);
+                $('l-id').value = docId;
+                $('l-name').value = l.name;
+                $('l-city-sel').value = l.city;
+                $('l-img').value = l.img || '';
+                $('l-local').value = l.localPrice;
+                $('l-foreign').value = l.foreignPrice;
+                $('l-free').value = l.freeDeliveryLimit || '';
+                $('l-discount').value = l.discountPercent || '';
+                $('lib-modal').style.display = 'flex';
+            },
+            async saveLib() {
+                const docId = $('l-id').value;
+                const d = {
+                    name: $('l-name').value,
+                    city: $('l-city-sel').value,
+                    img: $('l-img').value,
+                    localPrice: Number($('l-local').value),
+                    foreignPrice: Number($('l-foreign').value),
+                    freeDeliveryLimit: Number($('l-free').value)||0,
+                    discountPercent: Number($('l-discount').value)||0
+                };
+                if(docId) await db.collection('libraries').doc(docId).update(d);
+                else { d.id = Date.now(); await db.collection('libraries').add(d); }
+                closeModal('lib-modal');
+                showToast('پەرتووکخانە پاشەکەوت بوو');
+            },
+            async delLib(id) { if(confirm('دڵنیای؟')) await db.collection('libraries').doc(id).delete(); },
 
-            // --- POINT RULES MANAGER ---
-            async loadPointRules() {
-                firestore.collection('settings').doc('points_rules_dynamic').onSnapshot(doc => {
+            // --- MARKETING (COUPONS & NOTIF & POINTS) ---
+            listenCoupons() {
+                db.collection('coupons').onSnapshot(snap => {
+                    $('coupons-list').innerHTML = '';
+                    snap.forEach(d => {
+                        $('coupons-list').innerHTML += `
+                            <div class="list-item">
+                                <b>${d.id}</b>
+                                <span class="badge bg-ok">${(d.data().discount * 100)}% Off</span>
+                                <i class="fas fa-trash text-danger" onclick="admin.delCoupon('${d.id}')"></i>
+                            </div>
+                        `;
+                    });
+                });
+            },
+            async addCoupon() {
+                const code = $('cp-code').value.toUpperCase();
+                const val = Number($('cp-val').value);
+                if(code && val) {
+                    await db.collection('coupons').doc(code).set({ discount: val });
+                    showToast('کۆد زێدە بوو');
+                }
+            },
+            async delCoupon(id) { await db.collection('coupons').doc(id).delete(); },
+
+            listenPoints() {
+                db.collection('settings').doc('points_rules_dynamic').onSnapshot(doc => {
+                    $('points-list').innerHTML = '';
                     if(doc.exists) {
-                        this.data.pointRules = doc.data().rules || [];
-                        this.renderPointRules();
+                        const rules = doc.data().rules || [];
+                        this.data.points = rules;
+                        rules.forEach((r, index) => {
+                            $('points-list').innerHTML += `
+                                <div class="list-item">
+                                    <span>${r.points} خاڵ = ${(r.discount * 100)}%</span>
+                                    <i class="fas fa-trash text-danger" onclick="admin.delPointRule(${index})"></i>
+                                </div>
+                            `;
+                        });
                     }
                 });
             },
-            renderPointRules() {
-                const con = document.getElementById('points-rules-container');
-                con.innerHTML = this.data.pointRules.map((rule, index) => `
-                    <div class="point-rule-tag">
-                        ${rule.points} خاڵ = ${rule.discount * 100}%
-                        <i class="fas fa-times" style="cursor:pointer; color:red;" onclick="admin.removePointRule(${index})"></i>
-                    </div>
-                `).join('');
-            },
             async addPointRule() {
-                const pts = Number(document.getElementById('new-rule-pts').value);
-                const disc = Number(document.getElementById('new-rule-disc').value);
-                
-                if(pts && disc) {
-                    const newRule = { points: pts, discount: disc };
-                    // Add to local array then save
-                    const updatedRules = [...this.data.pointRules, newRule];
-                    await firestore.collection('settings').doc('points_rules_dynamic').set({ rules: updatedRules });
-                    document.getElementById('new-rule-pts').value = '';
-                    document.getElementById('new-rule-disc').value = '';
+                const p = Number($('p-points').value);
+                const d = Number($('p-discount').value);
+                if(p && d) {
+                    const newRules = [...this.data.points, { points: p, discount: d }];
+                    await db.collection('settings').doc('points_rules_dynamic').set({ rules: newRules });
+                    $('p-points').value = ''; $('p-discount').value = '';
                 }
             },
-            async removePointRule(index) {
-                const updatedRules = this.data.pointRules.filter((_, i) => i !== index);
-                await firestore.collection('settings').doc('points_rules_dynamic').set({ rules: updatedRules });
+            async delPointRule(index) {
+                const newRules = this.data.points.filter((_, i) => i !== index);
+                await db.collection('settings').doc('points_rules_dynamic').set({ rules: newRules });
             },
 
-            // --- USERS & FULL DETAILS (ADDED EDIT/DELETE) ---
-            renderUsers() {
-                const tbody = document.getElementById('users-table');
-                tbody.innerHTML = `<thead><tr><th>ناڤ</th><th>مۆبایل</th><th>خاڵ</th><th>کردار</th></tr></thead><tbody>` + 
-                this.data.users.slice(0, 50).map(u => `
-                    <tr>
-                        <td>${u.name}</td>
-                        <td>${u.phone}</td>
-                        <td style="color:var(--accent); font-weight:bold;">${u.points || 0}</td>
-                        <td><button class="btn btn-primary btn-sm" onclick="admin.openUserDetails('${u.docId}')">تەفاسیل</button></td>
-                    </tr>
-                `).join('') + `</tbody>`;
-            },
-
-            async openUserDetails(docId) {
-                // Find user by docId (Firestore ID)
-                this.selectedUserId = docId;
-                const u = this.data.users.find(x => x.docId === docId);
-                
-                if(!u) return alert("بکارئینەر نەهاتە دیتن!");
-
-                // Populate Editable Fields
-                document.getElementById('ud-name-edit').value = u.name;
-                document.getElementById('ud-phone-edit').value = u.phone;
-                document.getElementById('ud-city-edit').value = u.city || '';
-                document.getElementById('ud-address-edit').value = u.address || '';
-                document.getElementById('ud-points').innerText = u.points || 0;
-
-                // Fetch Orders for this user (using Phone as ID)
-                const snap = await firestore.collection('orders').where('userId', '==', u.phone).get();
-                const orders = [];
-                let totalSpent = 0;
-                snap.forEach(doc => {
-                    const o = doc.data();
-                    orders.push(o);
-                    if(o.status === 'delivered') totalSpent += o.total;
-                });
-
-                document.getElementById('ud-total-spent').innerText = totalSpent.toLocaleString();
-
-                const table = document.getElementById('ud-orders-table');
-                table.innerHTML = `<thead><tr><th>#ID</th><th>پارە</th><th>ڕەوش</th><th>کڕین</th></tr></thead><tbody>` +
-                orders.map(o => `
-                    <tr>
-                        <td>#${o.id.toString().slice(-6)}</td>
-                        <td>${o.total.toLocaleString()}</td>
-                        <td>${o.status}</td>
-                        <td>${o.items.length} دانە</td>
-                    </tr>
-                `).join('') + `</tbody>`;
-
-                document.getElementById('user-details-modal').style.display = 'flex';
-            },
-
-            async saveUserEdits() {
-                const name = document.getElementById('ud-name-edit').value;
-                const phone = document.getElementById('ud-phone-edit').value;
-                const city = document.getElementById('ud-city-edit').value;
-                const address = document.getElementById('ud-address-edit').value;
-                
-                await firestore.collection('users').doc(this.selectedUserId).update({
-                    name, phone, city, address
-                });
-                alert("زانیاری نوێ بوون ✅");
-            },
-
-            async deleteUser() {
-                if(confirm("دڵنیای؟ ئەکاونت دێ ب یەکجاری هێتە ژێبرن! ⚠️")) {
-                    await firestore.collection('users').doc(this.selectedUserId).delete();
-                    alert("ئەکاونت هاتە ژێبرن 🗑️");
-                    closeModal('user-details-modal');
-                }
-            },
-
-            async modUserPoints(type) {
-                const val = Number(document.getElementById('ud-mod-points').value);
-                if(!val) return;
-                const amount = type === 'add' ? val : -val;
-                await firestore.collection('users').doc(this.selectedUserId).update({
-                    points: firebase.firestore.FieldValue.increment(amount)
-                });
-                alert("خاڵ نوێ بوون ✅");
-                const current = Number(document.getElementById('ud-points').innerText);
-                document.getElementById('ud-points').innerText = current + amount;
-            },
-
-            // --- LIBRARIES ---
-            openLibModal() { document.getElementById('lib-modal').style.display = 'flex'; },
-            async saveLib() {
-                const lib = {
-                    id: Date.now(),
-                    name: document.getElementById('l-name').value,
-                    city: document.getElementById('l-city').value,
-                    img: document.getElementById('l-img').value,
-                    discountPercent: Number(document.getElementById('l-discount').value) || 0,
-                    localPrice: Number(document.getElementById('l-price-local').value) || 0,
-                    foreignPrice: Number(document.getElementById('l-price-foreign').value) || 0,
-                    freeDeliveryLimit: Number(document.getElementById('l-free').value) || 0
-                };
-                await firestore.collection('libraries').add(lib);
-                closeModal('lib-modal');
-            },
-            renderLibs() {
-                document.getElementById('lib-list').innerHTML = this.data.libs.map(l => `
-                    <div class="card" style="display:flex; gap:15px; align-items:center;">
-                        <img src="${l.img}" style="width:50px; height:50px; border-radius:50%;">
-                        <div style="flex:1;">
-                            <b>${l.name}</b> (${l.city})<br>
-                            <small class="text-muted">داشکاندن: ${l.discountPercent}% | گەهاندن: ${l.localPrice}/${l.foreignPrice}</small>
-                        </div>
-                        <button class="btn btn-danger btn-sm" style="width:auto;" onclick="admin.delLib('${l.docId}')">X</button>
-                    </div>
-                `).join('');
-            },
-            async delLib(id) { if(confirm('ژێبرن؟')) await firestore.collection('libraries').doc(id).delete(); },
-
-            // --- BOOKS ---
-            renderBooks() {
-                document.getElementById('books-table').innerHTML = `<thead><tr><th>وێنە</th><th>ناڤ</th><th>نرخ</th><th>کردار</th></tr></thead><tbody>` + 
-                this.data.books.map(b => `
-                    <tr>
-                        <td><img src="${b.img}" style="width:40px; height:50px; border-radius:5px;"></td>
-                        <td>${b.title}</td>
-                        <td>${b.price}</td>
-                        <td>
-                            <button class="btn btn-warning btn-sm" onclick="admin.editBook('${b.docId}')"><i class="fas fa-pen"></i></button>
-                            <button class="btn btn-danger btn-sm" onclick="admin.delBook('${b.docId}')"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `).join('') + `</tbody>`;
-            },
-            openBookModal() {
-                document.getElementById('b-id').value = '';
-                document.querySelectorAll('#book-modal input, #book-modal textarea').forEach(i => i.value = '');
-                document.getElementById('book-modal').style.display = 'flex';
-            },
-            editBook(docId) {
-                const b = this.data.books.find(x => x.docId === docId);
-                document.getElementById('b-id').value = docId;
-                document.getElementById('b-title').value = b.title;
-                document.getElementById('b-author').value = b.author;
-                document.getElementById('b-price').value = b.price;
-                document.getElementById('b-orig-price').value = b.originalPrice || '';
-                document.getElementById('b-lib').value = b.libId;
-                document.getElementById('b-bulk-qty').value = b.bulkQty || '';
-                document.getElementById('b-bulk-price').value = b.bulkPrice || '';
-                document.getElementById('b-pages').value = b.pages || '';
-                document.getElementById('b-tahqiq').value = b.tahqiq || '';
-                document.getElementById('b-volumes').value = b.volumes || '';
-                document.getElementById('b-paper').value = b.paper || '';
-                document.getElementById('b-desc').value = b.desc || '';
-                document.getElementById('b-img').value = b.img || '';
-                document.getElementById('b-preview-imgs').value = b.previewImages ? b.previewImages.join('\n') : '';
-                document.getElementById('book-modal').style.display = 'flex';
-            },
-            async saveBook() {
-                const docId = document.getElementById('b-id').value;
-                const prev = document.getElementById('b-preview-imgs').value.split('\n').map(x=>x.trim()).filter(x=>x);
-                const data = {
-                    title: document.getElementById('b-title').value,
-                    author: document.getElementById('b-author').value,
-                    price: Number(document.getElementById('b-price').value),
-                    originalPrice: Number(document.getElementById('b-orig-price').value) || 0,
-                    libId: Number(document.getElementById('b-lib').value),
-                    bulkQty: Number(document.getElementById('b-bulk-qty').value) || 0,
-                    bulkPrice: Number(document.getElementById('b-bulk-price').value) || 0,
-                    pages: document.getElementById('b-pages').value,
-                    tahqiq: document.getElementById('b-tahqiq').value,
-                    volumes: document.getElementById('b-volumes').value,
-                    paper: document.getElementById('b-paper').value,
-                    desc: document.getElementById('b-desc').value,
-                    img: document.getElementById('b-img').value,
-                    previewImages: prev,
-                    cat: 'General'
-                };
-                if(docId) await firestore.collection('books').doc(docId).update(data);
-                else { data.id = Date.now(); await firestore.collection('books').add(data); }
-                closeModal('book-modal');
-                alert("تەمامە ✅");
-            },
-            async delBook(id) { if(confirm('ژێبرن؟')) await firestore.collection('books').doc(id).delete(); },
-
-            // --- NOTIFICATIONS (Targeted) ---
             async sendNotif() {
-                const type = document.getElementById('notif-type').value;
-                const msg = document.getElementById('notif-msg').value;
-                
-                if(!msg) return alert("پەیام بەتاڵە!");
+                const msg = $('notif-msg').value;
+                if(!msg) return alert('پەیامێ بنڤیسە');
+                const type = $('notif-type').value;
+                const target = $('notif-target').value;
 
-                const data = { text: msg, time: new Date().toLocaleTimeString(), read: false };
-
-                if(type === 'all') {
-                    await firestore.collection('notifications').add(data);
-                    alert("بۆ هەمیان چوو");
-                } else if(type === 'single') {
-                    const phone = document.getElementById('notif-single-phone').value;
-                    if(!phone) return alert("ژمارا مۆبایلێ بنڤیسە!");
-                    data.targetPhone = phone;
-                    await firestore.collection('notifications').add(data);
-                    alert("بۆ " + phone + " چوو");
-                } else if(type === 'limit') {
-                    const limit = Number(document.getElementById('notif-count').value);
-                    const users = [...this.data.users].sort((a,b) => (b.points||0)-(a.points||0)).slice(0, limit);
-                    const batch = firestore.batch();
-                    users.forEach(u => {
-                        const ref = firestore.collection('notifications').doc();
-                        batch.set(ref, { ...data, targetPhone: u.phone });
-                    });
-                    await batch.commit();
-                    alert(`بۆ ${limit} کەسان چوو`);
-                }
-            },
-            async addCoupon() {
-                // FIXED: Capitalize coupon code automatically
-                const code = document.getElementById('coupon-code').value.toUpperCase();
-                const val = Number(document.getElementById('coupon-val').value);
-                if(code && val) {
-                    await firestore.collection('coupons').doc(code).set({ discount: val });
-                    alert("کۆد زیاد بوو ✅");
-                }
-            },
-
-            // --- ORDERS (Table & Actions - UPDATED) ---
-            renderOrders() {
-                const html = this.data.orders.map(o => `
-                    <tr>
-                        <td>#${o.id.toString().slice(-6)}</td>
-                        <td>${o.userName}<br><small>${o.userId}</small></td>
-                        <td style="color:var(--success); font-weight:bold;">${o.total.toLocaleString()}</td>
-                        <td>${o.userCity || '-'}</td>
-                        <td><span style="padding:2px 8px; border-radius:5px; background:${o.status==='waiting'?'#F59E0B':o.status==='approved'?'#10B981':'#3b82f6'}; color:white; font-size:0.8rem;">${o.status}</span></td>
-                        <td>
-                            <!-- NEW: View Details Button -->
-                            <button class="btn-info btn-sm" onclick="admin.viewOrder('${o.docId}')">👁️ تەفاسیل</button>
-                        </td>
-                        <td>
-                            <button class="btn-success btn-sm" onclick="admin.setStatus('${o.docId}', 'approved')">✓</button>
-                            <button class="btn-danger btn-sm" onclick="admin.delOrder('${o.docId}')">X</button>
-                        </td>
-                    </tr>
-                `).join('');
-                document.getElementById('dash-orders-table').innerHTML = `<thead><tr><th>ID</th><th>کەس</th><th>پارە</th><th>باژێڕ</th><th>ڕەوش</th><th>تەفاسیل</th><th>کردار</th></tr></thead><tbody>${html}</tbody>`;
-            },
-            
-            // --- NEW: VIEW ORDER LOGIC ---
-            viewOrder(docId) {
-                const o = this.data.orders.find(x => x.docId === docId);
-                if(!o) return;
-                currentViewOrderId = docId;
-
-                document.getElementById('vo-id').innerText = '#' + o.id;
-                document.getElementById('vo-code').innerText = o.code || '----';
-                document.getElementById('vo-name').innerText = o.userName;
-                document.getElementById('vo-phone').innerText = o.userId;
-                document.getElementById('vo-address').innerText = o.userAddress;
-                document.getElementById('vo-city').innerText = o.userCity || '-';
-
-                // Items List
-                document.getElementById('vo-items').innerHTML = o.items.map(i => `
-                    <div class="receipt-item">
-                        <div style="display:flex; align-items:center;">
-                            <img src="${i.img}" class="item-img" onerror="this.src='https://via.placeholder.com/50'">
-                            <div style="margin-left:10px;">
-                                <div>${i.title}</div>
-                                <small style="color:#aaa;">${i.price.toLocaleString()} IQD</small>
-                            </div>
-                        </div>
-                        <div style="font-weight:bold;">x${i.qty}</div>
-                    </div>
-                `).join('');
-
-                // Financials
-                const delivery = o.deliveryFee || 0;
-                // Reverse calc for display if needed, or simple subtraction
-                const subtotal = o.items.reduce((a,b)=>a+(b.price*b.qty),0);
-                const discount = (subtotal + delivery) - o.total;
-
-                document.getElementById('vo-delivery').innerText = delivery.toLocaleString() + ' IQD';
-                document.getElementById('vo-discount').innerText = discount > 0 ? '-' + discount.toLocaleString() + ' IQD' : '0 IQD';
-                document.getElementById('vo-total').innerText = o.total.toLocaleString() + ' IQD';
-
-                document.getElementById('order-modal').style.display = 'flex';
-            },
-
-            updateOrderStatus(status) {
-                if(currentViewOrderId) {
-                    this.setStatus(currentViewOrderId, status);
-                    closeModal('order-modal');
-                }
-            },
-            deleteCurrentOrder() {
-                if(currentViewOrderId) {
-                    this.delOrder(currentViewOrderId);
-                    closeModal('order-modal');
-                }
-            },
-
-            async setStatus(id, st) { await firestore.collection('orders').doc(id).update({status: st}); },
-            async delOrder(id) { if(confirm('ژێبرن؟')) await firestore.collection('orders').doc(id).delete(); },
-
-            searchUser(val) {
-                const filtered = this.data.users.filter(u => u.phone.includes(val) || u.name.includes(val));
-                const tbody = document.getElementById('users-table');
-                tbody.innerHTML = `<thead><tr><th>ناڤ</th><th>مۆبایل</th><th>خاڵ</th><th>کردار</th></tr></thead><tbody>` + 
-                filtered.map(u => `
-                    <tr>
-                        <td>${u.name}</td>
-                        <td>${u.phone}</td>
-                        <td style="color:var(--accent); font-weight:bold;">${u.points || 0}</td>
-                        <td><button class="btn btn-primary btn-sm" onclick="admin.openUserDetails('${u.docId}')">تەفاسیل</button></td>
-                    </tr>
-                `).join('') + `</tbody>`;
-            },
-            searchBook(val) {
-                const rows = document.querySelectorAll('#books-table tr');
-                rows.forEach(r => r.style.display = r.innerText.toLowerCase().includes(val.toLowerCase()) ? '' : 'none');
+                await db.collection('notifications').add({
+                    text: msg,
+                    time: new Date().toLocaleTimeString(),
+                    read: false,
+                    targetPhone: type === 'single' ? target : null
+                });
+                showToast('نۆتڤیکەیشن چوو 🚀');
+                $('notif-msg').value = '';
             }
         };
 
+        // START
         admin.init();
+
     </script>
 </body>
 </html>
