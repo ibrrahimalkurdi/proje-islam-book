@@ -80,12 +80,20 @@
         .story-item { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; transition: transform 0.2s; position: relative; }
         .story-item:active { transform: scale(0.9); }
         .story-item.active-lib .story-ring { border-color: var(--success); box-shadow: 0 0 0 3px var(--success); background: none; }
-        .story-item.has-discount .story-ring { background: var(--discount-gradient); animation: pulse-ring 2s infinite; }
-        .discount-badge-story { position: absolute; top: 0; right: 0; background: red; color: white; width: 22px; height: 22px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 0.7rem; border: 2px solid var(--bg-body); font-weight: bold; }
         .story-ring { width: 70px; height: 70px; border-radius: 50%; padding: 3px; background: var(--story-gradient); position: relative; transition: 0.3s; }
         .story-img { width: 100%; height: 100%; border-radius: 50%; border: 3px solid var(--bg-body); object-fit: cover; background: white; }
         .story-name { font-size: 0.75rem; max-width: 75px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-main); font-weight: 600; text-align: center; }
         
+        /* NEW: FREE DELIVERY BADGE ON LIBRARY */
+        .lib-free-badge {
+            position: absolute;
+            bottom: -8px; left: 50%; transform: translateX(-50%);
+            background: var(--success); color: white;
+            font-size: 0.6rem; padding: 2px 6px; border-radius: 10px;
+            white-space: nowrap; border: 2px solid var(--bg-body);
+            z-index: 2; font-weight: bold;
+        }
+
         /* --- SCREENS --- */
         .screen { display: none; min-height: 100vh; animation: fadeIn 0.4s ease-out; }
         .screen.active { display: block; }
@@ -230,6 +238,25 @@
         .qty-control { display: flex; align-items: center; background: var(--bg-body); border-radius: 8px; padding: 2px; }
         .qty-btn { width: 28px; height: 28px; display: flex; justify-content: center; align-items: center; cursor: pointer; font-weight: bold; color: var(--text-main); }
         
+        /* NEW: MAP BUTTON */
+        .btn-map {
+            width: 100%;
+            padding: 12px;
+            background: #e1f5fe;
+            color: #0288d1;
+            border: 1px dashed #0288d1;
+            border-radius: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            transition: 0.3s;
+        }
+        .btn-map.active { background: #0288d1; color: white; border-style: solid; }
+
         .points-redeem-box {
             background: linear-gradient(135deg, #6c5ce7, #a29bfe);
             color: white; padding: 15px; border-radius: 15px; margin-top: 15px;
@@ -312,9 +339,10 @@
             font-size: 1.1rem;
         }
         .delivery-body { padding: 20px; }
-        .input-group { margin-bottom: 20px; position: relative; }
-        .input-group-icon { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--primary); pointer-events: none; font-size: 1.2rem; }
-        .delivery-select, .delivery-input { width: 100%; padding: 18px 50px 18px 20px; border-radius: 15px; border: 2px solid var(--border-color); font-size: 1rem; background: var(--bg-body); color: var(--text-main); transition: 0.3s; appearance: none; outline: none; }
+        .input-group { margin-bottom: 15px; position: relative; }
+        .delivery-label { display: block; margin-bottom: 5px; font-size: 0.9rem; color: var(--text-light); font-weight: bold; }
+        .input-group-icon { position: absolute; right: 15px; top: 40px; transform: translateY(-50%); color: var(--primary); pointer-events: none; font-size: 1.1rem; }
+        .delivery-select, .delivery-input { width: 100%; padding: 12px 15px 12px 15px; border-radius: 15px; border: 2px solid var(--border-color); font-size: 1rem; background: var(--bg-body); color: var(--text-main); transition: 0.3s; appearance: none; outline: none; }
         .delivery-select:focus, .delivery-input:focus { border-color: var(--primary); background: var(--bg-card); box-shadow: 0 0 0 4px rgba(30, 55, 153, 0.1); }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -533,20 +561,35 @@
                         <span id="sub-total">0 IQD</span>
                     </div>
                     
+                    <!-- DELIVERY SECTION -->
                     <div class="delivery-box">
                         <div class="delivery-header">
                             <i class="fas fa-truck-moving"></i> &nbsp; زانیاریێن گەهاندنێ
                         </div>
                         <div class="delivery-body">
+                            <!-- City Selection -->
                             <div class="input-group">
-                                <i class="fas fa-map-marker-alt input-group-icon"></i>
-                                <select id="delivery-city-select" class="delivery-select" onchange="app.updateDeliveryFee()">
-                                    <option value="">-- باژێڕ / دەڤەر هەڵبژێرە --</option>
+                                <label class="delivery-label">باژێڕ / دەڤەر</label>
+                                <select id="delivery-city-select" class="delivery-select" onchange="app.updateCartUI()">
+                                    <option value="">-- هەڵبژێرە --</option>
                                 </select>
                             </div>
+                            
+                            <!-- Detailed Address -->
                             <div class="input-group">
-                                <i class="fas fa-pen-alt input-group-icon"></i>
-                                <input type="text" id="delivery-details" class="delivery-input" placeholder="تێبینی (ناڤێ تاخی، نێزیک مزگەفتێ...)">
+                                <label class="delivery-label">ناڤنیشان (تاخ - جادە)</label>
+                                <input type="text" id="delivery-address" class="delivery-input" placeholder="نموونە: دهۆک، تاخێ ماسی...">
+                            </div>
+
+                            <!-- NEW: MAP BUTTON -->
+                            <div class="btn-map" id="btn-map-loc" onclick="app.getLocation()">
+                                <i class="fas fa-map-marked-alt"></i> <span id="map-btn-text">دەستنیشانکرنا جهی (Location)</span>
+                            </div>
+
+                            <!-- Landmark -->
+                            <div class="input-group">
+                                <label class="delivery-label">نیشانەک (Landmark)</label>
+                                <input type="text" id="delivery-landmark" class="delivery-input" placeholder="نموونە: نێزیک مزگەفتا...">
                             </div>
                         </div>
                     </div>
@@ -806,6 +849,7 @@
                 lang: localStorage.getItem('lang_pro_max') || 'arabic', 
                 
                 appLoadedTime: Date.now(),
+                currentLocation: null, // NEW: Store GPS
 
                 currentBook: null,
                 isEditMode: false,
@@ -826,11 +870,8 @@
             },
 
             init() {
-                // Register Service Worker for PWA
                 if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.register('sw.js')
-                        .then(reg => console.log('SW Registered', reg))
-                        .catch(err => console.log('SW Error', err));
+                    navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Error', err));
                 }
 
                 if (this.state.darkMode) document.body.setAttribute('data-theme', 'dark');
@@ -966,7 +1007,6 @@
                     if (permission === 'granted') {
                         const token = await messaging.getToken({ vapidKey: 'BAn1A8NVcvldrBEwK_YTX9zLw7XU308I98DtKNSkWl6zJ-JC7YMOHQCy7ewZnBCe84EXRTSCAgVtOCfNCzGg9-c' }); 
                         if (token) {
-                            console.log('FCM Token:', token);
                             if(this.state.user) {
                                 await firestore.collection('users').doc(this.state.user.phone).update({
                                     fcmToken: token
@@ -980,7 +1020,6 @@
                         this.showToast("مۆڵەتی ئاگەهداری رەتکرایەوە ⚠️");
                     }
                 } catch (error) {
-                    console.error("Error:", error);
                     this.showToast("هەڵە هەیە: VapidKey");
                 }
             },
@@ -997,7 +1036,7 @@
             renderDeliveryOptions() {
                 const select = document.getElementById('delivery-city-select');
                 if(!select) return;
-                const options = `<option value="">-- باژێڕ / دەڤەر هەڵبژێرە --</option>` + 
+                const options = `<option value="">-- هەڵبژێرە --</option>` + 
                                 this.state.cities.map(c => `<option value="${c}">${c}</option>`).join('');
                 select.innerHTML = options;
             },
@@ -1290,8 +1329,27 @@
                 }
             },
             
-            updateDeliveryFee() {
-                this.updateCartUI();
+            // NEW: GET LOCATION (MAP)
+            getLocation() {
+                if(navigator.geolocation) {
+                    const btn = document.getElementById('btn-map-loc');
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاری دیتنا جهی...';
+                    
+                    navigator.geolocation.getCurrentPosition(position => {
+                        this.state.currentLocation = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        btn.classList.add('active');
+                        btn.innerHTML = '<i class="fas fa-check"></i> جهـ هاتە دیتن ✅';
+                        this.showToast("جهێ تە هاتە دیارکرن 📍");
+                    }, error => {
+                        this.showToast("نەشیام جهی دیاربکەم ❌");
+                        btn.innerHTML = '<i class="fas fa-map-marked-alt"></i> دەستنیشانکرنا جهی (Location)';
+                    });
+                } else {
+                    this.showToast("GPS ل سەر ڤی ئامێری نینە");
+                }
             },
 
             async smartCheckout() {
@@ -1304,8 +1362,10 @@
                     return;
                 }
                 
+                // --- GET DELIVERY DETAILS ---
                 const selectedCity = document.getElementById('delivery-city-select').value;
-                const details = document.getElementById('delivery-details').value.trim();
+                const userAddress = document.getElementById('delivery-address').value.trim();
+                const userLandmark = document.getElementById('delivery-landmark').value.trim();
 
                 if(!selectedCity || selectedCity === "") {
                     const sel = document.getElementById('delivery-city-select');
@@ -1313,6 +1373,14 @@
                     sel.focus();
                     setTimeout(() => sel.style.borderColor = '#e67e22', 1000);
                     return this.showToast("تکایە باژێڕ / دەڤەرێ هەڵبژێرە ⚠️");
+                }
+
+                if(!userAddress) {
+                    const inp = document.getElementById('delivery-address');
+                    inp.style.borderColor = 'red';
+                    inp.focus();
+                    setTimeout(() => inp.style.borderColor = '#e67e22', 1000);
+                    return this.showToast("تکایە ناڤنیشانەکێ بنڤیسە 🏠");
                 }
 
                 const verificationCode = Math.floor(1000 + Math.random() * 9000).toString();
@@ -1353,14 +1421,21 @@
 
                 const orderId = Date.now();
                 const userPhone = String(this.state.user.phone).trim();
+                
+                // NEW: ADD MAP LINK IF LOCATION EXISTS
+                let mapLink = "";
+                if (this.state.currentLocation) {
+                    mapLink = `https://www.google.com/maps?q=${this.state.currentLocation.lat},${this.state.currentLocation.lng}`;
+                }
 
                 const newOrder = {
                     id: orderId,
                     userId: userPhone,
                     userName: this.state.user.name,
-                    userAddress: this.state.user.address,
+                    userAddress: userAddress, 
                     userCity: selectedCity, 
-                    userDetails: details, 
+                    landmark: userLandmark,   
+                    locationLink: mapLink, // Saved here
                     date: new Date().toLocaleDateString('ku-IQ'),
                     time: new Date().toLocaleTimeString(),
                     items: verifiedItems, 
@@ -1392,8 +1467,12 @@
                     this.showToast(t['sent_msg']);
                     
                     document.getElementById('points-select').value = "0";
-                    document.getElementById('delivery-details').value = ""; 
+                    document.getElementById('delivery-address').value = ""; 
+                    document.getElementById('delivery-landmark').value = "";
                     this.state.pointsDiscount = 0;
+                    this.state.currentLocation = null;
+                    document.getElementById('btn-map-loc').classList.remove('active');
+                    document.getElementById('btn-map-loc').innerHTML = '<i class="fas fa-map-marked-alt"></i> دەستنیشانکرنا جهی (Location)';
 
                     setTimeout(() => {
                         const profileBtn = document.querySelectorAll('.nav-item')[2];
@@ -1463,24 +1542,27 @@
                 }
             },
 
+            // NEW: UPDATE RENDER LIBRARIES (BADGES)
             renderLibraries() {
-                const libsWithDiscount = this.state.libraries.map(lib => {
-                    const hasDiscount = lib.discountPercent && lib.discountPercent > 0;
-                    return { ...lib, hasDiscount };
-                });
-                
-                libsWithDiscount.sort((a, b) => (b.hasDiscount ? 1 : 0) - (a.hasDiscount ? 1 : 0));
-                
                 const con = document.getElementById('stories-list');
-                con.innerHTML = libsWithDiscount.map(lib => `
-                    <div class="story-item ${lib.hasDiscount ? 'has-discount' : ''}" onclick="app.filterByLibrary(${lib.id}, this)">
+                
+                // Sort so ones with free delivery appear first maybe, or keep default
+                con.innerHTML = this.state.libraries.map(lib => {
+                    let freeBadge = '';
+                    if(lib.freeDeliveryLimit && lib.freeDeliveryLimit > 0) {
+                        let kVal = lib.freeDeliveryLimit / 1000;
+                        freeBadge = `<div class="lib-free-badge">Free > ${kVal}K</div>`;
+                    }
+                    
+                    return `
+                    <div class="story-item" onclick="app.filterByLibrary('${lib.id}', this)">
                         <div class="story-ring">
                             <img src="${lib.img}" class="story-img" onerror="this.src='${DEFAULT_IMG}'">
-                            ${lib.hasDiscount ? '<div class="discount-badge-story">%</div>' : ''}
+                            ${freeBadge}
                         </div>
                         <div class="story-name">${lib.name}</div>
                     </div>
-                `).join('');
+                `}).join('');
             },
 
             filterByLibrary(libId, el) {
@@ -1754,15 +1836,29 @@
                 } else { this.showToast("پارڤەکرن ل سەر ڤی ئامێری نینە"); }
             },
 
+            // NEW: PREVENT MIXED LIBRARIES
             addToCartFromModal() {
                 const b = this.state.currentBook;
+                
+                if (this.state.cart.length > 0) {
+                    const firstItem = this.state.cart[0];
+                    if (firstItem.libId !== b.libId) {
+                        const oldLib = this.state.libraries.find(l => l.id === firstItem.libId)?.name || "پەرتووکخانا دی";
+                        this.showToast(`⚠️ نابیت ژ دوو پەرتووکخانان پێکڤە بکڕی.\nسەبەتە یا تژیە ژ: ${oldLib}`);
+                        return; 
+                    }
+                }
+
                 const exist = this.state.cart.find(x => x.id === b.id);
                 if (exist) exist.qty++; else this.state.cart.push({ ...b, qty: 1 });
-                this.saveCart(); this.closeModal(); this.showToast("هاتە زێدەکرن بۆ سەبەتەیێ ✅");
+                this.saveCart(); 
+                this.closeModal(); 
+                this.showToast("هاتە زێدەکرن بۆ سەبەتەیێ ✅");
             },
 
             saveCart() { localStorage.setItem('cart_pro_max', JSON.stringify(this.state.cart)); this.updateCartUI(); },
 
+            // NEW: UPDATE CART UI WITH DYNAMIC FEES PER CITY
             updateCartUI() {
                 const count = this.state.cart.reduce((a, b) => a + b.qty, 0);
                 document.getElementById('cart-count').innerText = count;
@@ -1774,6 +1870,7 @@
                 
                 let deliveryFee = 0;
                 let freeLimit = 0; 
+                
                 const selectedCity = document.getElementById('delivery-city-select') ? document.getElementById('delivery-city-select').value : "";
                 
                 let libDiscount = 0;
@@ -1786,12 +1883,15 @@
                         freeLimit = lib.freeDeliveryLimit || 0; 
                         if(lib.discountPercent) libDiscount = lib.discountPercent;
 
-                        if (selectedCity && lib.city === selectedCity) {
-                            deliveryFee = lib.localPrice || 2000; 
+                        // NEW LOGIC: Dynamic Delivery based on 'deliveryRates' map in DB
+                        if (selectedCity && lib.deliveryRates && lib.deliveryRates[selectedCity]) {
+                            deliveryFee = lib.deliveryRates[selectedCity];
+                        } else if (selectedCity && lib.city === selectedCity) {
+                            deliveryFee = lib.localPrice || 3000;
                         } else if(selectedCity) {
                             deliveryFee = lib.foreignPrice || 5000; 
                         } else {
-                            deliveryFee = 0;
+                            deliveryFee = 0; 
                         }
                     } else {
                         deliveryFee = 5000; 
@@ -1915,5 +2015,4 @@
     </script>
 </body>
 </html>
-
 
