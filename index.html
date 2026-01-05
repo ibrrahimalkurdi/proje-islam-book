@@ -961,7 +961,7 @@
                     const permission = await Notification.requestPermission();
                     if (permission === 'granted') {
                         // REPLACE 'YOUR_PUBLIC_KEY' with your actual key from Firebase Console
-                        const token = await messaging.getToken({ vapidKey: 'BMD_dJqS32u...' }); 
+                        const token = await messaging.getToken({ vapidKey: 'BAn1A8NVcvldrBEwK_YTX9zLw7XU308I98DtKNSkWl6zJ-JC7YMOHQCy7ewZnBCe84EXRTSCAgVtOCfNCzGg9-c' }); 
                         if (token) {
                             console.log('FCM Token:', token);
                             if(this.state.user) {
