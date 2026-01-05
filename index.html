@@ -21,7 +21,7 @@
     <!-- FIREBASE SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"></script> <!-- Added Messaging -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"></script>
 
     <style>
         :root {
@@ -133,7 +133,6 @@
         .search-icon { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: var(--text-light); }
         .sort-btn { background: var(--bg-card); width: 50px; height: 50px; border-radius: 15px; display: flex; justify-content: center; align-items: center; box-shadow: var(--shadow); color: var(--primary); font-size: 1.2rem; cursor: pointer; flex-shrink: 0; }
         
-        /* New Filter Panel Styles */
         #filter-panel {
             background: var(--bg-card);
             padding: 15px;
@@ -825,8 +824,7 @@
                 libraries: [],
                 cities: [],
                 pointRules: [],
-                dataLoaded: false,
-                isInitialNotifLoad: true 
+                dataLoaded: false
             },
 
             init() {
@@ -868,7 +866,6 @@
                         this.state.dataLoaded = true;
                         document.getElementById('loader-overlay').style.opacity = '0';
                         setTimeout(() => { document.getElementById('loader-overlay').style.display = 'none'; }, 500);
-                        setTimeout(() => { this.state.isInitialNotifLoad = false; }, 2000);
                     }
                 };
 
@@ -904,20 +901,34 @@
                     checkDone();
                 });
 
+                // *********** FIX: NOTIFICATION LOGIC ***********
                 firestore.collection('notifications').orderBy('id', 'desc').limit(5).onSnapshot(snap => {
+                    
+                    // 1. Check local storage for the last seen notification timestamp
+                    let storedTime = localStorage.getItem('last_seen_notif_time');
+                    let lastSeenTime = storedTime ? parseInt(storedTime) : Date.now();
+
+                    // If it's the very first time (or cleared data), set current time to avoid old popups
+                    if (!storedTime) {
+                        localStorage.setItem('last_seen_notif_time', lastSeenTime);
+                    }
+
                     snap.docChanges().forEach(change => {
                         if (change.type === 'added') {
                             const data = change.doc.data();
                             if (!this.state.user) return;
                             
                             if (!data.targetPhone || data.targetPhone === this.state.user.phone) {
+                                // Always add to dropdown list history
                                 this.addNotification(data.text, data.id);
-                                if (!this.state.isInitialNotifLoad) {
-                                    const lastSeenTime = parseInt(localStorage.getItem('last_seen_toast_time')) || 0;
-                                    if (data.id > lastSeenTime) {
-                                        this.showToast("🔔 " + data.text);
-                                        localStorage.setItem('last_seen_toast_time', data.id);
-                                    }
+                                
+                                // Only show TOAST popup if the notification is NEWER than what we've seen
+                                if (data.id > lastSeenTime) {
+                                    this.showToast("🔔 " + data.text);
+                                    
+                                    // Update local storage so we don't see it again on refresh
+                                    lastSeenTime = data.id;
+                                    localStorage.setItem('last_seen_notif_time', lastSeenTime);
                                 }
                             }
                         }
@@ -1222,6 +1233,11 @@
                         name, phone, password: pass, address, city, age, gender, points: 0,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
+
+                    // *********** FIX: SET CURRENT TIME AS LAST SEEN NOTIF ***********
+                    // This prevents old notifications from popping up for new users
+                    localStorage.setItem('last_seen_notif_time', Date.now());
+                    
                     this.state.user = { name, phone, address, city, age, gender, points: 0 };
                     this.saveUserLocally(); this.toggleAuthOverlay(); this.showToast("بەخێرهاتی! هەژمار دروست بوو ✅");
                     this.checkHeaderStatus(); this.fetchLiveOrders();
@@ -1911,4 +1927,3 @@
     </script>
 </body>
 </html>
-
