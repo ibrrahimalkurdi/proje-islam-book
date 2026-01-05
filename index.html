@@ -809,6 +809,12 @@
                 notifications: JSON.parse(localStorage.getItem('notifs_pro_max')) || [],
                 darkMode: localStorage.getItem('theme_pro_max') === 'dark',
                 lang: localStorage.getItem('lang_pro_max') || 'arabic', 
+                
+                // *** THE FIX: SESSION START TIME ***
+                // We record when the app was opened.
+                // We only show toasts for notifications NEWER than this time.
+                appLoadedTime: Date.now(),
+
                 currentBook: null,
                 isEditMode: false,
                 sortAsc: true,
@@ -901,35 +907,23 @@
                     checkDone();
                 });
 
-                // *********** FIX: NOTIFICATION LOGIC ***********
+                // *********** FIX: NOTIFICATION LOGIC (SESSION TIME) ***********
                 firestore.collection('notifications').orderBy('id', 'desc').limit(5).onSnapshot(snap => {
-                    
-                    // 1. Check local storage for the last seen notification timestamp
-                    let storedTime = localStorage.getItem('last_seen_notif_time');
-                    let lastSeenTime = storedTime ? parseInt(storedTime) : Date.now();
-
-                    // If it's the very first time (or cleared data), set current time to avoid old popups
-                    if (!storedTime) {
-                        localStorage.setItem('last_seen_notif_time', lastSeenTime);
-                    }
-
                     snap.docChanges().forEach(change => {
                         if (change.type === 'added') {
                             const data = change.doc.data();
-                            if (!this.state.user) return;
                             
-                            if (!data.targetPhone || data.targetPhone === this.state.user.phone) {
-                                // Always add to dropdown list history
-                                this.addNotification(data.text, data.id);
-                                
-                                // Only show TOAST popup if the notification is NEWER than what we've seen
-                                if (data.id > lastSeenTime) {
-                                    this.showToast("🔔 " + data.text);
-                                    
-                                    // Update local storage so we don't see it again on refresh
-                                    lastSeenTime = data.id;
-                                    localStorage.setItem('last_seen_notif_time', lastSeenTime);
-                                }
+                            // Filter by user/guest logic
+                            if (!this.state.user && data.targetPhone) return;
+                            if (this.state.user && data.targetPhone && data.targetPhone !== this.state.user.phone) return;
+
+                            // 1. Always add to history dropdown (so user can see old ones)
+                            this.addNotification(data.text, data.id);
+                            
+                            // 2. Only show TOAST popup if the notification is NEWER than when the app was opened
+                            // This guarantees old notifications from DB never pop up on refresh.
+                            if (data.id > this.state.appLoadedTime) {
+                                this.showToast("🔔 " + data.text);
                             }
                         }
                     });
@@ -1233,10 +1227,6 @@
                         name, phone, password: pass, address, city, age, gender, points: 0,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
-
-                    // *********** FIX: SET CURRENT TIME AS LAST SEEN NOTIF ***********
-                    // This prevents old notifications from popping up for new users
-                    localStorage.setItem('last_seen_notif_time', Date.now());
                     
                     this.state.user = { name, phone, address, city, age, gender, points: 0 };
                     this.saveUserLocally(); this.toggleAuthOverlay(); this.showToast("بەخێرهاتی! هەژمار دروست بوو ✅");
@@ -1927,3 +1917,4 @@
     </script>
 </body>
 </html>
+
