@@ -21,6 +21,7 @@
     <!-- FIREBASE SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"></script> <!-- Added Messaging -->
 
     <style>
         :root {
@@ -60,6 +61,12 @@
         body { background: var(--bg-body); color: var(--text-main); overflow-x: hidden; padding-bottom: calc(var(--nav-h) + 20px); transition: background 0.3s, color 0.3s; }
         a { text-decoration: none; color: inherit; }
         
+        /* --- LOADER & OFFLINE --- */
+        #loader-overlay, #offline-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-body); z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; transition: opacity 0.5s; }
+        #offline-overlay { z-index: 10000; display: none; text-align: center; }
+        .spinner { width: 50px; height: 50px; border: 5px solid rgba(0,0,0,0.1); border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        .loading-text { font-weight: bold; color: var(--text-light); animation: pulse 1.5s infinite; }
+
         /* --- TOAST NOTIFICATION --- */
         #toast-container { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); z-index: 6000; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 350px; pointer-events: none; }
         .toast { background: rgba(30, 30, 30, 0.95); color: white; padding: 15px 20px; border-radius: 50px; display: flex; align-items: center; gap: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); opacity: 0; transform: translateY(20px); transition: 0.3s; backdrop-filter: blur(5px); }
@@ -73,7 +80,6 @@
         .story-item:active { transform: scale(0.9); }
         .story-item.active-lib .story-ring { border-color: var(--success); box-shadow: 0 0 0 3px var(--success); background: none; }
         .story-item.has-discount .story-ring { background: var(--discount-gradient); animation: pulse-ring 2s infinite; }
-        /* Only show badge if library specifically has a discount */
         .discount-badge-story { position: absolute; top: 0; right: 0; background: red; color: white; width: 22px; height: 22px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 0.7rem; border: 2px solid var(--bg-body); font-weight: bold; }
         .story-ring { width: 70px; height: 70px; border-radius: 50%; padding: 3px; background: var(--story-gradient); position: relative; transition: 0.3s; }
         .story-img { width: 100%; height: 100%; border-radius: 50%; border: 3px solid var(--bg-body); object-fit: cover; background: white; }
@@ -120,12 +126,26 @@
         .notif-dot { position: absolute; top: -2px; right: -2px; width: 12px; height: 12px; background: var(--danger); border-radius: 50%; border: 2px solid var(--bg-card); display: none; }
         .notif-dot.show { display: block; }
 
-        /* --- SEARCH & HOME --- */
+        /* --- SEARCH & ADVANCED FILTER --- */
         .search-container { padding: 10px 20px 10px; display: flex; gap: 10px; align-items: center; }
         .search-box { position: relative; width: 100%; }
         .search-input { width: 100%; padding: 16px 50px 16px 20px; border-radius: 20px; border: none; background: var(--bg-card); color: var(--text-main); box-shadow: var(--shadow); font-size: 1rem; }
         .search-icon { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: var(--text-light); }
         .sort-btn { background: var(--bg-card); width: 50px; height: 50px; border-radius: 15px; display: flex; justify-content: center; align-items: center; box-shadow: var(--shadow); color: var(--primary); font-size: 1.2rem; cursor: pointer; flex-shrink: 0; }
+        
+        /* New Filter Panel Styles */
+        #filter-panel {
+            background: var(--bg-card);
+            padding: 15px;
+            margin: 0 20px 15px;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            animation: fadeIn 0.3s;
+            border: 1px solid var(--border-color);
+        }
+        .filter-input-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .filter-input { width: 100%; padding: 10px; background: var(--bg-body); border-radius: 10px; border: 1px solid var(--border-color); color: var(--text-main); font-size: 0.9rem; outline: none; }
+        .filter-select { padding: 8px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-main); outline: none; font-size: 0.9rem; }
 
         .categories { display: flex; gap: 12px; overflow-x: auto; padding: 10px 20px; scrollbar-width: none; }
         .cat-chip { background: var(--bg-card); padding: 10px 20px; border-radius: 30px; white-space: nowrap; font-weight: 600; color: var(--text-light); border: 1px solid var(--border-color); transition: 0.3s; cursor: pointer; }
@@ -155,67 +175,33 @@
         .req-input { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-main); }
         .btn-req { padding: 0 15px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; }
 
-        /* --- UPDATED PRODUCT MODAL (CLEANER) --- */
+        /* --- PRODUCT MODAL --- */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-body); z-index: 2000; overflow-y: auto; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
         .modal.open { transform: translateY(0); }
         
-        .modal-hero {
-            height: 320px;
-            width: 100%;
-            position: relative;
-        }
-        .modal-hero img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .modal-hero-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.3), transparent 60%, var(--bg-card));
-        }
+        .modal-hero { height: 260px; width: 100%; position: relative; } 
+        .modal-hero img { width: 100%; height: 100%; object-fit: cover; }
+        .modal-hero-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(0,0,0,0.3), transparent 60%, var(--bg-card)); }
 
         .modal-btn-row { position: absolute; top: 20px; left: 20px; right: 20px; display: flex; justify-content: space-between; pointer-events: none; z-index: 10; }
         .modal-btn-icon { background: rgba(255,255,255,0.9); width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.3rem; cursor: pointer; pointer-events: auto; color: var(--text-main); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
 
-        .modal-content-container {
-            background: var(--bg-card);
-            border-radius: 30px 30px 0 0;
-            margin-top: -50px;
-            position: relative;
-            padding: 30px 25px 120px 25px;
-            min-height: 500px;
-            box-shadow: 0 -10px 30px rgba(0,0,0,0.1);
-        }
+        .modal-content-container { background: var(--bg-card); border-radius: 30px 30px 0 0; margin-top: -30px; position: relative; padding: 30px 25px 120px 25px; min-height: 500px; box-shadow: 0 -10px 30px rgba(0,0,0,0.1); }
 
         .m-header-info { text-align: center; margin-bottom: 25px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; }
         .m-cat-tag { background: var(--primary); color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; margin-bottom: 10px; display: inline-block; }
         .m-lib-tag { background: #34495e; color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; margin-bottom: 10px; display: inline-block; margin-right:5px; }
         
-        .m-title { font-size: 1.6rem; font-weight: 800; color: var(--text-main); margin: 10px 0; line-height: 1.4; }
+        .m-title { font-size: 1.3rem; font-weight: 800; color: var(--text-main); margin: 10px 0; line-height: 1.5; }
         .m-author { color: var(--text-light); font-size: 1rem; font-weight: 500; }
 
-        .m-spec-box {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-        .m-spec-item {
-            background: var(--bg-body);
-            padding: 15px;
-            border-radius: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-        }
-        .m-spec-icon { color: var(--primary); font-size: 1.2rem; }
+        .m-spec-box { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 25px; }
+        .m-spec-item { background: var(--bg-body); padding: 12px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; border: 1px solid var(--border-color); }
+        .m-spec-icon { color: var(--primary); font-size: 1.1rem; }
         .m-spec-label { font-size: 0.75rem; color: var(--text-light); }
-        .m-spec-val { font-weight: bold; color: var(--text-main); font-size: 0.95rem; }
+        .m-spec-val { font-weight: bold; color: var(--text-main); font-size: 0.9rem; text-align: center; }
 
-        .m-desc-box { background: #f8f9fa; padding: 20px; border-radius: 15px; border: 1px solid var(--border-color); margin-bottom: 25px; line-height: 1.8; color: #4b5563; text-align: justify; font-size: 0.95rem; }
+        .m-desc-box { background: var(--bg-body); padding: 20px; border-radius: 15px; border: 1px solid var(--border-color); margin-bottom: 25px; line-height: 2; color: var(--text-main); text-align: justify; font-size: 0.95rem; }
 
         .m-offers { background: rgba(46, 204, 113, 0.1); border: 1px solid var(--success); padding: 15px; border-radius: 15px; margin-bottom: 25px; }
         .m-offer-row { display: flex; gap: 10px; align-items: center; font-size: 0.9rem; margin-bottom: 8px; color: #1e8449; }
@@ -283,14 +269,12 @@
         .st-wait { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
         .st-done { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .st-del { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .st-cancel { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
         .track-items { font-size: 0.9rem; color: var(--text-main); line-height: 1.6; margin-bottom: 15px; }
         .track-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
         .track-total { font-weight: 900; color: var(--primary); font-size: 1.2rem; }
         
-        /* CODE BOX FOR ORDER - HIDDEN FOR USER IN NEW LOGIC BUT KEPT FOR ADMIN LOGIC IF NEEDED */
-        .code-box-display { display: none; } 
-
         .btn-confirm-order { width: 100%; padding: 10px; background: var(--success); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; animation: pulse 2s infinite; }
         .btn-cancel-order { width: 40px; height: 40px; background: rgba(235, 77, 75, 0.1); color: var(--danger); border-radius: 50%; border: 1px solid var(--danger); display: flex; justify-content: center; align-items: center; cursor: pointer; }
 
@@ -307,7 +291,7 @@
         .btn:active { transform: scale(0.98); }
         .hidden { display: none !important; }
         
-        /* --- NEW DELIVERY DESIGN --- */
+        /* --- DELIVERY DESIGN --- */
         .delivery-box {
             background: var(--bg-card);
             border-radius: 20px;
@@ -328,44 +312,33 @@
             font-size: 1.1rem;
         }
         .delivery-body { padding: 20px; }
-        .input-group {
-            margin-bottom: 20px;
-            position: relative;
-        }
-        .input-group-icon {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--primary);
-            pointer-events: none;
-            font-size: 1.2rem;
-        }
-        .delivery-select, .delivery-input {
-            width: 100%;
-            padding: 18px 50px 18px 20px; /* space for icon */
-            border-radius: 15px;
-            border: 2px solid var(--border-color);
-            font-size: 1rem;
-            background: var(--bg-body);
-            color: var(--text-main);
-            transition: 0.3s;
-            appearance: none;
-            outline: none;
-        }
-        .delivery-select:focus, .delivery-input:focus {
-            border-color: var(--primary);
-            background: var(--bg-card);
-            box-shadow: 0 0 0 4px rgba(30, 55, 153, 0.1);
-        }
+        .input-group { margin-bottom: 20px; position: relative; }
+        .input-group-icon { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--primary); pointer-events: none; font-size: 1.2rem; }
+        .delivery-select, .delivery-input { width: 100%; padding: 18px 50px 18px 20px; border-radius: 15px; border: 2px solid var(--border-color); font-size: 1rem; background: var(--bg-body); color: var(--text-main); transition: 0.3s; appearance: none; outline: none; }
+        .delivery-select:focus, .delivery-input:focus { border-color: var(--primary); background: var(--bg-card); box-shadow: 0 0 0 4px rgba(30, 55, 153, 0.1); }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes heartBeat { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
         @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(255, 0, 0, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); } }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
+
+    <!-- LOADING OVERLAY -->
+    <div id="loader-overlay">
+        <div class="spinner"></div>
+        <div class="loading-text">جاری بارکردن داتایێ...</div>
+    </div>
+
+    <!-- OFFLINE OVERLAY -->
+    <div id="offline-overlay">
+        <i class="fas fa-wifi-slash" style="font-size:4rem; color:var(--text-light); margin-bottom:20px;"></i>
+        <h3 style="color:var(--text-main);">ئینتەرنێت نینە!</h3>
+        <p style="color:var(--text-light);">تکایە دڵنیابە لە هەبوونی هێڵی ئینتەرنێت</p>
+        <button class="btn btn-primary" onclick="window.location.reload()" style="margin-top:20px; width:auto; padding:10px 30px;">نوێکرنەوە 🔄</button>
+    </div>
 
     <!-- TOAST NOTIFICATION -->
     <div id="toast-container"></div>
@@ -396,7 +369,6 @@
             <div class="auth-close" onclick="app.toggleAuthOverlay()"><i class="fas fa-times"></i></div>
             <div class="auth-logo"><i class="fas fa-kaaba"></i></div>
             
-            <!-- Login Form -->
             <div id="login-form">
                 <h2 style="margin-bottom:20px; text-align:center;" data-lang="login">چوونە ژوور</h2>
                 <input type="tel" id="login-phone" class="auth-input" placeholder="ژمارا مۆبایلێ (07xxxxxxxxx)" maxlength="11">
@@ -408,7 +380,6 @@
                 </p>
             </div>
             
-            <!-- Register Form -->
             <div id="register-form" class="hidden">
                 <h2 style="margin-bottom:20px; text-align:center;" data-lang="new_account">هەژمارا نوێ</h2>
                 <input type="text" id="reg-name" class="auth-input" placeholder="ناڤێ سیانی">
@@ -425,7 +396,6 @@
                 <div style="display:flex; gap:10px;">
                     <input type="number" id="reg-age" class="auth-input" placeholder="ژی (عەمر)" style="flex:1;">
                     <select id="reg-city" class="auth-input" style="flex:2;">
-                        <!-- Options filled dynamically -->
                         <option value="Duhok">دهۆک</option>
                     </select>
                 </div>
@@ -443,8 +413,6 @@
 
     <!-- MAIN APP -->
     <div id="main-app">
-        
-        <!-- HEADER -->
         <header>
             <div class="brand">
                 <i class="fas fa-quran" style="font-size:1.4rem; color:var(--accent);"></i>
@@ -475,19 +443,37 @@
             </div>
         </header>
 
-        <!-- 1. HOME SCREEN -->
         <section id="home" class="screen active">
+            <!-- UPDATED SEARCH WITH FILTER TOGGLE -->
             <div class="search-container">
                 <div class="search-box">
-                    <input type="text" class="search-input" id="search-input" placeholder="لێگەریان..." oninput="app.search(this.value)">
+                    <input type="text" class="search-input" id="search-input" placeholder="لێگەریان..." oninput="app.advancedSearch()">
                     <i class="fas fa-search search-icon"></i>
                 </div>
-                <div class="sort-btn" onclick="app.toggleSort()">
-                    <i class="fas fa-sort-amount-down" id="sort-icon"></i>
+                <div class="sort-btn" onclick="app.toggleFilterPanel()">
+                    <i class="fas fa-sliders-h" style="font-size:1.1rem;"></i>
+                </div>
+            </div>
+
+            <!-- NEW ADVANCED FILTER PANEL -->
+            <div id="filter-panel" style="display:none;">
+                <div class="filter-input-row">
+                    <input type="text" id="filter-author" class="filter-input" placeholder="ناڤێ نڤیسەری / وەرگێڕی" oninput="app.advancedSearch()">
+                </div>
+                <div class="filter-input-row">
+                    <input type="number" id="filter-min-price" class="filter-input" placeholder="کێمترین نرخ" oninput="app.advancedSearch()">
+                    <input type="number" id="filter-max-price" class="filter-input" placeholder="زۆرترین نرخ" oninput="app.advancedSearch()">
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:0.8rem; color:var(--text-light);">ڕیزبەندی:</span>
+                    <select id="filter-sort" class="filter-select" onchange="app.advancedSearch()">
+                        <option value="default">ئاسایی</option>
+                        <option value="low-high">نرخ: کێم ➡️ زۆر</option>
+                        <option value="high-low">نرخ: زۆر ➡️ کێم</option>
+                    </select>
                 </div>
             </div>
             
-            <!-- LIBRARIES -->
             <h4 style="padding:0 20px; color:var(--text-light); font-size:0.9rem;" data-lang="libraries">پەرتووکخانە</h4>
             <div class="stories-container" id="stories-list"></div>
             
@@ -502,10 +488,7 @@
                 <div class="cat-chip" onclick="app.filter('city', this)" data-lang="city_filter">باژێڕ</div>
             </div>
             
-            <!-- CITY FILTER (Hidden by default) -->
-            <div id="city-filters" class="categories" style="display:none; margin-top:-10px;">
-                <!-- Populated by JS -->
-            </div>
+            <div id="city-filters" class="categories" style="display:none; margin-top:-10px;"></div>
 
             <div class="grid" id="book-grid"></div>
             <div class="request-box">
@@ -519,14 +502,12 @@
             <div style="height:100px;"></div> 
         </section>
 
-        <!-- 2. CART SCREEN -->
         <section id="cart" class="screen">
             <div style="padding:20px;">
                 <h2 style="margin-bottom:20px; color:var(--text-main);" data-lang="cart_title">سەبەتەیا کڕینێ</h2>
                 <div id="cart-list"></div>
                 <div style="background:var(--bg-card); padding:20px; border-radius:20px; margin-top:20px; box-shadow:var(--shadow);">
                     
-                    <!-- POINTS REDEMPTION -->
                     <div id="points-redeem-section" style="display:none;">
                         <div class="points-redeem-box">
                             <div>
@@ -535,7 +516,6 @@
                             </div>
                             <select id="points-select" style="padding:5px; border-radius:10px; border:none; color:black;">
                                 <option value="0">هەڵبژێرە</option>
-                                <!-- Populated from DB -->
                             </select>
                             <button class="redeem-btn" onclick="app.applyPointsDiscount()">چالاک بکە</button>
                         </div>
@@ -553,7 +533,6 @@
                         <span id="sub-total">0 IQD</span>
                     </div>
                     
-                    <!-- NEW DELIVERY DESIGN -->
                     <div class="delivery-box">
                         <div class="delivery-header">
                             <i class="fas fa-truck-moving"></i> &nbsp; زانیاریێن گەهاندنێ
@@ -563,7 +542,6 @@
                                 <i class="fas fa-map-marker-alt input-group-icon"></i>
                                 <select id="delivery-city-select" class="delivery-select" onchange="app.updateDeliveryFee()">
                                     <option value="">-- باژێڕ / دەڤەر هەڵبژێرە --</option>
-                                    <!-- Populated dynamically -->
                                 </select>
                             </div>
                             <div class="input-group">
@@ -594,7 +572,6 @@
             <div style="height:100px;"></div>
         </section>
 
-        <!-- 3. PROFILE SCREEN (UPDATED) -->
         <section id="profile" class="screen">
             <div id="profile-guest" class="hidden" style="text-align:center; padding:50px 20px;">
                 <i class="fas fa-user-lock" style="font-size:4rem; color:var(--text-light); margin-bottom:20px;"></i>
@@ -620,6 +597,12 @@
 
                 <div class="profile-card">
                     <h3 style="margin-bottom:15px; border-bottom:1px solid var(--border-color); padding-bottom:10px; color:var(--text-main);" data-lang="personal_info">زانیاریێن کەسی</h3>
+                    
+                    <!-- Notification Button -->
+                    <button class="btn btn-outline" onclick="app.enableNotifications()" style="margin-bottom:20px; font-size:0.9rem;">
+                        <i class="fas fa-bell"></i> چالاککرنا ئاگەهداریان 🔔
+                    </button>
+
                     <div class="info-row">
                         <span class="info-label"><i class="fas fa-user"></i> <span data-lang="name">ناڤ</span></span>
                         <span class="info-val" id="val-name">...</span>
@@ -633,9 +616,7 @@
                     <div class="info-row">
                         <span class="info-label"><i class="fas fa-city"></i> <span>باژێڕ</span></span>
                         <span class="info-val" id="val-city">...</span>
-                        <select id="inp-city" class="edit-input hidden">
-                            <!-- Populated dynamically -->
-                        </select>
+                        <select id="inp-city" class="edit-input hidden"></select>
                     </div>
                     <div class="info-row">
                         <span class="info-label"><i class="fas fa-map-marker-alt"></i> <span data-lang="address">ناڤنیشان</span></span>
@@ -647,12 +628,10 @@
                     </div>
                 </div>
 
-                <!-- LOGOUT BUTTON (Moved INSIDE Edit Mode) -->
                 <button onclick="app.logout()" id="btn-logout-edit" class="btn-logout-styled hidden">
                     <span data-lang="logout">دەرکەڤتن ژ هەژمارێ</span> <i class="fas fa-sign-out-alt"></i>
                 </button>
 
-                <!-- NEW LIVE ORDERS SECTION (Below Logout) -->
                 <div class="live-orders-container">
                     <h3 class="live-title">
                         <i class="fas fa-history"></i> <span data-lang="my_orders">داواکاری و چاڤەڕێبوون</span>
@@ -664,7 +643,6 @@
             </div>
         </section>
 
-        <!-- NAV -->
         <nav class="nav-bar">
             <div class="nav-item active" onclick="app.nav('home', this)"><i class="fas fa-home"></i></div>
             <div class="nav-item" onclick="app.nav('cart', this)">
@@ -675,7 +653,6 @@
         </nav>
     </div>
 
-    <!-- UPDATED PRODUCT MODAL -->
     <div id="product-modal" class="modal">
         <div class="modal-hero">
             <div class="modal-hero-overlay"></div>
@@ -718,7 +695,10 @@
             </div>
 
             <div class="m-offers">
-                <div class="m-offer-row"><i class="fas fa-truck"></i> <span>گەهاندن بێ بەرامبەرە بۆ کڕینا سەرووی <span id="m-free-limit">50,000</span> IQD</span></div>
+                <div class="m-offer-row" id="m-delivery-row">
+                    <i class="fas fa-truck"></i> 
+                    <span id="m-delivery-text">گەهاندن بێ بەرامبەرە بۆ کڕینا سەرووی <span id="m-free-limit">50,000</span> IQD</span>
+                </div>
                 <div class="m-offer-row" id="m-wholesale-row"><i class="fas fa-tags"></i> <span>داشکاندن هەیە بۆ کڕینا <span id="m-bulk-qty" style="font-weight:bold;">5</span>+ دانە</span></div>
             </div>
 
@@ -729,7 +709,6 @@
                 <i class="fas fa-book-reader"></i> <span data-lang="preview">چاڤخشاندن (نموونە)</span>
             </button>
 
-            <!-- RELATED BOOKS SECTION -->
             <div class="related-books-section">
                 <div class="related-title" data-lang="related">پەرتووکێن هەڤشێوە</div>
                 <div class="related-scroll" id="related-books-container"></div>
@@ -748,9 +727,10 @@
     </div>
 
     <script>
-        // PWA SERVICE WORKER REGISTRATION
+        // NOTE: For Background Notifications to work, you MUST create 'firebase-messaging-sw.js'
+        // in the root directory. Inside this HTML file, we only handle Foreground notifications.
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').then(() => console.log('SW Registered'));
+            navigator.serviceWorker.register('sw.js').then(reg => console.log('SW Registered', reg)).catch(err => console.log('SW Error', err));
         }
 
         const firebaseConfig = {
@@ -767,10 +747,15 @@
             firebase.initializeApp(firebaseConfig);
         }
         const firestore = firebase.firestore();
+        let messaging;
+        try {
+            messaging = firebase.messaging();
+        } catch(e) {
+            console.log("Messaging not supported or blocked");
+        }
 
         const DEFAULT_IMG = "https://via.placeholder.com/300x450/cccccc/000000?text=No+Image";
 
-        // TRANSLATIONS
         const translations = {
             'badini': {
                 app_name: "پڕۆژێ ئیسلام", search_place: "لێگەریان...", all: "هەمی", fav: "دڵخواز ❤️", quran: "قورئان", aqida: "عەقیدە", hadith: "فەرموودە", history: "مێژوو", city_filter: "باژێڕ",
@@ -780,7 +765,7 @@
                 personal_info: "زانیاریێن کەسی", name: "ناڤ", phone: "مۆبایل", address: "ناونیشان", save: "پاشەکەوتکرن",
                 my_orders: "داواکاری و مێژوو", logout: "دەرکەڤتن ژ هەژمارێ",
                 pages: "لاپەڕ", investigation: "تەحقیق", paper: "جورێ کاغەزێ", volumes: "ژمارا بەرگان", summary: "پوختە", preview: "چاڤخشاندن", add_to_cart: "زیادکرن", view: "ببینە", related: "پەرتووکێن هەڤشێوە", points: "خاڵ",
-                wait: "چاڤەڕێکرن", approved: "وەرگرتن (ئەدمین)", delivered: "گەهشت (تەمام)", empty_cart: "سەبەتە یا بەتاڵە", sent_msg: "داواکاری هاتە هنارتن ✅",
+                wait: "چاڤەڕێکرن", approved: "وەرگرتن (ئەدمین)", delivered: "گەهشت (تەمام)", canceled: "هاتە هەلوەشاندن", empty_cart: "سەبەتە یا بەتاڵە", sent_msg: "داواکاری هاتە هنارتن ✅",
                 lang_val: "کوردی", req_title: "کتێبەکەت نەدۆزیەوە؟", req_desc: "ناڤێ پەرتووکێ بنڤیسە، ئەم دێ بۆ تە دابین کەین.", send: "هنارتن",
                 req_sent: "داواکارییا پەرتووکێ گەهشت 📥", 
                 confirm_btn: "وەرگرتن (پشتڕاستکرن)", enter_code: "کۆدی بنڤیسە", code_desc: "کۆدێ د ئاگەهداریان دا بۆ تە هاتی بنڤیسە.",
@@ -794,7 +779,7 @@
                 personal_info: "زانیاری کەسی", name: "ناو", phone: "مۆبایل", address: "ناونیشان", save: "پاشەکەوتکردن",
                 my_orders: "داواکاری و مێژوو", logout: "دەرچوون",
                 pages: "لاپەڕە", investigation: "تەحقیق", paper: "جۆری کاغەز", volumes: "ژمارەی بەرگ", summary: "پوختە", preview: "پێداچوونەوە", add_to_cart: "زیادکردن", view: "بینین", related: "پەرتووکە هاوشێوەکان", points: "خاڵ",
-                wait: "چاەڕێکردن", approved: "وەرگیرا (ئەدمین)", delivered: "گەیشت (تەواو)", empty_cart: "سەبەتە بەتاڵە", sent_msg: "داواکاری نێردرا ✅",
+                wait: "چاەڕێکردن", approved: "وەرگیرا (ئەدمین)", delivered: "گەیشت (تەواو)", canceled: "هەڵوەشێنرایەوە", empty_cart: "سەبەتە بەتاڵە", sent_msg: "داواکاری نێردرا ✅",
                 lang_val: "کوردی", req_title: "کتێبەکەت نەدۆزیەوە؟", req_desc: "ناوی کتێبەکە بنووسە، بۆتی دابین دەکەین.", send: "ناردن",
                 req_sent: "داواکاری کتێب گەیشت 📥",
                 confirm_btn: "وەرگرتن (پشتڕاستکردن)", enter_code: "کۆد بنووسە", code_desc: "ئەو کۆدەی لە ئاگادارکردنەوە هاتوو بنووسە.",
@@ -808,7 +793,7 @@
                 personal_info: "المعلومات الشخصية", name: "الاسم", phone: "الهاتف", address: "العنوان", save: "حفظ",
                 my_orders: "الطلبات والسجل", logout: "تسجيل الخروج",
                 pages: "صفحات", investigation: "التحقيق", paper: "نوع الورق", volumes: "عدد المجلدات", summary: "ملخص", preview: "معاينة", add_to_cart: "إضافة", view: "عرض", related: "كتب مشابهة", points: "نقطة",
-                wait: "قيد الانتظار", approved: "تم القبول", delivered: "تم التوصيل", empty_cart: "السلة فارغة", sent_msg: "تم إرسال الطلب ✅",
+                wait: "قيد الانتظار", approved: "تم القبول", delivered: "تم التوصيل", canceled: "ملغي", empty_cart: "السلة فارغة", sent_msg: "تم إرسال الطلب ✅",
                 lang_val: "العربية", req_title: "لم تجد كتابك؟", req_desc: "اكتب اسم الكتاب وسنوفره لك.", send: "إرسال",
                 req_sent: "تم استلام طلب الكتاب 📥",
                 confirm_btn: "استلام (تأكيد)", enter_code: "أدخل الرمز", code_desc: "أدخل الرمز الذي وصلك في الإشعارات.",
@@ -825,7 +810,6 @@
                 notifications: JSON.parse(localStorage.getItem('notifs_pro_max')) || [],
                 darkMode: localStorage.getItem('theme_pro_max') === 'dark',
                 lang: localStorage.getItem('lang_pro_max') || 'arabic', 
-                
                 currentBook: null,
                 isEditMode: false,
                 sortAsc: true,
@@ -837,41 +821,69 @@
                 activeLibFilter: null,
                 deliveryFee: 0,
                 isSubmitting: false, 
-
                 books: [],
                 libraries: [],
                 cities: [],
-                pointRules: []
+                pointRules: [],
+                dataLoaded: false,
+                isInitialNotifLoad: true 
             },
 
             init() {
                 if (this.state.darkMode) document.body.setAttribute('data-theme', 'dark');
                 this.updateTexts();
-                
+                this.checkOnlineStatus();
                 this.fetchAllData();
-                
                 this.updateCartUI();
                 this.checkHeaderStatus();
                 this.checkNotifications();
-                
                 if(this.state.user) {
                     this.fetchLiveOrders();
                 }
-
                 this.setupInputListeners();
             },
 
+            checkOnlineStatus() {
+                const handleStatus = () => {
+                    const overlay = document.getElementById('offline-overlay');
+                    if (navigator.onLine) {
+                        overlay.style.display = 'none';
+                    } else {
+                        overlay.style.display = 'flex';
+                    }
+                };
+                window.addEventListener('online', handleStatus);
+                window.addEventListener('offline', handleStatus);
+                handleStatus(); 
+            },
+
             fetchAllData() {
+                document.getElementById('loader-overlay').style.opacity = '1';
+                document.getElementById('loader-overlay').style.display = 'flex';
+
+                let loadedCount = 0;
+                const checkDone = () => {
+                    loadedCount++;
+                    if(loadedCount >= 4) {
+                        this.state.dataLoaded = true;
+                        document.getElementById('loader-overlay').style.opacity = '0';
+                        setTimeout(() => { document.getElementById('loader-overlay').style.display = 'none'; }, 500);
+                        setTimeout(() => { this.state.isInitialNotifLoad = false; }, 2000);
+                    }
+                };
+
                 firestore.collection('books').onSnapshot(snap => {
                     this.state.books = [];
                     snap.forEach(doc => { this.state.books.push({ docId: doc.id, ...doc.data() }); });
                     this.renderBooks(this.state.books);
+                    checkDone();
                 });
 
                 firestore.collection('libraries').onSnapshot(snap => {
                     this.state.libraries = [];
                     snap.forEach(doc => { this.state.libraries.push({ docId: doc.id, ...doc.data() }); });
                     this.renderLibraries();
+                    checkDone();
                 });
 
                 firestore.collection('settings').doc('locations').onSnapshot(doc => {
@@ -881,6 +893,7 @@
                         this.renderCityFilters();
                         this.renderDeliveryOptions();
                     }
+                    checkDone();
                 });
 
                 firestore.collection('settings').doc('points_rules_dynamic').onSnapshot(doc => {
@@ -888,31 +901,85 @@
                         this.state.pointRules = doc.data().rules || [];
                         this.renderPointRedeemOptions();
                     }
+                    checkDone();
                 });
 
-                firestore.collection('notifications').onSnapshot(snap => {
+                firestore.collection('notifications').orderBy('id', 'desc').limit(5).onSnapshot(snap => {
                     snap.docChanges().forEach(change => {
                         if (change.type === 'added') {
                             const data = change.doc.data();
-                            
                             if (!this.state.user) return;
+                            
                             if (!data.targetPhone || data.targetPhone === this.state.user.phone) {
-                                
-                                const notifTime = data.id || Date.now();
-                                // Track the ID of the last seen notification
-                                const lastSeenId = parseInt(localStorage.getItem('last_seen_notif_time')) || 0;
-                                
-                                // Only show TOAST if the notification is newer than what we've seen
-                                if (notifTime > lastSeenId) {
-                                    this.showToast("🔔 " + data.text);
-                                    localStorage.setItem('last_seen_notif_time', notifTime);
+                                this.addNotification(data.text, data.id);
+                                if (!this.state.isInitialNotifLoad) {
+                                    const lastSeenTime = parseInt(localStorage.getItem('last_seen_toast_time')) || 0;
+                                    if (data.id > lastSeenTime) {
+                                        this.showToast("🔔 " + data.text);
+                                        localStorage.setItem('last_seen_toast_time', data.id);
+                                    }
                                 }
-                                // Always add to the list
-                                this.addNotification(data.text, notifTime);
                             }
                         }
                     });
                 });
+            },
+
+            // --- ADVANCED SEARCH & FILTER ---
+            toggleFilterPanel() {
+                const panel = document.getElementById('filter-panel');
+                panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+            },
+
+            advancedSearch() {
+                const query = document.getElementById('search-input').value.toLowerCase().trim();
+                const authorQuery = document.getElementById('filter-author').value.toLowerCase().trim();
+                const minPrice = parseFloat(document.getElementById('filter-min-price').value) || 0;
+                const maxPrice = parseFloat(document.getElementById('filter-max-price').value) || Infinity;
+                const sortType = document.getElementById('filter-sort').value;
+                
+                let filtered = this.state.books.filter(b => {
+                    const matchTitle = b.title.toLowerCase().includes(query) || (b.desc && b.desc.toLowerCase().includes(query));
+                    const matchAuthor = !authorQuery || (b.author && b.author.toLowerCase().includes(authorQuery)) || (b.translator && b.translator.toLowerCase().includes(authorQuery));
+                    const matchPrice = b.price >= minPrice && b.price <= maxPrice;
+                    return matchTitle && matchAuthor && matchPrice;
+                });
+
+                if(sortType === 'low-high') {
+                    filtered.sort((a, b) => a.price - b.price);
+                } else if(sortType === 'high-low') {
+                    filtered.sort((a, b) => b.price - a.price);
+                }
+
+                this.renderBooks(filtered);
+            },
+
+            // --- PUSH NOTIFICATIONS ---
+            async enableNotifications() {
+                if(!messaging) return this.showToast("ئاگەهداری ل سەر ڤی ئامێری نینە");
+                try {
+                    const permission = await Notification.requestPermission();
+                    if (permission === 'granted') {
+                        // REPLACE 'YOUR_PUBLIC_KEY' with your actual key from Firebase Console
+                        const token = await messaging.getToken({ vapidKey: 'BMD_dJqS32u...' }); 
+                        if (token) {
+                            console.log('FCM Token:', token);
+                            if(this.state.user) {
+                                await firestore.collection('users').doc(this.state.user.phone).update({
+                                    fcmToken: token
+                                });
+                                this.showToast("ئاگەهداری چالاک بوون ✅");
+                            }
+                        } else {
+                            this.showToast("ناتوانرێت تۆکن وەربگیرێت ❌");
+                        }
+                    } else {
+                        this.showToast("مۆڵەتی ئاگەهداری رەتکرایەوە ⚠️");
+                    }
+                } catch (error) {
+                    console.error("Error:", error);
+                    this.showToast("هەڵە هەیە: VapidKey");
+                }
             },
 
             renderCityOptions() {
@@ -1023,18 +1090,16 @@
                 list.innerHTML = this.state.orders.map(o => {
                     let statusBadge = '', actionArea = '', cancelButton = '';
                     
-                    // Code display hidden for user, only used in backend
-                    let codeDisplay = ''; 
-
                     if(o.status === 'waiting') {
                         statusBadge = `<div class="track-status-badge st-wait"><i class="fas fa-clock"></i> ${t['wait']}</div>`;
                         cancelButton = `<div class="btn-cancel-order" onclick="app.cancelOrder('${o.docId}')"><i class="fas fa-times"></i></div>`;
                     } else if(o.status === 'approved') {
                         statusBadge = `<div class="track-status-badge st-done"><i class="fas fa-check-circle"></i> ${t['approved']}</div>`;
-                        // User enters code to confirm receipt
                         actionArea = `<button class="btn-confirm-order" onclick="app.openVerifyModal(${o.id})">${t['confirm_btn']}</button>`;
                     } else if(o.status === 'delivered') {
                         statusBadge = `<div class="track-status-badge st-del"><i class="fas fa-truck"></i> ${t['delivered']}</div>`;
+                    } else if(o.status === 'canceled') {
+                        statusBadge = `<div class="track-status-badge st-cancel"><i class="fas fa-ban"></i> ${t['canceled']}</div>`;
                     }
 
                     const itemsText = o.items.map(i => `• ${i.title} <span style="font-size:0.8em; color:#888;">(x${i.qty})</span>`).join('<br>');
@@ -1049,7 +1114,6 @@
                         </div>
                         ${statusBadge}
                         <div class="track-items">${itemsText}</div>
-                        ${codeDisplay}
                         <div class="track-footer"><span>${t['total']}</span><span class="track-total">${o.total.toLocaleString()} IQD</span></div>
                         ${actionArea ? '<div style="margin-top:15px;">'+actionArea+'</div>' : ''}
                     </div>
@@ -1057,11 +1121,13 @@
             },
 
             async cancelOrder(docId) {
-                if(confirm("دڵنیای ل ژێبرنا داواکاریێ؟")) {
+                if(confirm("دڵنیای ل هەلوەشاندنا داواکاریێ؟")) {
                     try {
-                        await firestore.collection('orders').doc(docId).delete();
-                        this.showToast("داواکاری هاتە ژێبرن 🗑️");
-                    } catch (err) { this.showToast("هەڵە ل ژێبرنێ! ❌"); }
+                        await firestore.collection('orders').doc(docId).update({
+                            status: 'canceled'
+                        });
+                        this.showToast("داواکاری هاتە هەلوەشاندن 🗑️");
+                    } catch (err) { this.showToast("هەڵە ل هەلوەشاندنێ! ❌"); }
                 }
             },
 
@@ -1247,28 +1313,32 @@
 
                 const verificationCode = Math.floor(1000 + Math.random() * 9000).toString();
                 
-                // Calculate Totals again for security
                 let totalBooks = 0;
-                
-                const libId = this.state.cart[0].libId;
-                const lib = this.state.libraries.find(l => l.id === libId);
-                const libDiscount = (lib && lib.discountPercent) ? lib.discountPercent : 0;
+                let verifiedItems = [];
 
-                this.state.cart.forEach(item => {
-                    let itemPrice = item.price;
-                    // Apply Library Discount first
-                    if(libDiscount > 0) {
-                        itemPrice = itemPrice - (itemPrice * libDiscount);
+                for (let item of this.state.cart) {
+                    const originalBook = this.state.books.find(b => b.id === item.id);
+                    if(originalBook) {
+                        const lib = this.state.libraries.find(l => l.id === originalBook.libId);
+                        let realPrice = originalBook.price;
+                        let libDiscount = (lib && lib.discountPercent) ? lib.discountPercent : 0;
+                        
+                        if(libDiscount > 0) {
+                            realPrice = realPrice - (realPrice * libDiscount);
+                        }
+                        if(item.bulkQty && item.qty >= item.bulkQty) {
+                             realPrice = item.bulkPrice || realPrice;
+                        }
+
+                        totalBooks += (realPrice * item.qty);
+                        verifiedItems.push({
+                            ...item,
+                            price: realPrice 
+                        });
                     }
-                    // Wholesale logic usually overrides or applies after. 
-                    // Simplified: if wholesale quantity reached, use wholesale price (no lib discount on top of wholesale typically, but let's stick to logic)
-                    if(item.bulkQty && item.qty >= item.bulkQty) {
-                        itemPrice = item.bulkPrice || itemPrice;
-                    }
-                    totalBooks += (itemPrice * item.qty);
-                });
+                }
                 
-                let delivery = this.state.deliveryFee;
+                let delivery = this.state.deliveryFee; 
                 
                 const totalDiscountPercent = this.state.discount + this.state.pointsDiscount;
                 const discountAmount = totalBooks * totalDiscountPercent;
@@ -1289,7 +1359,7 @@
                     userDetails: details, 
                     date: new Date().toLocaleDateString('ku-IQ'),
                     time: new Date().toLocaleTimeString(),
-                    items: [...this.state.cart], 
+                    items: verifiedItems, 
                     total: finalTotal,
                     deliveryFee: delivery,
                     earnedPoints: earnedPoints, 
@@ -1318,7 +1388,7 @@
                     this.showToast(t['sent_msg']);
                     
                     document.getElementById('points-select').value = "0";
-                    document.getElementById('delivery-details').value = ""; // Clear
+                    document.getElementById('delivery-details').value = ""; 
                     this.state.pointsDiscount = 0;
 
                     setTimeout(() => {
@@ -1336,7 +1406,6 @@
                 this.state.verifyOrderId = orderId;
                 document.getElementById('verify-input').value = '';
                 document.getElementById('verify-modal').style.display = 'flex';
-                // Reset flag
                 this.state.isSubmitting = false;
                 document.getElementById('btn-submit-verify').disabled = false;
             },
@@ -1362,7 +1431,6 @@
                             return;
                         }
 
-                        // ATOMIC INCREMENT FOR SAFETY
                         await orderRef.update({ status: 'delivered' });
                         
                         if(order.earnedPoints && order.earnedPoints > 0) {
@@ -1370,7 +1438,6 @@
                              await firestore.collection('users').doc(userPhone).update({
                                  points: firebase.firestore.FieldValue.increment(order.earnedPoints)
                              });
-                             // FORCE LOCAL UPDATE FOR IMMEDIATE UI FEEDBACK
                              this.state.user.points += order.earnedPoints;
                              this.saveUserLocally();
                              this.updateProfileUI();
@@ -1393,7 +1460,6 @@
             },
 
             renderLibraries() {
-                // Determine if a library has a discount (explicitly set in DB)
                 const libsWithDiscount = this.state.libraries.map(lib => {
                     const hasDiscount = lib.discountPercent && lib.discountPercent > 0;
                     return { ...lib, hasDiscount };
@@ -1500,7 +1566,6 @@
                     const lib = this.state.libraries.find(l => l.id === b.libId);
                     const libName = lib ? lib.name : "Library";
                     
-                    // Logic: Library Discount
                     let priceDisplay = b.price.toLocaleString();
                     let finalPrice = b.price;
                     let hasDiscount = false;
@@ -1518,7 +1583,6 @@
                         priceHtml = `<span class="price discount-price">${priceDisplay}</span>
                                      <span class="old-price">${originalPriceDisplay}</span>`;
                     } else if(b.originalPrice && b.originalPrice > b.price) {
-                         // Manual single book discount
                          priceHtml = `<span class="price discount-price">${b.price.toLocaleString()}</span>
                                      <span class="old-price">${b.originalPrice.toLocaleString()}</span>`;
                     }
@@ -1566,12 +1630,6 @@
                 localStorage.setItem('favs_pro_max', JSON.stringify(this.state.favs));
             },
 
-            search(query) {
-                if (!query) return this.renderBooks(this.state.books);
-                const filtered = this.state.books.filter(b => b.title.includes(query) || b.author.includes(query));
-                this.renderBooks(filtered);
-            },
-
             filter(cat, el) {
                 this.state.activeLibFilter = null;
                 document.querySelectorAll('.story-item').forEach(s => s.classList.remove('active-lib'));
@@ -1589,7 +1647,6 @@
                 if (cat === 'all') this.renderBooks(this.state.books);
                 else if (cat === 'favorites') this.renderBooks(this.state.books.filter(b => this.state.favs.includes(b.id)));
                 else if (cat === 'discounted') {
-                    // Filter books where library has discount OR book has manual discount
                     const discountedBooks = this.state.books.filter(b => {
                         const lib = this.state.libraries.find(l => l.id === b.libId);
                         return (lib && lib.discountPercent > 0) || (b.originalPrice && b.originalPrice > b.price);
@@ -1606,16 +1663,6 @@
                 this.showToast(`پەرتووکخانێن: ${cityName}`);
             },
 
-            toggleSort() {
-                this.state.sortAsc = !this.state.sortAsc;
-                const icon = document.getElementById('sort-icon');
-                icon.className = this.state.sortAsc ? 'fas fa-sort-amount-down-alt' : 'fas fa-sort-amount-up';
-                this.state.books.sort((a,b) => this.state.sortAsc ? a.price - b.price : b.price - a.price);
-                const activeChip = document.querySelector('.cat-chip.active');
-                if (activeChip) activeChip.click(); else this.renderBooks(this.state.books);
-                this.showToast(this.state.sortAsc ? "ئەرزان بۆ گران 🔽" : "گران بۆ ئەرزان 🔼");
-            },
-
             openModal(id) {
                 const b = this.state.books.find(x => x.id === id);
                 const lib = this.state.libraries.find(l => l.id === b.libId);
@@ -1629,14 +1676,12 @@
                 document.getElementById('m-author').innerText = b.author;
                 document.getElementById('m-desc').innerText = b.desc || 'هیچ زانیارییەک نییە.';
                 
-                // Price Calculation
                 let finalPrice = b.price;
                 if(lib && lib.discountPercent && lib.discountPercent > 0) {
                      finalPrice = b.price - (b.price * lib.discountPercent);
                 }
                 document.getElementById('m-price').innerText = finalPrice.toLocaleString() + ' IQD';
 
-                // Display Logic for Specs (Hide if empty)
                 const pagesEl = document.getElementById('row-pages');
                 if(b.pages) {
                     pagesEl.style.display = 'flex';
@@ -1669,7 +1714,6 @@
                     volumesEl.style.display = 'none';
                 }
                 
-                // Wholesale Logic (Hidden Price)
                 const wsRow = document.getElementById('m-wholesale-row');
                 if(b.bulkQty && b.bulkQty > 0) {
                     wsRow.style.display = 'flex';
@@ -1678,9 +1722,13 @@
                     wsRow.style.display = 'none';
                 }
 
-                // Free delivery logic
-                const freeLimit = lib ? (lib.freeDeliveryLimit || 50000) : 50000;
-                document.getElementById('m-free-limit').innerText = freeLimit.toLocaleString();
+                const deliveryRow = document.getElementById('m-delivery-row');
+                if (lib && lib.freeDeliveryLimit && lib.freeDeliveryLimit > 0) {
+                    deliveryRow.style.display = 'flex';
+                    document.getElementById('m-free-limit').innerText = lib.freeDeliveryLimit.toLocaleString();
+                } else {
+                    deliveryRow.style.display = 'none'; 
+                }
 
                 const relatedContainer = document.getElementById('related-books-container');
                 const relatedBooks = this.state.books.filter(book => book.id !== b.id && book.libId === b.libId && (book.author === b.author || book.cat === b.cat));
@@ -1704,10 +1752,6 @@
 
             addToCartFromModal() {
                 const b = this.state.currentBook;
-                if (this.state.cart.length > 0) {
-                    const existingLibId = this.state.cart[0].libId;
-                    if (existingLibId !== b.libId) { return this.showToast("نابێت لە دوو پەرتووکخانە داواکاری بکەی! تکایە داواکاریێ پێشێ بنێرە ⚠️"); }
-                }
                 const exist = this.state.cart.find(x => x.id === b.id);
                 if (exist) exist.qty++; else this.state.cart.push({ ...b, qty: 1 });
                 this.saveCart(); this.closeModal(); this.showToast("هاتە زێدەکرن بۆ سەبەتەیێ ✅");
@@ -1725,18 +1769,17 @@
                 let totalBooks = 0;
                 
                 let deliveryFee = 0;
-                let freeLimit = 50000;
-                
+                let freeLimit = 0; 
                 const selectedCity = document.getElementById('delivery-city-select') ? document.getElementById('delivery-city-select').value : "";
                 
-                // Get library discount
                 let libDiscount = 0;
+                
                 if (this.state.cart.length > 0) {
                     const libId = this.state.cart[0].libId;
                     const lib = this.state.libraries.find(l => l.id === libId);
                     
                     if (lib) {
-                        freeLimit = lib.freeDeliveryLimit || 50000;
+                        freeLimit = lib.freeDeliveryLimit || 0; 
                         if(lib.discountPercent) libDiscount = lib.discountPercent;
 
                         if (selectedCity && lib.city === selectedCity) {
@@ -1760,16 +1803,13 @@
                 } else {
                     list.innerHTML = this.state.cart.map(item => {
                         let finalPrice = item.price;
-                        // Apply Library discount to individual item for display if needed, 
-                        // BUT logic usually applies it to final total or unit price. 
-                        // Let's apply to unit price here for visual consistency.
                         if(libDiscount > 0) {
                              finalPrice = finalPrice - (finalPrice * libDiscount);
                         }
 
                         let isWholesale = false;
                         if(item.bulkQty && item.qty >= item.bulkQty) {
-                            finalPrice = item.bulkPrice || finalPrice; // Bulk price typically overrides lib discount or is net
+                            finalPrice = item.bulkPrice || finalPrice; 
                             isWholesale = true;
                         }
                         const rowTotal = finalPrice * item.qty;
@@ -1794,9 +1834,8 @@
                     }).join('');
                 }
                 
-                // Free delivery logic check
                 if (this.state.cart.length > 0 && selectedCity) {
-                    if(totalBooks >= freeLimit) {
+                    if(freeLimit > 0 && totalBooks >= freeLimit) {
                         deliveryFee = 0;
                     }
                 }
