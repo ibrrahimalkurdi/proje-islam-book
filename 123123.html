@@ -2,60 +2,177 @@
 ‏<html lang="ku" dir="rtl">
 ‏<head>
 ‏    <meta charset="UTF-8">
+‏    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 ‏    <title>گەڕیان ل ئایەت و حەدیسان ب AI</title>
 ‏    <style>
-‏        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; padding: 50px; }
-‏        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 600px; text-align: center; }
-‏        h1 { color: #2c3e50; }
-‏        input { width: 90%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; }
-‏        button { background-color: #27ae60; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-size: 16px; }
-‏        button:hover { background-color: #219150; }
-‏        #result { margin-top: 20px; padding: 15px; border-top: 2px solid #eee; text-align: right; line-height: 1.6; white-space: pre-wrap; }
-‏        .loading { color: #888; font-style: italic; }
+‏        :root {
+‏            --primary-color: #2c3e50;
+‏            --accent-color: #27ae60;
+‏            --bg-color: #f0f2f5;
+        }
+‏        body { 
+‏            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+‏            background-color: var(--bg-color); 
+‏            display: flex; 
+‏            justify-content: center; 
+‏            align-items: center;
+‏            min-height: 100vh;
+‏            margin: 0;
+‏            padding: 20px;
+        }
+‏        .container { 
+‏            background: white; 
+‏            padding: 40px; 
+‏            border-radius: 20px; 
+‏            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+‏            width: 100%; 
+‏            max-width: 700px; 
+‏            text-align: center; 
+        }
+‏        h1 { color: var(--primary-color); margin-bottom: 10px; font-size: 24px; }
+‏        p.subtitle { color: #666; margin-bottom: 30px; }
+        
+‏        .input-group {
+‏            position: relative;
+‏            margin-bottom: 20px;
+        }
+‏        input { 
+‏            width: 100%; 
+‏            padding: 15px 20px; 
+‏            border: 2px solid #e0e0e0; 
+‏            border-radius: 12px; 
+‏            font-size: 16px;
+‏            outline: none;
+‏            transition: border-color 0.3s;
+‏            box-sizing: border-box;
+        }
+‏        input:focus { border-color: var(--accent-color); }
+        
+‏        button { 
+‏            background-color: var(--accent-color); 
+‏            color: white; 
+‏            border: none; 
+‏            padding: 15px 40px; 
+‏            border-radius: 12px; 
+‏            cursor: pointer; 
+‏            font-size: 18px; 
+‏            font-weight: bold;
+‏            transition: transform 0.2s, background 0.3s;
+‏            width: 100%;
+        }
+‏        button:hover { background-color: #219150; transform: translateY(-2px); }
+‏        button:active { transform: translateY(0); }
+
+‏        #result { 
+‏            margin-top: 30px; 
+‏            padding: 20px; 
+‏            border-radius: 12px;
+‏            background-color: #f9f9f9;
+‏            text-align: right; 
+‏            line-height: 1.8; 
+‏            white-space: pre-wrap; 
+‏            display: none;
+‏            border-right: 5px solid var(--accent-color);
+‏            position: relative;
+        }
+‏        .loading { display: none; color: #888; margin-top: 20px; font-style: italic; }
+        
+‏        .arabic-text {
+‏            font-family: 'Traditional Arabic', 'Simplified Arabic', serif;
+‏            font-size: 1.3em;
+‏            color: #1a1a1a;
+‏            display: block;
+‏            margin-bottom: 10px;
+‏            direction: rtl;
+        }
+‏        .kurdish-text { color: #333; display: block; margin-bottom: 10px; }
+‏        .reference { color: var(--accent-color); font-weight: bold; font-size: 0.9em; }
+
+‏        .copy-btn {
+‏            background: #eee;
+‏            border: none;
+‏            padding: 5px 10px;
+‏            border-radius: 5px;
+‏            cursor: pointer;
+‏            font-size: 12px;
+‏            margin-top: 10px;
+        }
 ‏    </style>
 ‏</head>
 ‏<body>
 
 ‏<div class="container">
 ‏    <h1>گەڕیانا زیرەک (AI)</h1>
-‏    <p>وەسفەکێ بنڤێسە دا ئایەت یان حەدیسەکا گونجای بۆ تە بهێت</p>
+‏    <p class="subtitle">وەسفەکێ بنڤێسە دا ئایەت یان حەدیسەکا گونجای بۆ تە بهێت</p>
     
-‏    <input type="text" id="userInput" placeholder="بۆ نموونە: ئایەتەک ل سەر دلۆڤانیا دەیبابان...">
-‏    <br>
-‏    <button onclick="searchAI()">بگەڕیێ</button>
+‏    <div class="input-group">
+‏        <input type="text" id="userInput" placeholder="بۆ نموونە: دلۆڤانیا خودێ، رێزگرتن ل دەیبابان...">
+‏    </div>
+    
+‏    <button onclick="searchAI()" id="searchBtn">بگەڕیێ</button>
 
-‏    <div id="result">ئەنجام ل ڤێرێ دێ دیار بن...</div>
+‏    <div id="loading" class="loading">ل هیڤیێ بە... AI یێ ل ئایەت و حەدیسان دگەڕیێت...</div>
+‏    <div id="result"></div>
+‏    <button id="copyBtn" style="display:none;" class="copy-btn" onclick="copyResult()">کۆپی بکە</button>
 ‏</div>
 
 ‏<script type="module">
 ‏    import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
 
-    // ل ڤێرێ API Key یێ خۆ دانیە
-‏    const API_KEY = "AIzaSyCqSo0U3FuleNqi5FDLH8HEeJnkaX0oUfI";
+    // تێبینی: کلیلا خۆ ل خوارێ دانیە
+‏    const API_KEY = "AIzaSyA1Gbszs-Hy43fwouYZuTywKTxyZgPWP8c"; 
 ‏    const genAI = new GoogleGenerativeAI(API_KEY);
 
 ‏    window.searchAI = async function() {
 ‏        const input = document.getElementById("userInput").value;
 ‏        const resultDiv = document.getElementById("result");
+‏        const loadingDiv = document.getElementById("loading");
+‏        const copyBtn = document.getElementById("copyBtn");
 
-‏        if(!input) { alert("تکایە تشتەکێ بنڤێسە!"); return; }
+‏        if(!input) { 
+‏            alert("تکایە تشتەکێ بنڤێسە!"); 
+‏            return; 
+        }
 
-‏        resultDiv.innerHTML = "<span class='loading'>ل هیڤیێ بە... AI یێ دگەڕیێت...</span>";
+        // نیشاندانا بارێ بارکرنێ
+‏        resultDiv.style.display = "none";
+‏        copyBtn.style.display = "none";
+‏        loadingDiv.style.display = "block";
 
 ‏        try {
 ‏            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
             
-‏            const prompt = `تۆ شارەزایەکێ ئیسلامی یی، ئەڤێ وەسفێ وەربگرە: "${input}". 
-            تنێ ئایەتەکا قورئانێ یان حەدیسەکا صحیح کو دگەل ڤێ وەسفێ بگونجیت بنڤێسە، 
-            دگەل ئاماژەدان ب ناڤێ سورەتێ یان ژێدەرێ حەدیسێ. ب زمانێ کوردی بادینی بەرسڤێ بدە.`;
+‏            const prompt = `تۆ پسپۆرەکێ ئیسلامی یی. ئەڤێ وەسفێ وەربگرە: "${input}".
+            ئەرکێ تە:
+            1. ئایەتەکا قورئانێ یان حەدیسەکا صحیح کو گونجای بیت پەیدا بکە.
+            2. بەرسڤێ ب ڤی شێوەی ڕێکبێخە:
+               - دەقێ عەرەبی (ب تەشکیل ڤە).
+               - وەرگێڕان ب زمانێ کوردی (بادینی).
+               - ناڤێ سورەتێ و ژمارا ئایەتێ یان ژێدەرێ حەدیسێ.
+            3. تنێ ب زمانێ کوردی بادینی باخڤە.`;
 
 ‏            const result = await model.generateContent(prompt);
 ‏            const response = await result.response;
-‏            resultDiv.innerText = response.text();
+‏            const text = response.text();
+
+‏            loadingDiv.style.display = "none";
+‏            resultDiv.style.display = "block";
+‏            copyBtn.style.display = "block";
+‏            resultDiv.innerText = text;
+
 ‏        } catch (error) {
-‏            resultDiv.innerText = "شەکەک چێبوو! پشت ڕاست ببە کو API Key یێ تە یێ دروستە.";
+‏            loadingDiv.style.display = "none";
+‏            resultDiv.style.display = "block";
+‏            resultDiv.innerText = "شەکەک چێبوو! ئەگەر کلیل (API Key) یا دروست نەبیت یان ئینتەرنێت لاواز بیت ئەڤە چێدبیت.";
 ‏            console.error(error);
         }
+    }
+
+‏    window.copyResult = function() {
+‏        const resultText = document.getElementById("result").innerText;
+‏        navigator.clipboard.writeText(resultText).then(() => {
+‏            alert("هاتە کۆپی کرن!");
+        });
     }
 ‏</script>
 
