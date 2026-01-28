@@ -1,0 +1,63 @@
+‏<!DOCTYPE html>
+‏<html lang="ku" dir="rtl">
+‏<head>
+‏    <meta charset="UTF-8">
+‏    <title>گەڕیان ل ئایەت و حەدیسان ب AI</title>
+‏    <style>
+‏        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; padding: 50px; }
+‏        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 600px; text-align: center; }
+‏        h1 { color: #2c3e50; }
+‏        input { width: 90%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; }
+‏        button { background-color: #27ae60; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-size: 16px; }
+‏        button:hover { background-color: #219150; }
+‏        #result { margin-top: 20px; padding: 15px; border-top: 2px solid #eee; text-align: right; line-height: 1.6; white-space: pre-wrap; }
+‏        .loading { color: #888; font-style: italic; }
+‏    </style>
+‏</head>
+‏<body>
+
+‏<div class="container">
+‏    <h1>گەڕیانا زیرەک (AI)</h1>
+‏    <p>وەسفەکێ بنڤێسە دا ئایەت یان حەدیسەکا گونجای بۆ تە بهێت</p>
+    
+‏    <input type="text" id="userInput" placeholder="بۆ نموونە: ئایەتەک ل سەر دلۆڤانیا دەیبابان...">
+‏    <br>
+‏    <button onclick="searchAI()">بگەڕیێ</button>
+
+‏    <div id="result">ئەنجام ل ڤێرێ دێ دیار بن...</div>
+‏</div>
+
+‏<script type="module">
+‏    import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
+
+    // ل ڤێرێ API Key یێ خۆ دانیە
+‏    const API_KEY = "AIzaSyCqSo0U3FuleNqi5FDLH8HEeJnkaX0oUfI";
+‏    const genAI = new GoogleGenerativeAI(API_KEY);
+
+‏    window.searchAI = async function() {
+‏        const input = document.getElementById("userInput").value;
+‏        const resultDiv = document.getElementById("result");
+
+‏        if(!input) { alert("تکایە تشتەکێ بنڤێسە!"); return; }
+
+‏        resultDiv.innerHTML = "<span class='loading'>ل هیڤیێ بە... AI یێ دگەڕیێت...</span>";
+
+‏        try {
+‏            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            
+‏            const prompt = `تۆ شارەزایەکێ ئیسلامی یی، ئەڤێ وەسفێ وەربگرە: "${input}". 
+            تنێ ئایەتەکا قورئانێ یان حەدیسەکا صحیح کو دگەل ڤێ وەسفێ بگونجیت بنڤێسە، 
+            دگەل ئاماژەدان ب ناڤێ سورەتێ یان ژێدەرێ حەدیسێ. ب زمانێ کوردی بادینی بەرسڤێ بدە.`;
+
+‏            const result = await model.generateContent(prompt);
+‏            const response = await result.response;
+‏            resultDiv.innerText = response.text();
+‏        } catch (error) {
+‏            resultDiv.innerText = "شەکەک چێبوو! پشت ڕاست ببە کو API Key یێ تە یێ دروستە.";
+‏            console.error(error);
+        }
+    }
+‏</script>
+
+‏</body>
+‏</html>
